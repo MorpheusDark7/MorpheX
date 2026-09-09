@@ -1,0 +1,294 @@
+<Page
+    x:Class="MorpheX.LibraryPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:local="clr-namespace:MorpheX">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <local:ThumbnailImageConverter x:Key="ThumbnailConverter" />
+    </Page.Resources>
+
+    <Grid Margin="28,20,28,24" AllowDrop="True" Drop="Grid_Drop" DragOver="Grid_DragOver">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                <TextBlock
+                    Text="Library"
+                    Style="{StaticResource PageTitleStyle}" />
+                <TextBlock
+                    x:Name="WallpaperCountText"
+                    Text="0 wallpapers"
+                    Style="{StaticResource PageSubtitleStyle}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <ui:TextBox
+                    x:Name="SearchBox"
+                    Width="230"
+                    PlaceholderText="Search wallpapers..."
+                    Icon="{ui:SymbolIcon Search24}"
+                    TextChanged="SearchBox_TextChanged"
+                    ClearButtonEnabled="True"
+                    VerticalAlignment="Center"
+                    Margin="0,0,10,0" />
+                <ui:Button
+                    x:Name="AddWallpaperButton"
+                    Content="Add Wallpaper"
+                    Icon="{ui:SymbolIcon Add24}"
+                    Appearance="Primary"
+                    Click="AddWallpaperButton_Click"
+                    Margin="0,0,8,0" />
+                <ui:Button
+                    x:Name="RefreshButton"
+                    Icon="{ui:SymbolIcon ArrowSync24}"
+                    ToolTip="Refresh library"
+                    Click="RefreshButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,0,0,20" />
+
+        <ScrollViewer
+            x:Name="WallpapersScroll"
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="WallpaperGrid">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ui:CardAction
+                            Style="{StaticResource WallpaperCardStyle}"
+                            Click="WallpaperCard_Click">
+                            <ui:CardAction.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Apply as Wallpaper" Click="ContextMenu_Apply_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Play24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Toggle Favorite" Click="ContextMenu_Favorite_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Heart24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Open File Location" Click="ContextMenu_OpenLocation_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="FolderOpen24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Remove from Library" Click="ContextMenu_Delete_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Delete24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ui:CardAction.ContextMenu>
+
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="148" />
+                                    <RowDefinition Height="62" />
+                                </Grid.RowDefinitions>
+
+                                <Border
+                                    Grid.Row="0"
+                                    CornerRadius="6,6,0,0"
+                                    ClipToBounds="True"
+                                    Background="#111118">
+                                    <Grid>
+                                        <ui:SymbolIcon
+                                            Symbol="Image24"
+                                            FontSize="28"
+                                            Foreground="#30FFFFFF"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                                        <Image
+                                            Source="{Binding PreviewImagePath, Converter={StaticResource ThumbnailConverter}}"
+                                            Stretch="UniformToFill"
+                                            RenderOptions.BitmapScalingMode="HighQuality" />
+                                        <Border VerticalAlignment="Bottom" Height="48">
+                                            <Border.Background>
+                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                                    <GradientStop Color="#00000000" Offset="0" />
+                                                    <GradientStop Color="#99000000" Offset="1" />
+                                                </LinearGradientBrush>
+                                            </Border.Background>
+                                        </Border>
+                                    </Grid>
+                                </Border>
+
+                                <Border
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Left"
+                                    VerticalAlignment="Top"
+                                    Margin="8,8,0,0"
+                                    Padding="7,3"
+                                    CornerRadius="4"
+                                    Background="{StaticResource MxActiveBadgeBrush}"
+                                    Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel Orientation="Horizontal">
+                                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="White" FontSize="10" Margin="0,0,4,0" />
+                                        <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                    </StackPanel>
+                                </Border>
+
+                                <Border
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Top"
+                                    Margin="0,8,8,0"
+                                    Padding="7,3"
+                                    CornerRadius="4"
+                                    Background="#BB000000">
+                                    <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" />
+                                </Border>
+
+                                <Button
+                                    Grid.Row="0"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Bottom"
+                                    Margin="0,0,8,8"
+                                    Width="28" Height="28"
+                                    Cursor="Hand"
+                                    Click="FavoriteButton_Click"
+                                    ToolTip="Toggle Favorite">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="#AA000000" CornerRadius="14" Width="28" Height="28">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <ui:SymbolIcon Symbol="Heart24" FontSize="13" Foreground="{Binding FavoriteBrush}" />
+                                </Button>
+
+                                <Border Grid.Row="1" Padding="12,10,12,10">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock
+                                            Grid.Row="0"
+                                            Text="{Binding Name}"
+                                            FontSize="13"
+                                            FontWeight="Medium"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                        <TextBlock Grid.Row="1" FontSize="11" Margin="0,3,0,0" Opacity="0.6"
+                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                                            <Run Text="{Binding Type, Mode=OneWay}" />
+                                            <Run Text=" · " />
+                                            <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='—'}" />
+                                        </TextBlock>
+                                    </Grid>
+                                </Border>
+                            </Grid>
+                        </ui:CardAction>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <StackPanel
+            x:Name="EmptyState"
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Visibility="Visible">
+            <Border
+                Width="72" Height="72"
+                CornerRadius="36"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,20">
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#1A38BDF8" Offset="0" />
+                        <GradientStop Color="#0A0A0F" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+                <Image
+                    Source="/Assets/Branding/morphex-icon.png"
+                    Width="40" Height="40"
+                    RenderOptions.BitmapScalingMode="HighQuality"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Opacity="0.75" />
+            </Border>
+            <TextBlock
+                Text="No wallpapers yet"
+                FontSize="17"
+                FontWeight="Medium"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,8"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            <TextBlock
+                Text="Add your first live wallpaper to get started,&#x0a;or drag and drop files here."
+                FontSize="12"
+                HorizontalAlignment="Center"
+                TextAlignment="Center"
+                TextWrapping="Wrap"
+                MaxWidth="280"
+                Opacity="0.55"
+                Margin="0,0,0,22"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            <ui:Button
+                Content="Add Wallpaper"
+                Icon="{ui:SymbolIcon Add24}"
+                Appearance="Primary"
+                HorizontalAlignment="Center"
+                Click="AddWallpaperButton_Click" />
+        </StackPanel>
+
+        <StackPanel
+            x:Name="SearchEmptyState"
+            Grid.Row="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Visibility="Collapsed">
+            <Border
+                Width="64" Height="64"
+                CornerRadius="32"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,20">
+                <Border.Background>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#1AA78BFA" Offset="0" />
+                        <GradientStop Color="#0A0A0F" Offset="1" />
+                    </RadialGradientBrush>
+                </Border.Background>
+                <ui:SymbolIcon
+                    Symbol="Search24"
+                    FontSize="26"
+                    Foreground="#A78BFA"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"
+                    Opacity="0.7" />
+            </Border>
+            <TextBlock
+                Text="No wallpapers found"
+                FontSize="17"
+                FontWeight="Medium"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,8"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+            <TextBlock
+                Text="Try a different search term."
+                FontSize="12"
+                HorizontalAlignment="Center"
+                Opacity="0.55"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+        </StackPanel>
+
+    </Grid>
+</Page>

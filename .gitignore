@@ -1,0 +1,89 @@
+## ===================================================
+## MorpheX Live — .gitignore
+## Standard .NET / C# / WPF / Visual Studio / JetBrains
+## ===================================================
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+publish/
+dist/
+
+# Release bundles & binaries (exceeds GitHub 100MB limit)
+*.zip
+*.tar.gz
+*.7z
+*.rar
+*.exe
+*.dll
+*.so
+*.dylib
+*.pdb
+
+# Visual Studio files
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+*.ide/
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains Rider / ReSharper
+.idea/
+*.DotSettings.user
+_ReSharper*/
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+project.lock.json
+project.assets.json
+*.nuget.props
+*.nuget.targets
+
+# User-specific & local machine files
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+settings.json
+*.tmp
+
+# Windows OS metadata
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.appx
+
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux metadata
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Test & Code Coverage
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml

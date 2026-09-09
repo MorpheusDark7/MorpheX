@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MorpheX.Core/MorpheX.Core.csproj" />
+    <Project Path="src/MorpheX/MorpheX.csproj" />
+  </Folder>
+</Solution>

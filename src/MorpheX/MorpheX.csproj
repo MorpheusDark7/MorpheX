@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>MorpheX</RootNamespace>
+    <AssemblyName>MorpheX</AssemblyName>
+    <ApplicationIcon>Assets\Branding\morphex-icon.ico</ApplicationIcon>
+    <Description>Lightweight live wallpapers for Windows.</Description>
+    <Company>MorpheusDark</Company>
+    <Product>MorpheX Live</Product>
+    <Version>0.1.1</Version>
+
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
+  </PropertyGroup>
+
+  <Target Name="RemoveUnusedLibVlcRuntimes" AfterTargets="Publish">
+    <RemoveDir Directories="$(PublishDir)libvlc\win-arm64" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x86" />
+    <Delete Files="$(PublishDir)*.pdb" />
+    <Delete Files="$(PublishDir)*.xml" />
+  </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MorpheX.Core\MorpheX.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="WPF-UI" Version="3.*" />
+    <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.*" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\**" />
+  </ItemGroup>
+
+</Project>
