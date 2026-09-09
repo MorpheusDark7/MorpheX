@@ -1,0 +1,62 @@
+name: Build and Release MorpheX Live
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Release Tag Name (e.g. v0.1.1)'
+        required: true
+        default: 'v0.1.1'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Install Inno Setup
+        run: |
+          choco install innosetup --no-progress
+
+      - name: Restore Dependencies
+        run: |
+          dotnet restore src/MorpheX/MorpheX.csproj
+
+      - name: Publish MorpheX Standalone Executable
+        run: |
+          dotnet publish src/MorpheX/MorpheX.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
+          Remove-Item -Path ./publish/*.pdb, ./publish/*.xml -Force -ErrorAction SilentlyContinue
+
+      - name: Compile Inno Setup Installer
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" installer.iss
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MorpheX-Installer
+          path: dist/*.exe
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
+          name: MorpheX Live ${{ github.event.inputs.tag_name || github.ref_name }}
+          files: dist/*.exe
+          generate_release_notes: true
+          draft: false
+          prerelease: false

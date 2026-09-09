@@ -1,0 +1,159 @@
+<Page
+    x:Class="MorpheX.DisplaysPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Displays">
+
+    <Page.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Page.Resources>
+
+    <Grid Margin="28,20,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,18">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+                <TextBlock
+                    Text="Displays"
+                    Style="{StaticResource PageTitleStyle}" />
+                <TextBlock
+                    x:Name="DisplaysCountText"
+                    Text="Detecting displays..."
+                    Style="{StaticResource PageSubtitleStyle}" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <ui:Button
+                    Content="Identify"
+                    Icon="{ui:SymbolIcon WindowDevTools24}"
+                    Click="IdentifyButton_Click"
+                    Margin="0,0,8,0" />
+                <ui:Button
+                    Content="Refresh"
+                    Icon="{ui:SymbolIcon ArrowClockwise24}"
+                    Click="RefreshButton_Click" />
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,0,0,20" />
+
+        <ScrollViewer
+            Grid.Row="2"
+            VerticalScrollBarVisibility="Auto"
+            HorizontalScrollBarVisibility="Disabled">
+            <ItemsControl x:Name="DisplaysList">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <ui:CardControl Margin="0,0,0,10" Padding="16,14">
+                            <ui:CardControl.Header>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <Border
+                                        Width="44" Height="44"
+                                        CornerRadius="8"
+                                        Background="{StaticResource MxAccentSubtleBrush}"
+                                        Margin="0,0,14,0">
+                                        <ui:SymbolIcon
+                                            Symbol="Desktop24"
+                                            FontSize="22"
+                                            Foreground="{StaticResource MxAccentBrush}"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center" />
+                                    </Border>
+
+                                    <StackPanel VerticalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock
+                                                Text="{Binding DisplayName}"
+                                                FontSize="15"
+                                                FontWeight="SemiBold"
+                                                Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                            <Border
+                                                Visibility="{Binding PrimaryVisibility}"
+                                                Background="{DynamicResource AccentFillColorDefaultBrush}"
+                                                CornerRadius="4"
+                                                Padding="6,1"
+                                                Margin="10,0,0,0"
+                                                VerticalAlignment="Center">
+                                                <TextBlock
+                                                    Text="PRIMARY"
+                                                    FontSize="9"
+                                                    FontWeight="Bold"
+                                                    Foreground="White" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock
+                                            Text="{Binding SpecsString}"
+                                            FontSize="12"
+                                            Margin="0,3,0,0"
+                                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                                            Opacity="0.75" />
+                                        <TextBlock
+                                            Text="{Binding ActiveWallpaperString}"
+                                            FontSize="12"
+                                            Margin="0,2,0,0"
+                                            Foreground="{DynamicResource AccentTextFillColorSecondaryBrush}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </ui:CardControl.Header>
+
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <StackPanel
+                                    Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="0,0,12,0"
+                                    Visibility="{Binding HasAudioControls, Converter={StaticResource BoolToVis}}">
+                                    <ui:Button
+                                        Appearance="Secondary"
+                                        Padding="8,6"
+                                        ToolTip="{Binding MuteTooltip}"
+                                        Click="MuteToggle_Click"
+                                        Tag="{Binding DeviceId}"
+                                        Margin="0,0,8,0">
+                                        <Grid>
+                                            <ui:SymbolIcon Symbol="SpeakerOff24" FontSize="16" Foreground="#FF6B6B" Visibility="{Binding IsMuted, Converter={StaticResource BoolToVis}}" />
+                                            <ui:SymbolIcon Symbol="Speaker224" FontSize="16" Visibility="{Binding IsNotMuted, Converter={StaticResource BoolToVis}}" />
+                                        </Grid>
+                                    </ui:Button>
+                                    <Slider
+                                        Width="100"
+                                        Minimum="0"
+                                        Maximum="100"
+                                        TickFrequency="1"
+                                        IsSnapToTickEnabled="True"
+                                        Value="{Binding Volume, Mode=TwoWay}"
+                                        ValueChanged="VolumeSlider_ValueChanged"
+                                        Tag="{Binding DeviceId}"
+                                        VerticalAlignment="Center"
+                                        Margin="0,0,8,0" />
+                                    <TextBlock
+                                        Text="{Binding VolumeText}"
+                                        FontSize="12"
+                                        Width="36"
+                                        VerticalAlignment="Center"
+                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+
+                                <ui:Button
+                                    Content="Clear"
+                                    Appearance="Secondary"
+                                    Icon="{ui:SymbolIcon Dismiss24}"
+                                    Click="ClearWallpaper_Click"
+                                    Tag="{Binding DeviceId}" />
+                            </StackPanel>
+                        </ui:CardControl>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Page>

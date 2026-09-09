@@ -1,0 +1,384 @@
+<Page
+    x:Class="MorpheX.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20,28,32">
+        <StackPanel MaxWidth="720">
+
+            <TextBlock
+                Text="Settings"
+                Style="{StaticResource PageTitleStyle}"
+                Margin="0,0,0,2" />
+            <TextBlock
+                Text="Customize how MorpheX Live behaves on your system."
+                Style="{StaticResource PageSubtitleStyle}"
+                Margin="0,0,0,24" />
+
+            <TextBlock Text="GENERAL" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,8" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Start with Windows" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Launch MorpheX automatically when you log in" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="StartWithWindowsToggle"
+                              Checked="StartWithWindowsToggle_Toggled" Unchecked="StartWithWindowsToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Start minimized" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Open directly to the system tray without showing the window" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="StartMinimizedToggle"
+                              Checked="StartMinimizedToggle_Toggled" Unchecked="StartMinimizedToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="System resource monitor" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Show live CPU, GPU, and RAM usage in the status bar" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="ShowSystemStatsToggle"
+                              Checked="ShowSystemStatsToggle_Toggled" Unchecked="ShowSystemStatsToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Check for updates automatically" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Automatically check for new versions when MorpheX starts" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="CheckForUpdatesToggle"
+                              Checked="CheckForUpdatesToggle_Toggled" Unchecked="CheckForUpdatesToggle_Toggled" />
+            </ui:CardControl>
+
+            <TextBlock Text="PERFORMANCE" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Direct3D 11 hardware acceleration" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Offload video decoding to the GPU. Disable only if you experience driver issues." Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="HardwareAccelerationToggle"
+                              Checked="HardwareAccelerationToggle_Toggled" Unchecked="HardwareAccelerationToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Pause wallpaper" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="When to pause playback to save resources" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PauseRuleCombo"
+                          Width="210"
+                          SelectionChanged="PauseRuleCombo_SelectionChanged">
+                    <ComboBoxItem Content="Never" Tag="Never" />
+                    <ComboBoxItem Content="On fullscreen app" Tag="OnFullscreen" />
+                    <ComboBoxItem Content="On maximized window" Tag="OnMaximized" />
+                    <ComboBoxItem Content="On any focused window" Tag="OnAnyFocused" />
+                    <ComboBoxItem Content="When completely covered" Tag="OnCompletelyCovered" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Pause on battery" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Automatically pause the wallpaper when running on battery" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="PauseBatteryToggle"
+                              Checked="PauseBatteryToggle_Toggled" Unchecked="PauseBatteryToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Resume video from previous position" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Continue from where you left off after unpausing" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="ResumePositionToggle"
+                              Checked="ResumePositionToggle_Toggled" Unchecked="ResumePositionToggle_Toggled" />
+            </ui:CardControl>
+
+            <TextBlock Text="AUDIO" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Wallpaper audio" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Enable audio output from video wallpapers" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="AudioEnabledToggle"
+                              Checked="AudioEnabledToggle_Toggled" Unchecked="AudioEnabledToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Volume" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Default playback volume for video wallpapers" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <Slider x:Name="VolumeSlider"
+                        Width="200"
+                        Minimum="0" Maximum="100" Value="50"
+                        ValueChanged="VolumeSlider_ValueChanged" />
+            </ui:CardControl>
+
+            <TextBlock Text="PLAYLIST &amp; AUTO-ROTATION" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Enable auto-rotation" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Automatically cycle through wallpapers on a timer" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="PlaylistEnabledToggle"
+                              Checked="PlaylistEnabledToggle_Toggled" Unchecked="PlaylistEnabledToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Rotation interval" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="How frequently to switch to the next wallpaper" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PlaylistIntervalCombo"
+                          Width="210"
+                          SelectionChanged="PlaylistIntervalCombo_SelectionChanged">
+                    <ComboBoxItem Content="1 minute" Tag="1" />
+                    <ComboBoxItem Content="5 minutes" Tag="5" />
+                    <ComboBoxItem Content="10 minutes" Tag="10" />
+                    <ComboBoxItem Content="15 minutes" Tag="15" />
+                    <ComboBoxItem Content="30 minutes" Tag="30" />
+                    <ComboBoxItem Content="1 hour" Tag="60" />
+                    <ComboBoxItem Content="2 hours" Tag="120" />
+                    <ComboBoxItem Content="6 hours" Tag="360" />
+                    <ComboBoxItem Content="24 hours" Tag="1440" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Wallpaper source" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Which wallpapers to include in the rotation pool" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PlaylistSourceCombo"
+                          Width="210"
+                          SelectionChanged="PlaylistSourceCombo_SelectionChanged">
+                    <ComboBoxItem Content="Favorites only" Tag="FavoritesOnly" />
+                    <ComboBoxItem Content="Entire library" Tag="AllLibrary" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Playback order" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Order in which wallpapers are selected" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PlaylistOrderCombo"
+                          Width="210"
+                          SelectionChanged="PlaylistOrderCombo_SelectionChanged">
+                    <ComboBoxItem Content="Shuffle (Random)" Tag="Shuffle" />
+                    <ComboBoxItem Content="In order (Sequential)" Tag="Sequential" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Change wallpaper on startup" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Pick a fresh wallpaper each time MorpheX starts" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="PlaylistStartupToggle"
+                              Checked="PlaylistStartupToggle_Toggled" Unchecked="PlaylistStartupToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Pause rotation during games" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Don't switch wallpapers while a fullscreen game or pause rule is active" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="PlaylistSkipPausedToggle"
+                              Checked="PlaylistSkipPausedToggle_Toggled" Unchecked="PlaylistSkipPausedToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Rotate now" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Immediately skip to the next wallpaper in the playlist" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button x:Name="RotateNowBtn" Content="Rotate Now" Icon="{ui:SymbolIcon Next24}" Click="RotateNowBtn_Click" Width="140" />
+            </ui:CardControl>
+
+            <TextBlock Text="GLOBAL HOTKEYS" Style="{StaticResource SectionHeaderStyle}" />
+            <TextBlock
+                Text="System-wide shortcuts that work even when MorpheX is minimized. Click any box to record a new shortcut."
+                Style="{StaticResource SettingDescriptionStyle}"
+                Margin="0,0,0,10" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Pause / Resume" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Toggle wallpaper playback on or off" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyPauseBtn" Content="Not Assigned" Width="160" Click="HotkeyPauseBtn_Click" Margin="0,0,6,0" />
+                    <Button x:Name="HotkeyPauseClearBtn" Content="✕" Width="34" Click="HotkeyPauseClearBtn_Click" ToolTip="Clear shortcut" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Mute / Unmute" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Toggle wallpaper audio output" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyMuteBtn" Content="Not Assigned" Width="160" Click="HotkeyMuteBtn_Click" Margin="0,0,6,0" />
+                    <Button x:Name="HotkeyMuteClearBtn" Content="✕" Width="34" Click="HotkeyMuteClearBtn_Click" ToolTip="Clear shortcut" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Next Wallpaper" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Skip to the next wallpaper in the playlist" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyNextBtn" Content="Not Assigned" Width="160" Click="HotkeyNextBtn_Click" Margin="0,0,6,0" />
+                    <Button x:Name="HotkeyNextClearBtn" Content="✕" Width="34" Click="HotkeyNextClearBtn_Click" ToolTip="Clear shortcut" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" />
+
+            <Border
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="20,18"
+                Margin="0,0,0,4">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <Image
+                            Source="/Assets/Branding/morphex-icon.png"
+                            Width="44" Height="44"
+                            RenderOptions.BitmapScalingMode="HighQuality"
+                            VerticalAlignment="Center"
+                            Margin="0,0,16,0" />
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="MorpheX Live" FontSize="17" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock Text="Live Wallpapers for Windows"
+                                       FontSize="12" Opacity="0.6" Margin="0,2,0,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="VersionText"
+                                       Text="Version 0.1.1"
+                                       FontSize="11" Opacity="0.4" Margin="0,3,0,0"
+                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <ui:Button
+                        Grid.Column="1"
+                        x:Name="CheckUpdatesBtn"
+                        Content="Check for updates"
+                        Appearance="Secondary"
+                        VerticalAlignment="Center"
+                        Click="CheckUpdatesBtn_Click" />
+                </Grid>
+            </Border>
+
+            <Border x:Name="UpdateStatusCard"
+                    Visibility="Collapsed"
+                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="8"
+                    Padding="20,16"
+                    Margin="0,0,0,4">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock x:Name="UpdateTitleText" Text="Update Available" FontWeight="SemiBold" FontSize="14"
+                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                            <TextBlock x:Name="UpdateDescText" Text="A new version is ready to install." FontSize="12" Opacity="0.7"
+                                       Margin="0,2,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <ui:Button
+                            Grid.Column="1"
+                            x:Name="InstallUpdateBtn"
+                            Content="Update Now"
+                            Appearance="Primary"
+                            VerticalAlignment="Center"
+                            Click="InstallUpdateBtn_Click" />
+                    </Grid>
+                    <StackPanel Grid.Row="1" x:Name="UpdateProgressPanel" Visibility="Collapsed" Margin="0,14,0,0">
+                        <Grid Margin="0,0,0,6">
+                            <TextBlock x:Name="UpdateProgressText" Text="Downloading..." FontSize="12" Opacity="0.7" />
+                            <TextBlock x:Name="UpdateProgressPercent" Text="0%" FontSize="12" FontWeight="SemiBold" HorizontalAlignment="Right" />
+                        </Grid>
+                        <ProgressBar x:Name="UpdateProgressBar" Height="5" Minimum="0" Maximum="100" Value="0" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <TextBlock
+                Text="Built lightweight, on purpose."
+                FontSize="11"
+                FontStyle="Italic"
+                Opacity="0.3"
+                HorizontalAlignment="Center"
+                Margin="0,14,0,0"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

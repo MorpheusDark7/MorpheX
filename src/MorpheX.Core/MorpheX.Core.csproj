@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>MorpheX.Core</RootNamespace>
+    <AssemblyName>MorpheX.Core</AssemblyName>
+    <Description>Core logic for MorpheX Live Wallpaper — models, services, providers, desktop integration</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.*" />
+    <PackageReference Include="Serilog" Version="4.*" />
+    <PackageReference Include="Serilog.Sinks.File" Version="6.*" />
+    <PackageReference Include="LibVLCSharp" Version="3.*" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.*" />
+    <PackageReference Include="System.Drawing.Common" Version="8.*" />
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="MorpheX" />
+  </ItemGroup>
+
+</Project>

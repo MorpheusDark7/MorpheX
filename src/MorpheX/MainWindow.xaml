@@ -1,0 +1,156 @@
+<ui:FluentWindow
+    x:Class="MorpheX.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:local="clr-namespace:MorpheX"
+    Title="MorpheX Live"
+    Icon="/Assets/Branding/morphex-icon.ico"
+    Width="1200"
+    Height="750"
+    MinWidth="900"
+    MinHeight="600"
+    WindowStartupLocation="CenterScreen"
+    ExtendsContentIntoTitleBar="True"
+    WindowBackdropType="Mica">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar
+            x:Name="TitleBar"
+            Grid.Row="0"
+            Title="MorpheX Live"
+            Icon="/Assets/Branding/morphex-icon.png"
+            ShowMaximize="True"
+            ShowMinimize="True" />
+
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="240" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ui:NavigationView
+                x:Name="NavigationView"
+                Grid.Column="0"
+                PaneDisplayMode="Left"
+                IsBackButtonVisible="Collapsed"
+                OpenPaneLength="240"
+                IsPaneToggleVisible="False"
+                IsPaneOpen="True">
+
+                <ui:NavigationView.Header>
+                    <Border Padding="16,12,16,14" BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,0,0,1">
+                        <StackPanel Orientation="Horizontal">
+                            <Image
+                                Source="/Assets/Branding/morphex-icon.png"
+                                Width="26" Height="26"
+                                RenderOptions.BitmapScalingMode="HighQuality"
+                                VerticalAlignment="Center"
+                                Margin="0,0,10,0" />
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock
+                                    Text="MorpheX Live"
+                                    FontSize="15"
+                                    FontWeight="SemiBold"
+                                    Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock
+                                    Text="Wallpaper Engine"
+                                    FontSize="11"
+                                    Opacity="0.5"
+                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </ui:NavigationView.Header>
+
+                <ui:NavigationView.MenuItems>
+                    <ui:NavigationViewItem
+                        x:Name="NavLibrary"
+                        Content="Library"
+                        Icon="{ui:SymbolIcon Image24}"
+                        TargetPageType="{x:Type local:LibraryPage}"
+                        IsActive="True" />
+                    <ui:NavigationViewItem
+                        x:Name="NavFavorites"
+                        Content="Favorites"
+                        Icon="{ui:SymbolIcon Heart24}"
+                        TargetPageType="{x:Type local:FavoritesPage}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavDisplays"
+                        Content="Displays"
+                        Icon="{ui:SymbolIcon Desktop24}"
+                        TargetPageType="{x:Type local:DisplaysPage}" />
+                </ui:NavigationView.MenuItems>
+
+                <ui:NavigationView.FooterMenuItems>
+                    <ui:NavigationViewItem
+                        x:Name="NavSettings"
+                        Content="Settings"
+                        Icon="{ui:SymbolIcon Settings24}"
+                        TargetPageType="{x:Type local:SettingsPage}" />
+                </ui:NavigationView.FooterMenuItems>
+
+            </ui:NavigationView>
+
+            <Frame
+                x:Name="ContentFrame"
+                Grid.Column="1"
+                NavigationUIVisibility="Hidden"
+                Margin="0" />
+        </Grid>
+
+        <Border
+            x:Name="SystemStatsBar"
+            Grid.Row="2"
+            Height="36"
+            Background="{StaticResource MxStatusBarBrush}"
+            BorderBrush="{StaticResource MxStatusBarBorderBrush}"
+            BorderThickness="0,1,0,0"
+            Padding="16,0">
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.7">
+                    <Ellipse Width="6" Height="6" Fill="#10B981" Margin="0,0,7,0" />
+                    <TextBlock
+                        Text="Engine Active"
+                        FontSize="11"
+                        FontWeight="Medium"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="CPU" FontSize="10" FontWeight="Bold" Foreground="#38BDF8" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatsCpuText" Text="0.0%" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="GPU" FontSize="10" FontWeight="Bold" Foreground="#A78BFA" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatsGpuText" Text="0.0%" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="RAM" FontSize="10" FontWeight="Bold" Foreground="#34D399" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatsRamText" Text="0.0 GB" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="APP" FontSize="10" FontWeight="Bold" Foreground="#FBBF24" Margin="0,0,5,0" VerticalAlignment="Center" />
+                            <TextBlock x:Name="StatsAppRamText" Text="0 MB" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</ui:FluentWindow>
