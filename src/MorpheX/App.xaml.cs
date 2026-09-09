@@ -213,6 +213,15 @@ public partial class App : Application
                 Dispatcher.Invoke(() =>
                 {
                     UpdateAvailable?.Invoke(this, update);
+                    if (_trayIcon != null)
+                    {
+                        _trayIcon.BalloonTipClicked += OnUpdateBalloonClicked;
+                        _trayIcon.ShowBalloonTip(
+                            5000,
+                            "MorpheX Update Available",
+                            $"Version {update.TagName} is available. Click here to view and install.",
+                            System.Windows.Forms.ToolTipIcon.Info);
+                    }
                 });
             }
         }
@@ -220,6 +229,15 @@ public partial class App : Application
         {
             Log.Debug(ex, "Background update check failed (non-critical)");
         }
+    }
+
+    private void OnUpdateBalloonClicked(object? sender, EventArgs e)
+    {
+        if (_trayIcon != null)
+        {
+            _trayIcon.BalloonTipClicked -= OnUpdateBalloonClicked;
+        }
+        Dispatcher.InvokeAsync(ShowSettings);
     }
 
     private static void SignalExistingInstance()
@@ -279,27 +297,34 @@ public partial class App : Application
 
     private async Task RestoreWallpapersAsync()
     {
-        foreach (var (monitorId, assignment) in SettingsService.Settings.MonitorAssignments)
-        {
-            if (string.IsNullOrEmpty(assignment.WallpaperId)) continue;
+        // Restore all monitors concurrently — sequential restore was a major startup bottleneck.
+        var tasks = SettingsService.Settings.MonitorAssignments
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.WallpaperId))
+            .Select(async kv =>
+            {
+                var (monitorId, assignment) = (kv.Key, kv.Value);
+                var wallpaper = LibraryService.GetById(assignment.WallpaperId!);
+                if (wallpaper == null)
+                {
+                    Log.Warning("Previously assigned wallpaper {Id} not found in library", assignment.WallpaperId);
+                    return;
+                }
 
-            var wallpaper = LibraryService.GetById(assignment.WallpaperId);
-            if (wallpaper == null)
-            {
-                Log.Warning("Previously assigned wallpaper {Id} not found in library", assignment.WallpaperId);
-                continue;
-            }
+                try
+                {
+                    await WallpaperService.SetWallpaperAsync(monitorId, wallpaper, skipSave: true);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to restore wallpaper '{Name}' on monitor {Monitor}",
+                        wallpaper.Name, monitorId);
+                }
+            });
 
-            try
-            {
-                await WallpaperService.SetWallpaperAsync(monitorId, wallpaper);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to restore wallpaper '{Name}' on monitor {Monitor}",
-                    wallpaper.Name, monitorId);
-            }
-        }
+        await Task.WhenAll(tasks);
+
+        // Single settings save after all monitors are restored.
+        await SettingsService.SaveAsync();
     }
 
     private void SetupTrayIcon()

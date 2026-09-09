@@ -72,6 +72,19 @@ internal static partial class NativeMethods
     [DllImport("user32.dll")]
     internal static extern IntPtr GetForegroundWindow();
 
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetShellWindow();
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetDesktopWindow();
+
+    [DllImport("user32.dll")]
+    internal static extern IntPtr GetAncestor(IntPtr hWnd, uint gaFlags);
+
+    internal const uint GA_PARENT = 1;
+    internal const uint GA_ROOT = 2;
+    internal const uint GA_ROOTOWNER = 3;
+
     [DllImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);

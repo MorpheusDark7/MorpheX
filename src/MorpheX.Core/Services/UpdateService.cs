@@ -66,8 +66,8 @@ public sealed class UpdateService : IUpdateService
             using var response = await _httpClient.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode)
             {
-                Log.Debug("GitHub update check returned {StatusCode} for {Url}", response.StatusCode, url);
-                return null;
+                Log.Warning("GitHub update check returned {StatusCode} for {Url}", response.StatusCode, url);
+                throw new HttpRequestException($"GitHub API error: {response.StatusCode}");
             }
 
             var json = await response.Content.ReadAsStringAsync(ct);
@@ -81,6 +81,11 @@ public sealed class UpdateService : IUpdateService
 
             string rawTag = tagProp.GetString() ?? "";
             string cleanTag = rawTag.TrimStart('v', 'V');
+            int suffixIndex = cleanTag.IndexOfAny(new[] { '-', '+' });
+            if (suffixIndex > 0)
+            {
+                cleanTag = cleanTag.Substring(0, suffixIndex);
+            }
 
             if (!Version.TryParse(cleanTag, out var releaseVersion))
             {

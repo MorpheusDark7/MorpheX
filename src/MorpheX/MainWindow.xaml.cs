@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -163,17 +164,43 @@ public partial class MainWindow : FluentWindow
         }
     }
 
+    // ── Win32 helpers for reliable tray-icon focus ──────────────────────────
+    [DllImport("user32.dll")] private static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hWnd, IntPtr lpdwProcessId);
+    [DllImport("user32.dll")] private static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+    [DllImport("kernel32.dll")] private static extern uint GetCurrentThreadId();
+
+    private const int SW_RESTORE = 9;
+    private const int SW_SHOW    = 5;
+
     public void BringToFront()
     {
-        if (WindowState == WindowState.Minimized)
-        {
-            WindowState = WindowState.Normal;
-        }
-
         Show();
+
+        var hwnd = new WindowInteropHelper(this).Handle;
+
+        // Restore from minimised / hidden state
+        if (WindowState == WindowState.Minimized)
+            ShowWindow(hwnd, SW_RESTORE);
+        else
+            ShowWindow(hwnd, SW_SHOW);
+
+        // Attach to the foreground thread so Windows lets us steal focus
+        IntPtr fgHwnd = GetForegroundWindow();
+        uint fgThread = GetWindowThreadProcessId(fgHwnd, IntPtr.Zero);
+        uint myThread = GetCurrentThreadId();
+
+        if (fgThread != myThread)
+            AttachThreadInput(myThread, fgThread, true);
+
+        SetForegroundWindow(hwnd);
+
+        if (fgThread != myThread)
+            AttachThreadInput(myThread, fgThread, false);
+
         Activate();
-        Topmost = true;
-        Topmost = false;
         Focus();
 
         UpdateStatsBarVisibility();

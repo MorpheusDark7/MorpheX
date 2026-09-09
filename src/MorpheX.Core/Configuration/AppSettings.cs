@@ -22,7 +22,7 @@ public sealed class GeneralSettings
     public bool StartWithWindows { get; set; } = false;
     public bool StartMinimized { get; set; } = true;
     public bool ShowTrayIcon { get; set; } = true;
-    public bool CheckForUpdates { get; set; } = false;
+    public bool CheckForUpdates { get; set; } = true;
 }
 
 public sealed class PlaybackSettings

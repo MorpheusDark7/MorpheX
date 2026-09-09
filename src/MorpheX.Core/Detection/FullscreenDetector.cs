@@ -112,17 +112,6 @@ public sealed class FullscreenDetector
 
     private static bool IsIgnoredWindow(IntPtr hWnd)
     {
-        if (hWnd == IntPtr.Zero) return true;
-
-        Desktop.NativeMethods.GetWindowThreadProcessId(hWnd, out uint pid);
-        if (pid == (uint)CurrentPid) return true;
-
-        var className = new StringBuilder(256);
-        Desktop.NativeMethods.GetClassName(hWnd, className, 256);
-        var name = className.ToString();
-
-        return name is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
-            or "NotifyIconOverflowWindow" or "Windows.UI.Core.CoreWindow" or "Shell_CharmWindow"
-            or "XamlExplorerHostIslandWindow" or "DV2ControlHost" or "MorpheXWallpaperHost";
+        return ShellWindowHelper.IsShellOrDesktopWindow(hWnd);
     }
 }

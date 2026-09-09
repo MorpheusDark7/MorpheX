@@ -9,7 +9,8 @@ public interface IWallpaperService : IDisposable
 {
     bool Initialize();
 
-    Task SetWallpaperAsync(string monitorDeviceId, WallpaperInfo wallpaper, CancellationToken ct = default);
+    Task SetWallpaperAsync(string monitorDeviceId, WallpaperInfo wallpaper,
+                            CancellationToken ct = default, bool skipSave = false);
 
     Task SetWallpaperOnAllMonitorsAsync(WallpaperInfo wallpaper, CancellationToken ct = default);
 
@@ -84,7 +85,7 @@ public sealed class WallpaperService : IWallpaperService
     }
 
     public async Task SetWallpaperAsync(string monitorDeviceId, WallpaperInfo wallpaper,
-                                         CancellationToken ct = default)
+                                         CancellationToken ct = default, bool skipSave = false)
     {
         var monitor = _monitorService.Monitors.FirstOrDefault(m => m.DeviceId == monitorDeviceId);
         if (monitor == null)
@@ -181,7 +182,10 @@ public sealed class WallpaperService : IWallpaperService
         }
         savedAssignment.WallpaperId = wallpaper.Id;
         savedAssignment.ScalingMode = scaling;
-        await _settingsService.SaveAsync(ct);
+        if (!skipSave)
+        {
+            await _settingsService.SaveAsync(ct);
+        }
 
         Utilities.MemoryOptimizer.TrimWorkingSet();
     }

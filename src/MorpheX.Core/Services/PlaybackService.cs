@@ -194,15 +194,10 @@ public sealed class PlaybackService : IPlaybackService
         var fgWindow = Desktop.NativeMethods.GetForegroundWindow();
         if (fgWindow == IntPtr.Zero) return false;
 
-        if (!Desktop.NativeMethods.IsWindowVisible(fgWindow) || Desktop.NativeMethods.IsIconic(fgWindow))
+        if (ShellWindowHelper.IsShellOrDesktopWindow(fgWindow))
             return false;
 
-        var className = new System.Text.StringBuilder(256);
-        Desktop.NativeMethods.GetClassName(fgWindow, className, 256);
-        var name = className.ToString();
-        if (name is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
-            or "NotifyIconOverflowWindow" or "MorpheXWallpaperHost" or "DV2ControlHost"
-            or "SHELLDLL_DefView" or "SysListView32")
+        if (!Desktop.NativeMethods.IsWindowVisible(fgWindow) || Desktop.NativeMethods.IsIconic(fgWindow))
             return false;
 
         if (!Desktop.NativeMethods.GetWindowRect(fgWindow, out var wr)) return false;

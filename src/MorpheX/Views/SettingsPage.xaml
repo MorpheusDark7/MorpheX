@@ -312,7 +312,7 @@
                                        FontSize="12" Opacity="0.6" Margin="0,2,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="VersionText"
-                                       Text="Version 0.1.1"
+                                       Text="Version 0.1.2"
                                        FontSize="11" Opacity="0.4" Margin="0,3,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>

@@ -96,7 +96,12 @@ public partial class SettingsPage : Page
         VolumeSlider.Value = settings.Audio.Volume;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.1"}";
+        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.2"}";
+
+        if (app.AvailableUpdate != null)
+        {
+            ShowUpdateCard(app.AvailableUpdate);
+        }
 
         _isInitializing = false;
     }

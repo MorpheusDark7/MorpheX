@@ -97,23 +97,34 @@ public sealed class LibraryService : ILibraryService
                         _manifest = loaded;
                         Log.Information("Loaded library with {Count} wallpaper(s)", _manifest.Wallpapers.Count);
 
+                        // Generate any missing thumbnails in the background so startup
+                        // is not blocked by slow shell probing (especially for videos).
                         var thumbDir = Path.Combine(_libraryDir, "thumbnails");
-                        bool manifestUpdated = false;
-                        foreach (var w in _manifest.Wallpapers)
+                        var wallpapersMissingThumbs = _manifest.Wallpapers
+                            .Where(w => string.IsNullOrEmpty(w.ThumbnailPath) || !File.Exists(w.ThumbnailPath))
+                            .ToList();
+
+                        if (wallpapersMissingThumbs.Count > 0)
                         {
-                            if (string.IsNullOrEmpty(w.ThumbnailPath) || !File.Exists(w.ThumbnailPath))
+                            _ = Task.Run(async () =>
                             {
-                                var generated = Utilities.ShellThumbnailHelper.GenerateThumbnail(w.EffectivePath, thumbDir, w.Id);
-                                if (generated != null)
+                                bool updated = false;
+                                foreach (var w in wallpapersMissingThumbs)
                                 {
-                                    w.ThumbnailPath = generated;
-                                    manifestUpdated = true;
+                                    var generated = Utilities.ShellThumbnailHelper.GenerateThumbnail(
+                                        w.EffectivePath, thumbDir, w.Id);
+                                    if (generated != null)
+                                    {
+                                        w.ThumbnailPath = generated;
+                                        updated = true;
+                                    }
                                 }
-                            }
-                        }
-                        if (manifestUpdated)
-                        {
-                            await SaveInternalAsync(ct);
+                                if (updated)
+                                {
+                                    await SaveAsync(ct);
+                                    LibraryChanged?.Invoke(this, EventArgs.Empty);
+                                }
+                            }, ct);
                         }
                         return;
                     }
