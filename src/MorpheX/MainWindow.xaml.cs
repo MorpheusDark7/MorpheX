@@ -11,6 +11,8 @@ public partial class MainWindow : FluentWindow
     private readonly Dictionary<Type, Page> _pageCache = new();
     private bool _allowClose;
 
+    public Page? CurrentPage => ContentFrame.Content as Page;
+
     public MainWindow()
     {
         InitializeComponent();

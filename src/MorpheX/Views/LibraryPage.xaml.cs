@@ -72,8 +72,6 @@ public partial class LibraryPage : Page
         var filter = (FilterCombo?.SelectedItem as ComboBoxItem)?.Tag as string ?? "All";
         filtered = filter switch
         {
-            "Favorites" => filtered.Where(w => w.IsFavorite),
-            "Tagged" => filtered.Where(w => w.Tags is { Count: > 0 }),
             "Image" or "Video" or "AnimatedImage" when Enum.TryParse<WallpaperType>(filter, out var type) =>
                 filtered.Where(w => w.Type == type),
             _ => filtered
@@ -83,7 +81,6 @@ public partial class LibraryPage : Page
         var results = sort switch
         {
             "Name" => filtered.OrderBy(w => w.Name, StringComparer.OrdinalIgnoreCase).ToList(),
-            "Favorites" => filtered.OrderByDescending(w => w.IsFavorite).ThenBy(w => w.Name, StringComparer.OrdinalIgnoreCase).ToList(),
             _ => filtered.OrderByDescending(w => w.DateAdded).ToList()
         };
 
@@ -287,39 +284,6 @@ public partial class LibraryPage : Page
             app.LibraryService.SetFavorite(wp.Id, !wp.IsFavorite);
             Log.Information("Context menu: toggled favorite for '{Name}'", wp.Name);
             RefreshWallpaperList();
-        }
-    }
-
-    private async void ContextMenu_EditTags_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not MenuItem { DataContext: WallpaperInfo wallpaper }) return;
-
-        var value = SimpleInputDialog.Show(
-            "Edit Wallpaper Tags",
-            "Separate tags with commas. Tags make this wallpaper easier to find.",
-            string.Join(", ", wallpaper.Tags ?? new List<string>()));
-        if (value == null) return;
-
-        var tags = value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-        await ((App)Application.Current).LibraryService.SetTagsAsync(wallpaper.Id, tags);
-        RefreshWallpaperList();
-    }
-
-    private async void ContextMenu_AddToCollection_Click(object sender, RoutedEventArgs e)
-    {
-        if (sender is not MenuItem { DataContext: WallpaperInfo wallpaper }) return;
-
-        var collectionName = SimpleInputDialog.Show(
-            "Add to Collection",
-            "Enter a collection name. An existing collection with this name will be used.");
-        if (string.IsNullOrWhiteSpace(collectionName)) return;
-
-        var app = (App)Application.Current;
-        var collection = await app.LibraryService.CreateCollectionAsync(collectionName);
-        if (collection != null)
-        {
-            await app.LibraryService.AddWallpaperToCollectionAsync(collection.Id, wallpaper.Id);
-            Log.Information("Added wallpaper '{Name}' to collection '{Collection}'", wallpaper.Name, collection.Name);
         }
     }
 

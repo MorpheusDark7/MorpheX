@@ -440,12 +440,26 @@ public sealed class WallpaperService : IWallpaperService
 
     public async Task HandleMonitorChangeAsync()
     {
-        _monitorService.Refresh();
-
         if (_monitorService.Monitors.Count == 0)
         {
             Log.Debug("No monitors currently detected (displays may be entering standby). Preserving wallpaper states.");
             return;
+        }
+
+        if (!_workerW.IsAttached)
+        {
+            Log.Information("WorkerW handle lost during monitor change, re-initializing...");
+            _workerW.Initialize();
+        }
+
+        var removedDeviceIds = _monitorStates.Keys
+            .Where(id => !_monitorService.Monitors.Any(m => m.DeviceId == id))
+            .ToList();
+
+        foreach (var deviceId in removedDeviceIds)
+        {
+            Log.Information("Monitor {DeviceId} is no longer connected. Cleaning up wallpaper.", deviceId);
+            await RemoveWallpaperAsync(deviceId);
         }
 
         foreach (var state in _monitorStates.Values)

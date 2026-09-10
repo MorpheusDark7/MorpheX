@@ -59,6 +59,20 @@
                         <ui:CardAction
                             Style="{StaticResource WallpaperCardStyle}"
                             Click="WallpaperCard_Click">
+                            <ui:CardAction.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Apply as Wallpaper" Click="ContextMenu_Apply_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Play24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Remove from Favorites" Click="ContextMenu_RemoveFavorite_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="HeartDislike24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem Header="Open File Location" Click="ContextMenu_OpenLocation_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="FolderOpen24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ui:CardAction.ContextMenu>
 
                             <Grid>
                                 <Grid.RowDefinitions>
@@ -119,16 +133,24 @@
                                     <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" />
                                 </Border>
 
-                                <Border
+                                <Button
                                     Grid.Row="0"
                                     HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
                                     Margin="0,0,8,8"
                                     Width="28" Height="28"
-                                    CornerRadius="14"
-                                    Background="#AA000000">
+                                    Cursor="Hand"
+                                    Click="FavoriteButton_Click"
+                                    ToolTip="Remove from Favorites">
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="#AA000000" CornerRadius="14" Width="28" Height="28">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
                                     <ui:SymbolIcon Symbol="Heart24" FontSize="13" Foreground="#FF2D55" />
-                                </Border>
+                                </Button>
 
                                 <Border Grid.Row="1" Padding="12,10,12,10">
                                     <Grid>

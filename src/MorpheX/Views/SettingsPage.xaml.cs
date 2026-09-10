@@ -82,10 +82,6 @@ public partial class SettingsPage : Page
             }
         }
 
-        PlaylistCollectionCombo.ItemsSource = app.LibraryService.Collections;
-        PlaylistCollectionCombo.SelectedValue = settings.Playlist.CollectionId;
-        PlaylistCollectionCard.Visibility = settings.Playlist.Source == PlaylistSource.Collection
-            ? Visibility.Visible : Visibility.Collapsed;
 
         string currentOrder = settings.Playlist.Order.ToString();
         foreach (ComboBoxItem item in PlaylistOrderCombo.Items)
@@ -244,25 +240,9 @@ public partial class SettingsPage : Page
         {
             var app = (App)Application.Current;
             app.SettingsService.Settings.Playlist.Source = src;
-            PlaylistCollectionCard.Visibility = src == PlaylistSource.Collection
-                ? Visibility.Visible : Visibility.Collapsed;
-            if (src == PlaylistSource.Collection && PlaylistCollectionCombo.SelectedValue is not string)
-            {
-                PlaylistCollectionCombo.SelectedIndex = 0;
-                app.SettingsService.Settings.Playlist.CollectionId = PlaylistCollectionCombo.SelectedValue as string;
-            }
             await app.SettingsService.SaveAsync();
             app.PlaylistService.UpdateSettings();
         }
-    }
-
-    private async void PlaylistCollectionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isInitializing) return;
-        var app = (App)Application.Current;
-        app.SettingsService.Settings.Playlist.CollectionId = PlaylistCollectionCombo.SelectedValue as string;
-        await app.SettingsService.SaveAsync();
-        app.PlaylistService.UpdateSettings();
     }
 
     private async void PlaylistOrderCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)

@@ -40,6 +40,8 @@ public partial class App : Application
     private MainWindow? _mainWindow;
     private bool _startMinimized;
     private SplashWindow? _splash;
+    private CancellationTokenSource? _monitorChangeDebounceCts;
+    private readonly SemaphoreSlim _monitorChangeLock = new(1, 1);
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -135,12 +137,49 @@ public partial class App : Application
         };
         _explorerWatcher.Start();
 
-        MonitorService.MonitorsChanged += async (_, _) =>
+        MonitorService.MonitorsChanged += (_, _) =>
         {
-            await Dispatcher.InvokeAsync(async () =>
+            _monitorChangeDebounceCts?.Cancel();
+            _monitorChangeDebounceCts?.Dispose();
+            _monitorChangeDebounceCts = new CancellationTokenSource();
+            var token = _monitorChangeDebounceCts.Token;
+
+            _ = Task.Run(async () =>
             {
-                await WallpaperService.HandleMonitorChangeAsync();
-                await RestoreWallpapersAsync();
+                try
+                {
+                    // Debounce rapid display setting changes (e.g. extending monitors triggers bursts of WM_DISPLAYCHANGE)
+                    await Task.Delay(800, token);
+                    if (token.IsCancellationRequested) return;
+
+                    await _monitorChangeLock.WaitAsync(token);
+                    try
+                    {
+                        await Dispatcher.InvokeAsync(async () =>
+                        {
+                            Log.Information("Processing debounced monitor change event...");
+                            await WallpaperService.HandleMonitorChangeAsync();
+                            await RestoreWallpapersAsync(onlyMissing: true);
+
+                            if (_mainWindow?.CurrentPage is DisplaysPage displaysPage)
+                            {
+                                displaysPage.RefreshDisplays();
+                            }
+                        });
+                    }
+                    finally
+                    {
+                        _monitorChangeLock.Release();
+                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Newer display settings event superseded this one
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error handling monitor change");
+                }
             });
         };
 
@@ -150,13 +189,21 @@ public partial class App : Application
             {
                 Log.Information("System resumed from sleep — refreshing display and recovering wallpapers");
                 await Task.Delay(1500);
-                await Dispatcher.InvokeAsync(async () =>
+                await _monitorChangeLock.WaitAsync();
+                try
                 {
-                    MonitorService.Refresh();
-                    await WallpaperService.RecoverFromExplorerRestartAsync();
-                    await RestoreWallpapersAsync();
-                    WallpaperService.ResumeAll();
-                });
+                    await Dispatcher.InvokeAsync(async () =>
+                    {
+                        MonitorService.Refresh();
+                        await WallpaperService.RecoverFromExplorerRestartAsync();
+                        await RestoreWallpapersAsync();
+                        WallpaperService.ResumeAll();
+                    });
+                }
+                finally
+                {
+                    _monitorChangeLock.Release();
+                }
             }
         };
 
@@ -296,11 +343,12 @@ public partial class App : Application
         }, token);
     }
 
-    private async Task RestoreWallpapersAsync()
+    private async Task RestoreWallpapersAsync(bool onlyMissing = false)
     {
-        // Restore all monitors concurrently — sequential restore was a major startup bottleneck.
+        // Restore monitors concurrently. When onlyMissing is true, skip monitors that already have an active wallpaper.
         var tasks = SettingsService.Settings.MonitorAssignments
             .Where(kv => !string.IsNullOrEmpty(kv.Value.WallpaperId))
+            .Where(kv => !onlyMissing || WallpaperService.GetActiveWallpaper(kv.Key) == null)
             .Select(async kv =>
             {
                 var (monitorId, assignment) = (kv.Key, kv.Value);
@@ -561,6 +609,9 @@ public partial class App : Application
 
         _pipeCts?.Cancel();
         _pipeCts?.Dispose();
+        _monitorChangeDebounceCts?.Cancel();
+        _monitorChangeDebounceCts?.Dispose();
+        _monitorChangeLock.Dispose();
 
         if (_trayIcon != null)
         {

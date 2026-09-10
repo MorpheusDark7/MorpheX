@@ -188,20 +188,7 @@
                           SelectionChanged="PlaylistSourceCombo_SelectionChanged">
                     <ComboBoxItem Content="Favorites only" Tag="FavoritesOnly" />
                     <ComboBoxItem Content="Entire library" Tag="AllLibrary" />
-                    <ComboBoxItem Content="A collection" Tag="Collection" />
                 </ComboBox>
-            </ui:CardControl>
-
-            <ui:CardControl x:Name="PlaylistCollectionCard" Margin="0,0,0,3" Visibility="Collapsed">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="Playlist collection" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Only wallpapers in this collection will rotate" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ComboBox x:Name="PlaylistCollectionCombo" Width="210"
-                          DisplayMemberPath="Name" SelectedValuePath="Id"
-                          SelectionChanged="PlaylistCollectionCombo_SelectionChanged" />
             </ui:CardControl>
 
             <ui:CardControl Margin="0,0,0,3">
