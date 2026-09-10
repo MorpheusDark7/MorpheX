@@ -21,6 +21,7 @@ public interface ILibraryService
     WallpaperInfo? GetById(string wallpaperId);
     void SetFavorite(string wallpaperId, bool isFavorite);
     Task SetTagsAsync(string wallpaperId, IEnumerable<string> tags, CancellationToken ct = default);
+    Task RenameWallpaperAsync(string wallpaperId, string newName, CancellationToken ct = default);
 
     WallpaperCollection? GetCollectionById(string collectionId);
     Task<WallpaperCollection?> CreateCollectionAsync(string name, CancellationToken ct = default);
@@ -310,6 +311,28 @@ public sealed class LibraryService : ILibraryService
             wallpaper.IsFavorite = isFavorite;
             _ = SaveAsync();
             LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public async Task RenameWallpaperAsync(string wallpaperId, string newName, CancellationToken ct = default)
+    {
+        newName = newName.Trim();
+        if (string.IsNullOrWhiteSpace(newName)) return;
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var wallpaper = _manifest.Wallpapers.FirstOrDefault(w => w.Id == wallpaperId);
+            if (wallpaper == null) return;
+
+            wallpaper.Name = newName;
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+            Log.Information("Renamed wallpaper {Id} → '{Name}'", wallpaperId, newName);
+        }
+        finally
+        {
+            _lock.Release();
         }
     }
 

@@ -44,6 +44,20 @@ public partial class FavoritesPage : Page
         }
     }
 
+    /// <summary>
+    /// Gets WallpaperInfo from a context menu item by walking up to the placement target.
+    /// ContextMenus are outside the visual tree so DataContext doesn't inherit; Tag does.
+    /// </summary>
+    private static WallpaperInfo? GetWallpaperFromMenuItem(object sender)
+    {
+        if (sender is not MenuItem mi) return null;
+        // Walk up: MenuItem → ContextMenu → PlacementTarget (the CardAction)
+        if (mi.Parent is ContextMenu cm && cm.PlacementTarget is FrameworkElement target)
+            return target.Tag as WallpaperInfo;
+        // Fallback: DataContext (works in some templates)
+        return mi.DataContext as WallpaperInfo;
+    }
+
     private void FavoriteButton_Click(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
@@ -58,41 +72,49 @@ public partial class FavoritesPage : Page
 
     private async void ContextMenu_Apply_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
-        {
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp != null)
             await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wp, RefreshFavorites);
-        }
     }
 
     private void ContextMenu_RemoveFavorite_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var app = (App)Application.Current;
+        app.LibraryService.SetFavorite(wp.Id, false);
+        Log.Information("Removed '{Name}' from favorites via context menu", wp.Name);
+        RefreshFavorites();
+    }
+
+    private void ContextMenu_Info_Click(object sender, RoutedEventArgs e)
+    {
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var dialog = new WallpaperInfoDialog(wp, RefreshFavorites)
         {
-            var app = (App)Application.Current;
-            app.LibraryService.SetFavorite(wp.Id, false);
-            Log.Information("Removed '{Name}' from favorites via context menu", wp.Name);
-            RefreshFavorites();
-        }
+            Owner = Window.GetWindow(this)
+        };
+        dialog.ShowDialog();
     }
 
     private void ContextMenu_OpenLocation_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var path = wp.EffectivePath;
+        if (File.Exists(path))
         {
-            var path = wp.EffectivePath;
-            if (File.Exists(path))
-            {
-                Process.Start("explorer.exe", $"/select,\"{path}\"");
-            }
-            else
-            {
-                Log.Warning("Cannot open file location — file not found: {Path}", path);
-                System.Windows.MessageBox.Show(
-                    $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
-                    "File Not Found",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
+        }
+        else
+        {
+            Log.Warning("Cannot open file location — file not found: {Path}", path);
+            System.Windows.MessageBox.Show(
+                $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
+                "File Not Found",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
     }
 }

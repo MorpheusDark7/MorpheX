@@ -101,6 +101,7 @@
                     <DataTemplate>
                         <ui:CardAction
                             Style="{StaticResource WallpaperCardStyle}"
+                            Tag="{Binding}"
                             Click="WallpaperCard_Click">
                             <ui:CardAction.ContextMenu>
                                 <ContextMenu>
@@ -111,6 +112,9 @@
                                         <MenuItem.Icon><ui:SymbolIcon Symbol="Heart24" /></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator />
+                                    <MenuItem Header="Info / Rename" Click="ContextMenu_Info_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Info24" /></MenuItem.Icon>
+                                    </MenuItem>
                                     <MenuItem Header="Open File Location" Click="ContextMenu_OpenLocation_Click">
                                         <MenuItem.Icon><ui:SymbolIcon Symbol="FolderOpen24" /></MenuItem.Icon>
                                     </MenuItem>

@@ -268,63 +268,81 @@ public partial class LibraryPage : Page
         }
     }
 
+    /// <summary>
+    /// Gets WallpaperInfo from a context menu item via PlacementTarget.Tag.
+    /// ContextMenus live outside the visual tree so DataContext doesn't inherit from the card.
+    /// </summary>
+    private static WallpaperInfo? GetWallpaperFromMenuItem(object sender)
+    {
+        if (sender is not MenuItem mi) return null;
+        if (mi.Parent is ContextMenu cm && cm.PlacementTarget is FrameworkElement target)
+            return target.Tag as WallpaperInfo;
+        return mi.DataContext as WallpaperInfo;
+    }
+
     private async void ContextMenu_Apply_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
-        {
-            await ApplyWallpaperAsync(wp);
-        }
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp != null) await ApplyWallpaperAsync(wp);
     }
 
     private void ContextMenu_Favorite_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var app = (App)Application.Current;
+        app.LibraryService.SetFavorite(wp.Id, !wp.IsFavorite);
+        Log.Information("Context menu: toggled favorite for '{Name}'", wp.Name);
+        RefreshWallpaperList();
+    }
+
+    private void ContextMenu_Info_Click(object sender, RoutedEventArgs e)
+    {
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var dialog = new WallpaperInfoDialog(wp, RefreshWallpaperList)
         {
-            var app = (App)Application.Current;
-            app.LibraryService.SetFavorite(wp.Id, !wp.IsFavorite);
-            Log.Information("Context menu: toggled favorite for '{Name}'", wp.Name);
-            RefreshWallpaperList();
-        }
+            Owner = Window.GetWindow(this)
+        };
+        dialog.ShowDialog();
     }
 
     private void ContextMenu_OpenLocation_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var path = wp.EffectivePath;
+        if (File.Exists(path))
         {
-            var path = wp.EffectivePath;
-            if (File.Exists(path))
-            {
-                Process.Start("explorer.exe", $"/select,\"{path}\"");
-            }
-            else
-            {
-                Log.Warning("Cannot open file location — file not found: {Path}", path);
-                System.Windows.MessageBox.Show(
-                    $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
-                    "File Not Found",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Warning);
-            }
+            Process.Start("explorer.exe", $"/select,\"{path}\"");
+        }
+        else
+        {
+            Log.Warning("Cannot open file location — file not found: {Path}", path);
+            System.Windows.MessageBox.Show(
+                $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
+                "File Not Found",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
         }
     }
 
     private async void ContextMenu_Delete_Click(object sender, RoutedEventArgs e)
     {
-        if (sender is MenuItem mi && mi.DataContext is WallpaperInfo wp)
-        {
-            var result = System.Windows.MessageBox.Show(
-                $"Remove \"{wp.Name}\" from the library?\n\nThis will NOT delete the original file.",
-                "Remove Wallpaper",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Question);
+        var wp = GetWallpaperFromMenuItem(sender);
+        if (wp == null) return;
+        var result = System.Windows.MessageBox.Show(
+            $"Remove \"{wp.Name}\" from the library?\n\nThis will NOT delete the original file.",
+            "Remove Wallpaper",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
 
-            if (result == MessageBoxResult.Yes)
-            {
-                var app = (App)Application.Current;
-                await app.LibraryService.RemoveWallpaperAsync(wp.Id);
-                Log.Information("Removed wallpaper '{Name}' from library", wp.Name);
-                RefreshWallpaperList();
-            }
+        if (result == MessageBoxResult.Yes)
+        {
+            var app = (App)Application.Current;
+            await app.LibraryService.RemoveWallpaperAsync(wp.Id);
+            Log.Information("Removed wallpaper '{Name}' from library", wp.Name);
+            RefreshWallpaperList();
         }
     }
 
