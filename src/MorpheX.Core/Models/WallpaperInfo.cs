@@ -26,6 +26,11 @@ public sealed class WallpaperInfo
 
     public bool IsFavorite { get; set; }
 
+    /// <summary>
+    /// User-defined labels used for searching and organizing the local library.
+    /// </summary>
+    public List<string> Tags { get; set; } = new();
+
     public DateTimeOffset DateAdded { get; set; } = DateTimeOffset.UtcNow;
 
     [JsonIgnore]
@@ -40,6 +45,9 @@ public sealed class WallpaperInfo
 
     [JsonIgnore]
     public string FavoriteBrush => IsFavorite ? "#FFFF2D55" : "#88FFFFFF";
+
+    [JsonIgnore]
+    public string TagsText => Tags is { Count: > 0 } ? string.Join(" • ", Tags) : string.Empty;
 
     [JsonIgnore]
     public string? PreviewImagePath =>

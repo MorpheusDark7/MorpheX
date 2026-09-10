@@ -128,7 +128,23 @@ public sealed class PlaylistService : IPlaylistService
             }
 
             List<WallpaperInfo> candidates;
-            if (config.Source == PlaylistSource.FavoritesOnly)
+            if (config.Source == PlaylistSource.Collection)
+            {
+                var collection = !string.IsNullOrWhiteSpace(config.CollectionId)
+                    ? _libraryService.GetCollectionById(config.CollectionId)
+                    : null;
+                candidates = collection?.WallpaperIds
+                    .Select(_libraryService.GetById)
+                    .OfType<WallpaperInfo>()
+                    .ToList() ?? new List<WallpaperInfo>();
+
+                if (candidates.Count == 0)
+                {
+                    Log.Warning("PlaylistService: Selected collection has no available wallpapers; skipping rotation");
+                    return;
+                }
+            }
+            else if (config.Source == PlaylistSource.FavoritesOnly)
             {
                 candidates = allWallpapers.Where(w => w.IsFavorite).ToList();
                 if (candidates.Count == 0)

@@ -88,7 +88,8 @@ public sealed class AdvancedSettings
 public enum PlaylistSource
 {
     FavoritesOnly = 0,
-    AllLibrary = 1
+    AllLibrary = 1,
+    Collection = 2
 }
 
 public enum PlaylistOrder
@@ -102,6 +103,7 @@ public sealed class PlaylistSettings
     public bool Enabled { get; set; } = false;
     public int IntervalMinutes { get; set; } = 30;
     public PlaylistSource Source { get; set; } = PlaylistSource.FavoritesOnly;
+    public string? CollectionId { get; set; }
     public PlaylistOrder Order { get; set; } = PlaylistOrder.Shuffle;
     public bool ChangeOnStartup { get; set; } = false;
     public bool SkipWhenPaused { get; set; } = true;

@@ -1,4 +1,9 @@
 using System.Reflection;
+using System.Diagnostics;
+using System.Text;
+using System.IO;
+using Clipboard = System.Windows.Clipboard;
+using MessageBox = System.Windows.MessageBox;
 using System.Windows;
 using Application = System.Windows.Application;
 using System.Windows.Controls;
@@ -76,6 +81,11 @@ public partial class SettingsPage : Page
                 break;
             }
         }
+
+        PlaylistCollectionCombo.ItemsSource = app.LibraryService.Collections;
+        PlaylistCollectionCombo.SelectedValue = settings.Playlist.CollectionId;
+        PlaylistCollectionCard.Visibility = settings.Playlist.Source == PlaylistSource.Collection
+            ? Visibility.Visible : Visibility.Collapsed;
 
         string currentOrder = settings.Playlist.Order.ToString();
         foreach (ComboBoxItem item in PlaylistOrderCombo.Items)
@@ -234,8 +244,25 @@ public partial class SettingsPage : Page
         {
             var app = (App)Application.Current;
             app.SettingsService.Settings.Playlist.Source = src;
+            PlaylistCollectionCard.Visibility = src == PlaylistSource.Collection
+                ? Visibility.Visible : Visibility.Collapsed;
+            if (src == PlaylistSource.Collection && PlaylistCollectionCombo.SelectedValue is not string)
+            {
+                PlaylistCollectionCombo.SelectedIndex = 0;
+                app.SettingsService.Settings.Playlist.CollectionId = PlaylistCollectionCombo.SelectedValue as string;
+            }
             await app.SettingsService.SaveAsync();
+            app.PlaylistService.UpdateSettings();
         }
+    }
+
+    private async void PlaylistCollectionCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Playlist.CollectionId = PlaylistCollectionCombo.SelectedValue as string;
+        await app.SettingsService.SaveAsync();
+        app.PlaylistService.UpdateSettings();
     }
 
     private async void PlaylistOrderCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -423,6 +450,30 @@ public partial class SettingsPage : Page
         }
 
         await app.SettingsService.SaveAsync();
+    }
+    #endregion
+
+    #region Diagnostics
+    private void OpenLogsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MorpheX", "logs");
+        Directory.CreateDirectory(logDirectory);
+        Process.Start(new ProcessStartInfo { FileName = logDirectory, UseShellExecute = true });
+    }
+
+    private void CopyDiagnosticsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var builder = new StringBuilder()
+            .AppendLine($"MorpheX Live {Assembly.GetExecutingAssembly().GetName().Version?.ToString(3)}")
+            .AppendLine($"Windows: {Environment.OSVersion.VersionString}")
+            .AppendLine($"Displays: {app.MonitorService.Monitors.Count}")
+            .AppendLine($"Library wallpapers: {app.LibraryService.Wallpapers.Count}")
+            .AppendLine($"Collections: {app.LibraryService.Collections.Count}")
+            .AppendLine($"Manual pause: {app.PlaybackService.IsManuallyPaused}")
+            .AppendLine($"Active wallpapers: {app.WallpaperService.GetAllActiveWallpapers().Count}");
+        Clipboard.SetText(builder.ToString());
+        MessageBox.Show("Diagnostics copied to the clipboard.", "Diagnostics", MessageBoxButton.OK, MessageBoxImage.Information);
     }
     #endregion
 

@@ -9,6 +9,7 @@ namespace MorpheX.Core.Services;
 public interface ILibraryService
 {
     IReadOnlyList<WallpaperInfo> Wallpapers { get; }
+    IReadOnlyList<WallpaperCollection> Collections { get; }
 
     Task LoadAsync(CancellationToken ct = default);
     Task SaveAsync(CancellationToken ct = default);
@@ -19,6 +20,14 @@ public interface ILibraryService
                                CancellationToken ct = default);
     WallpaperInfo? GetById(string wallpaperId);
     void SetFavorite(string wallpaperId, bool isFavorite);
+    Task SetTagsAsync(string wallpaperId, IEnumerable<string> tags, CancellationToken ct = default);
+
+    WallpaperCollection? GetCollectionById(string collectionId);
+    Task<WallpaperCollection?> CreateCollectionAsync(string name, CancellationToken ct = default);
+    Task RenameCollectionAsync(string collectionId, string name, CancellationToken ct = default);
+    Task DeleteCollectionAsync(string collectionId, CancellationToken ct = default);
+    Task AddWallpaperToCollectionAsync(string collectionId, string wallpaperId, CancellationToken ct = default);
+    Task RemoveWallpaperFromCollectionAsync(string collectionId, string wallpaperId, CancellationToken ct = default);
 
     event EventHandler? LibraryChanged;
 }
@@ -66,6 +75,7 @@ public sealed class LibraryService : ILibraryService
     private LibraryManifest _manifest = new();
 
     public IReadOnlyList<WallpaperInfo> Wallpapers => _manifest.Wallpapers;
+    public IReadOnlyList<WallpaperCollection> Collections => _manifest.Collections;
 
     public event EventHandler? LibraryChanged;
 
@@ -95,6 +105,15 @@ public sealed class LibraryService : ILibraryService
                     if (loaded != null)
                     {
                         _manifest = loaded;
+                        _manifest.Collections ??= new List<WallpaperCollection>();
+                        foreach (var wallpaper in _manifest.Wallpapers)
+                        {
+                            wallpaper.Tags ??= new List<string>();
+                        }
+                        foreach (var collection in _manifest.Collections)
+                        {
+                            collection.WallpaperIds ??= new List<string>();
+                        }
                         Log.Information("Loaded library with {Count} wallpaper(s)", _manifest.Wallpapers.Count);
 
                         // Generate any missing thumbnails in the background so startup
@@ -177,6 +196,15 @@ public sealed class LibraryService : ILibraryService
         await _lock.WaitAsync(ct);
         try
         {
+            var normalizedPath = Path.GetFullPath(filePath);
+            var existing = _manifest.Wallpapers.FirstOrDefault(w =>
+                PathsMatch(w.SourcePath, normalizedPath) || PathsMatch(w.ImportedPath, normalizedPath));
+            if (existing != null)
+            {
+                Log.Information("Wallpaper already exists in library: {Path}", normalizedPath);
+                return existing;
+            }
+
             var fileInfo = new FileInfo(filePath);
             var wallpaper = new WallpaperInfo
             {
@@ -241,6 +269,11 @@ public sealed class LibraryService : ILibraryService
 
             _manifest.Wallpapers.Remove(wallpaper);
 
+            foreach (var collection in _manifest.Collections)
+            {
+                collection.WallpaperIds.RemoveAll(id => id == wallpaperId);
+            }
+
             if (deleteFile && !string.IsNullOrEmpty(wallpaper.ImportedPath) &&
                 File.Exists(wallpaper.ImportedPath))
             {
@@ -280,6 +313,139 @@ public sealed class LibraryService : ILibraryService
         }
     }
 
+    public async Task SetTagsAsync(string wallpaperId, IEnumerable<string> tags, CancellationToken ct = default)
+    {
+        var sanitizedTags = tags
+            .Select(tag => tag.Trim())
+            .Where(tag => !string.IsNullOrWhiteSpace(tag))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .Take(12)
+            .ToList();
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var wallpaper = _manifest.Wallpapers.FirstOrDefault(w => w.Id == wallpaperId);
+            if (wallpaper == null) return;
+
+            wallpaper.Tags = sanitizedTags;
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public WallpaperCollection? GetCollectionById(string collectionId) =>
+        _manifest.Collections.FirstOrDefault(collection => collection.Id == collectionId);
+
+    public async Task<WallpaperCollection?> CreateCollectionAsync(string name, CancellationToken ct = default)
+    {
+        name = name.Trim();
+        if (string.IsNullOrWhiteSpace(name)) return null;
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var existing = _manifest.Collections.FirstOrDefault(collection =>
+                string.Equals(collection.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (existing != null) return existing;
+
+            var collection = new WallpaperCollection { Name = name };
+            _manifest.Collections.Add(collection);
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+            Log.Information("Created wallpaper collection '{Name}'", name);
+            return collection;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task RenameCollectionAsync(string collectionId, string name, CancellationToken ct = default)
+    {
+        name = name.Trim();
+        if (string.IsNullOrWhiteSpace(name)) return;
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var collection = _manifest.Collections.FirstOrDefault(item => item.Id == collectionId);
+            if (collection == null) return;
+
+            bool nameTaken = _manifest.Collections.Any(item => item.Id != collectionId &&
+                string.Equals(item.Name, name, StringComparison.OrdinalIgnoreCase));
+            if (nameTaken) return;
+
+            collection.Name = name;
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task DeleteCollectionAsync(string collectionId, CancellationToken ct = default)
+    {
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var collection = _manifest.Collections.FirstOrDefault(item => item.Id == collectionId);
+            if (collection == null) return;
+
+            _manifest.Collections.Remove(collection);
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+            Log.Information("Deleted wallpaper collection '{Name}'", collection.Name);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task AddWallpaperToCollectionAsync(string collectionId, string wallpaperId, CancellationToken ct = default)
+    {
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var collection = _manifest.Collections.FirstOrDefault(item => item.Id == collectionId);
+            if (collection == null || !_manifest.Wallpapers.Any(wallpaper => wallpaper.Id == wallpaperId)) return;
+            if (collection.WallpaperIds.Contains(wallpaperId)) return;
+
+            collection.WallpaperIds.Add(wallpaperId);
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task RemoveWallpaperFromCollectionAsync(string collectionId, string wallpaperId, CancellationToken ct = default)
+    {
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var collection = _manifest.Collections.FirstOrDefault(item => item.Id == collectionId);
+            if (collection == null || !collection.WallpaperIds.Remove(wallpaperId)) return;
+
+            await SaveInternalAsync(ct);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
     public static string GetFileFilter()
     {
         var allExts = string.Join(";", ExtensionMap.Keys.Select(e => $"*{e}"));
@@ -296,5 +462,20 @@ public sealed class LibraryService : ILibraryService
         var tempPath = _manifestPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, ct);
         File.Move(tempPath, _manifestPath, overwrite: true);
+    }
+
+    private static bool PathsMatch(string? storedPath, string candidatePath)
+    {
+        if (string.IsNullOrWhiteSpace(storedPath)) return false;
+
+        try
+        {
+            return string.Equals(Path.GetFullPath(storedPath), candidatePath,
+                StringComparison.OrdinalIgnoreCase);
+        }
+        catch (Exception)
+        {
+            return false;
+        }
     }
 }

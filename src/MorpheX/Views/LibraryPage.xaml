@@ -34,6 +34,29 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                <ComboBox
+                    x:Name="FilterCombo"
+                    Width="108"
+                    SelectedIndex="0"
+                    SelectionChanged="FilterCombo_SelectionChanged"
+                    Margin="0,0,8,0">
+                    <ComboBoxItem Content="All types" Tag="All" />
+                    <ComboBoxItem Content="Favorites" Tag="Favorites" />
+                    <ComboBoxItem Content="Images" Tag="Image" />
+                    <ComboBoxItem Content="Videos" Tag="Video" />
+                    <ComboBoxItem Content="Animated" Tag="AnimatedImage" />
+                    <ComboBoxItem Content="Tagged" Tag="Tagged" />
+                </ComboBox>
+                <ComboBox
+                    x:Name="SortCombo"
+                    Width="105"
+                    SelectedIndex="0"
+                    SelectionChanged="SortCombo_SelectionChanged"
+                    Margin="0,0,8,0">
+                    <ComboBoxItem Content="Newest" Tag="Newest" />
+                    <ComboBoxItem Content="Name" Tag="Name" />
+                    <ComboBoxItem Content="Favorites" Tag="Favorites" />
+                </ComboBox>
                 <ui:TextBox
                     x:Name="SearchBox"
                     Width="230"
@@ -49,6 +72,12 @@
                     Icon="{ui:SymbolIcon Add24}"
                     Appearance="Primary"
                     Click="AddWallpaperButton_Click"
+                    Margin="0,0,8,0" />
+                <ui:Button
+                    Content="Import Folder"
+                    Icon="{ui:SymbolIcon FolderAdd24}"
+                    Appearance="Secondary"
+                    Click="ImportFolderButton_Click"
                     Margin="0,0,8,0" />
                 <ui:Button
                     x:Name="RefreshButton"
@@ -83,6 +112,12 @@
                                     </MenuItem>
                                     <MenuItem Header="Toggle Favorite" Click="ContextMenu_Favorite_Click">
                                         <MenuItem.Icon><ui:SymbolIcon Symbol="Heart24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Edit tags..." Click="ContextMenu_EditTags_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Tag24" /></MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Header="Add to collection..." Click="ContextMenu_AddToCollection_Click">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Collections24" /></MenuItem.Icon>
                                     </MenuItem>
                                     <Separator />
                                     <MenuItem Header="Open File Location" Click="ContextMenu_OpenLocation_Click">
@@ -177,6 +212,7 @@
                                         <Grid.RowDefinitions>
                                             <RowDefinition Height="Auto" />
                                             <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
                                         <TextBlock
                                             Grid.Row="0"
@@ -191,6 +227,13 @@
                                             <Run Text=" · " />
                                             <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='—'}" />
                                         </TextBlock>
+                                        <TextBlock
+                                            Grid.Row="2"
+                                            Text="{Binding TagsText}"
+                                            FontSize="10"
+                                            Margin="0,4,0,0"
+                                            TextTrimming="CharacterEllipsis"
+                                            Foreground="{StaticResource MxAccentBrush}" />
                                     </Grid>
                                 </Border>
                             </Grid>

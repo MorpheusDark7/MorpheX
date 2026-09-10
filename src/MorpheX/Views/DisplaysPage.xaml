@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -47,8 +48,41 @@
 
         <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,0,0,20" />
 
+        <ui:CardControl Grid.Row="2" Padding="16" Margin="0,0,0,14">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock Text="Display layout" Style="{StaticResource SettingLabelStyle}" />
+                    <TextBlock Text="Select a display, then choose a wallpaper to assign directly to it."
+                               Style="{StaticResource SettingDescriptionStyle}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="240" />
+                </Grid.ColumnDefinitions>
+                <Border Grid.Column="0" Height="188" Background="#11000000" CornerRadius="8" Padding="10" Margin="0,0,16,0">
+                    <Canvas x:Name="DisplayLayoutCanvas" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="SelectedDisplayText" Text="Select a display above"
+                               FontWeight="SemiBold" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    <TextBlock x:Name="SelectedWallpaperText" Text="No wallpaper selected"
+                               FontSize="12" Margin="0,4,0,12" TextWrapping="Wrap"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:Button x:Name="ChooseWallpaperButton" Content="Choose wallpaper"
+                               Icon="{ui:SymbolIcon ImageAdd24}" Appearance="Secondary"
+                               Click="ChooseWallpaperButton_Click" Margin="0,0,0,8" />
+                    <ui:Button x:Name="ApplySelectedButton" Content="Apply to selected display"
+                               Icon="{ui:SymbolIcon Play24}" Appearance="Primary"
+                               IsEnabled="False" Click="ApplySelectedButton_Click" />
+                </StackPanel>
+            </Grid>
+        </ui:CardControl>
+
         <ScrollViewer
-            Grid.Row="2"
+            Grid.Row="3"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled">
             <ItemsControl x:Name="DisplaysList">

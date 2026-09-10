@@ -188,7 +188,20 @@
                           SelectionChanged="PlaylistSourceCombo_SelectionChanged">
                     <ComboBoxItem Content="Favorites only" Tag="FavoritesOnly" />
                     <ComboBoxItem Content="Entire library" Tag="AllLibrary" />
+                    <ComboBoxItem Content="A collection" Tag="Collection" />
                 </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl x:Name="PlaylistCollectionCard" Margin="0,0,0,3" Visibility="Collapsed">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Playlist collection" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Only wallpapers in this collection will rotate" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PlaylistCollectionCombo" Width="210"
+                          DisplayMemberPath="Name" SelectedValuePath="Id"
+                          SelectionChanged="PlaylistCollectionCombo_SelectionChanged" />
             </ui:CardControl>
 
             <ui:CardControl Margin="0,0,0,3">
@@ -284,6 +297,22 @@
             </ui:CardControl>
 
             <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,12">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Diagnostics" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Open the log folder or copy a quick support summary when something goes wrong."
+                                   Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <ui:Button Content="Open logs" Icon="{ui:SymbolIcon FolderOpen24}"
+                               Appearance="Secondary" Click="OpenLogsButton_Click" Margin="0,0,8,0" />
+                    <ui:Button Content="Copy diagnostics" Icon="{ui:SymbolIcon Copy24}"
+                               Appearance="Secondary" Click="CopyDiagnosticsButton_Click" />
+                </StackPanel>
+            </ui:CardControl>
 
             <Border
                 Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
