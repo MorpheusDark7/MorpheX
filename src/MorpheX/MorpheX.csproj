@@ -13,33 +13,23 @@
     <Description>Lightweight live wallpapers for Windows.</Description>
     <Company>MorpheusDark</Company>
     <Product>MorpheX Live</Product>
-    <Version>0.1.3</Version>
+    <Version>0.1.2</Version>
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
     <PublishReadyToRun>true</PublishReadyToRun>
-    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
   </PropertyGroup>
 
-  <Target Name="DeployLibVlcCacheAndCleanup" AfterTargets="Publish">
+  <Target Name="RemoveUnusedLibVlcRuntimes" AfterTargets="Publish">
     <RemoveDir Directories="$(PublishDir)libvlc\win-arm64" />
     <RemoveDir Directories="$(PublishDir)libvlc\win-x86" />
     <Delete Files="$(PublishDir)*.pdb" />
     <Delete Files="$(PublishDir)*.xml" />
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\Assets\libvlc\plugins.dat"
-          DestinationFolder="$(PublishDir)libvlc\win-x64\plugins"
-          OverwriteReadOnlyFiles="true" />
-  </Target>
-
-  <Target Name="DeployLibVlcCacheLocal" AfterTargets="Build">
-    <Copy SourceFiles="$(MSBuildProjectDirectory)\Assets\libvlc\plugins.dat"
-          DestinationFolder="$(TargetDir)libvlc\win-x64\plugins"
-          OverwriteReadOnlyFiles="true"
-          Condition="Exists('$(TargetDir)libvlc\win-x64\plugins')" />
   </Target>
 
   <ItemGroup>

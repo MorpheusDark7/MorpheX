@@ -98,13 +98,6 @@ public partial class App : Application
         _splash?.SetProgress(0.10);
         await SettingsService.LoadAsync();
 
-        // Pre-warm LibVLC on a background thread in parallel with library scan
-        // so the cold DLL-init cost is already paid by the time we restore wallpapers.
-        bool hasVideoWallpaper = SettingsService.Settings.MonitorAssignments.Values
-            .Any(a => !string.IsNullOrEmpty(a.WallpaperId));
-        if (hasVideoWallpaper)
-            MorpheX.Core.Providers.VideoWallpaperProvider.WarmUpAsync();
-
         _splash?.SetStatus("Loading wallpaper library...");
         _splash?.SetProgress(0.30);
         await LibraryService.LoadAsync();
@@ -127,26 +120,6 @@ public partial class App : Application
         {
             Log.Error("Failed to initialize desktop wallpaper integration");
         }
-
-        _splash?.SetStatus("Preparing desktop...");
-        _splash?.SetProgress(0.70);
-
-        // Temporarily raise priority so wallpaper load isn't starved by other startup
-        // apps (Discord, browsers, etc.) competing for CPU right after boot.
-        var proc = System.Diagnostics.Process.GetCurrentProcess();
-        var originalPriority = proc.PriorityClass;
-        proc.PriorityClass = System.Diagnostics.ProcessPriorityClass.AboveNormal;
-        try
-        {
-            await RestoreWallpapersAsync();
-        }
-        finally
-        {
-            proc.PriorityClass = originalPriority;
-        }
-
-        _splash?.SetStatus("Starting services...");
-        _splash?.SetProgress(0.85);
 
         PlaybackService = new PlaybackService(WallpaperService, MonitorService, SettingsService);
         PlaybackService.Start();
@@ -186,6 +159,12 @@ public partial class App : Application
             }
         };
 
+        _splash?.SetStatus("Preparing desktop...");
+        _splash?.SetProgress(0.70);
+        await RestoreWallpapersAsync();
+
+        _splash?.SetStatus("Starting services...");
+        _splash?.SetProgress(0.88);
         PlaylistService = new PlaylistService(WallpaperService, LibraryService, MonitorService, SettingsService, PlaybackService);
         PlaylistService.Start();
 
@@ -318,42 +297,34 @@ public partial class App : Application
 
     private async Task RestoreWallpapersAsync()
     {
-        var connectedMonitors = MonitorService.Monitors.Select(m => m.DeviceId).ToHashSet();
-        var assignments = SettingsService.Settings.MonitorAssignments
-            .Where(kv => !string.IsNullOrEmpty(kv.Value.WallpaperId) && connectedMonitors.Contains(kv.Key))
-            .ToList();
-
-        if (assignments.Count == 0) return;
-
-        // Ensure LibVLC pre-warm is complete before trying to restore video wallpapers
-        await MorpheX.Core.Providers.VideoWallpaperProvider.EnsureWarmAsync();
-
         // Restore all monitors concurrently — sequential restore was a major startup bottleneck.
-        var tasks = assignments.Select(async kv =>
-        {
-            var (monitorId, assignment) = (kv.Key, kv.Value);
-            var wallpaper = LibraryService.GetById(assignment.WallpaperId!);
-            if (wallpaper == null)
+        var tasks = SettingsService.Settings.MonitorAssignments
+            .Where(kv => !string.IsNullOrEmpty(kv.Value.WallpaperId))
+            .Select(async kv =>
             {
-                Log.Warning("Previously assigned wallpaper {Id} not found in library", assignment.WallpaperId);
-                return;
-            }
+                var (monitorId, assignment) = (kv.Key, kv.Value);
+                var wallpaper = LibraryService.GetById(assignment.WallpaperId!);
+                if (wallpaper == null)
+                {
+                    Log.Warning("Previously assigned wallpaper {Id} not found in library", assignment.WallpaperId);
+                    return;
+                }
 
-            try
-            {
-                await WallpaperService.SetWallpaperAsync(monitorId, wallpaper, skipSave: true);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Failed to restore wallpaper '{Name}' on monitor {Monitor}",
-                    wallpaper.Name, monitorId);
-            }
-        });
+                try
+                {
+                    await WallpaperService.SetWallpaperAsync(monitorId, wallpaper, skipSave: true);
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Failed to restore wallpaper '{Name}' on monitor {Monitor}",
+                        wallpaper.Name, monitorId);
+                }
+            });
 
         await Task.WhenAll(tasks);
 
         // Single settings save after all monitors are restored.
-        _ = SettingsService.SaveAsync();
+        await SettingsService.SaveAsync();
     }
 
     private void SetupTrayIcon()
