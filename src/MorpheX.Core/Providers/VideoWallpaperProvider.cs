@@ -8,6 +8,40 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
 {
     private static LibVLC? _sharedLibVLC;
     private static readonly object _libVlcLock = new();
+    private static Task? _warmUpTask;
+
+    /// <summary>
+    /// Kicks off LibVLC initialization on a background thread so the first
+    /// wallpaper load doesn't block on cold-start DLL loading.
+    /// Safe to call multiple times — only runs once.
+    /// </summary>
+    public static void WarmUpAsync()
+    {
+        if (_sharedLibVLC != null || _warmUpTask != null) return;
+        _warmUpTask = Task.Run(() =>
+        {
+            try { EnsureLibVLCInitialized(); }
+            catch (Exception ex) { Log.Warning(ex, "LibVLC pre-warm failed (will retry on first use)"); }
+        });
+    }
+
+    /// <summary>
+    /// Awaits the pre-warm task if one is in flight, ensuring LibVLC is fully ready.
+    /// </summary>
+    public static async Task EnsureWarmAsync()
+    {
+        if (_sharedLibVLC != null) return;
+        if (_warmUpTask != null)
+        {
+            try { await _warmUpTask; } catch { }
+            return;
+        }
+        WarmUpAsync();
+        if (_warmUpTask != null)
+        {
+            try { await _warmUpTask; } catch { }
+        }
+    }
 
     public WallpaperType Type => WallpaperType.Video;
 
@@ -254,7 +288,16 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
         {
             if (_sharedLibVLC != null) return;
 
-            LibVLCSharp.Shared.Core.Initialize();
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var libvlcDir = Path.Combine(baseDir, "libvlc", "win-x64");
+            if (Directory.Exists(libvlcDir))
+            {
+                LibVLCSharp.Shared.Core.Initialize(libvlcDir);
+            }
+            else
+            {
+                LibVLCSharp.Shared.Core.Initialize();
+            }
 
             _sharedLibVLC = new LibVLC(
                 "--quiet",

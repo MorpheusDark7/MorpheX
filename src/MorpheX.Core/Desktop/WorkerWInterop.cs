@@ -15,13 +15,27 @@ public sealed class WorkerWInterop
     {
         Log.Information("Initializing WorkerW desktop integration");
 
-        _progmanHandle = NativeMethods.FindWindow("Progman", null);
+        for (int retry = 0; retry < 5; retry++)
+        {
+            _progmanHandle = NativeMethods.FindWindow("Progman", null);
+            if (_progmanHandle == IntPtr.Zero)
+            {
+                _progmanHandle = NativeMethods.GetShellWindow();
+            }
+
+            if (_progmanHandle != IntPtr.Zero)
+                break;
+
+            Log.Debug("Waiting for desktop Shell/Progman window (attempt {Attempt}/5)...", retry + 1);
+            Thread.Sleep(300);
+        }
+
         if (_progmanHandle == IntPtr.Zero)
         {
-            Log.Error("Failed to find Progman window");
+            Log.Error("Failed to find Progman or Shell window");
             return false;
         }
-        Log.Debug("Found Progman: 0x{Handle:X}", _progmanHandle);
+        Log.Debug("Found desktop host window: 0x{Handle:X}", _progmanHandle);
 
         NativeMethods.SendMessageTimeout(
             _progmanHandle,
