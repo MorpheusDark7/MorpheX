@@ -255,10 +255,20 @@ public partial class LibraryPage : Page
         }
     }
 
+    private void FavoriteButton_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        ToggleFavorite(sender);
+    }
+
     private void FavoriteButton_Click(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
+        ToggleFavorite(sender);
+    }
 
+    private void ToggleFavorite(object sender)
+    {
         if (sender is FrameworkElement el && el.DataContext is WallpaperInfo wp)
         {
             var app = (App)Application.Current;

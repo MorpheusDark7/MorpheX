@@ -19,6 +19,11 @@ public partial class MainWindow : FluentWindow
 
         NavigationView.SelectionChanged += NavigationView_SelectionChanged;
 
+        NavLibrary.Click += (_, _) => NavigateTo(typeof(LibraryPage));
+        NavFavorites.Click += (_, _) => NavigateTo(typeof(FavoritesPage));
+        NavDisplays.Click += (_, _) => NavigateTo(typeof(DisplaysPage));
+        NavSettings.Click += (_, _) => NavigateTo(typeof(SettingsPage));
+
         Loaded += MainWindow_Loaded;
 
         StateChanged += MainWindow_StateChanged;
@@ -125,28 +130,49 @@ public partial class MainWindow : FluentWindow
 
     public void NavigateTo(Type pageType)
     {
-        if (!_pageCache.TryGetValue(pageType, out var page))
+        try
         {
-            page = (Page)Activator.CreateInstance(pageType)!;
-            _pageCache[pageType] = page;
-        }
+            if (ContentFrame.Content?.GetType() == pageType)
+            {
+                if (ContentFrame.Content is LibraryPage lib) lib.RefreshWallpaperList();
+                else if (ContentFrame.Content is FavoritesPage fav) fav.RefreshFavorites();
+                else if (ContentFrame.Content is DisplaysPage disp) disp.RefreshDisplays();
+                SelectNavigationItem(pageType);
+                return;
+            }
 
-        if (page is LibraryPage libPage)
-        {
-            libPage.RefreshWallpaperList();
-        }
-        else if (page is FavoritesPage favPage)
-        {
-            favPage.RefreshFavorites();
-        }
-        else if (page is DisplaysPage dispPage)
-        {
-            dispPage.RefreshDisplays();
-        }
+            if (!_pageCache.TryGetValue(pageType, out var page))
+            {
+                page = (Page)Activator.CreateInstance(pageType)!;
+                _pageCache[pageType] = page;
+            }
 
-        ContentFrame.Navigate(page);
+            if (page is LibraryPage libPage)
+            {
+                libPage.RefreshWallpaperList();
+            }
+            else if (page is FavoritesPage favPage)
+            {
+                favPage.RefreshFavorites();
+            }
+            else if (page is DisplaysPage dispPage)
+            {
+                dispPage.RefreshDisplays();
+            }
 
-        SelectNavigationItem(pageType);
+            ContentFrame.Navigate(page);
+
+            SelectNavigationItem(pageType);
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to navigate to {PageType}", pageType.Name);
+            System.Windows.MessageBox.Show(
+                $"Failed to load {pageType.Name}:\n\n{ex.Message}",
+                "Navigation Error",
+                System.Windows.MessageBoxButton.OK,
+                System.Windows.MessageBoxImage.Error);
+        }
     }
 
     private void SelectNavigationItem(Type pageType)

@@ -98,6 +98,7 @@
 
             </ui:NavigationView>
 
+            <!-- ── CONTENT ── -->
             <Frame
                 x:Name="ContentFrame"
                 Grid.Column="1"

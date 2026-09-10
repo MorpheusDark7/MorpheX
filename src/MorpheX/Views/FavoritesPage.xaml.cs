@@ -58,9 +58,20 @@ public partial class FavoritesPage : Page
         return mi.DataContext as WallpaperInfo;
     }
 
+    private void FavoriteButton_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        e.Handled = true;
+        RemoveFromFavorites(sender);
+    }
+
     private void FavoriteButton_Click(object sender, RoutedEventArgs e)
     {
         e.Handled = true;
+        RemoveFromFavorites(sender);
+    }
+
+    private void RemoveFromFavorites(object sender)
+    {
         if (sender is FrameworkElement el && el.DataContext is WallpaperInfo wp)
         {
             var app = (App)Application.Current;
