@@ -53,6 +53,14 @@ public partial class LibraryPage : Page
 
     private void ApplyFilter()
     {
+        // ComboBox selection events can fire while XAML is still creating this
+        // page. Do not access named controls until initialization is complete.
+        if (WallpaperGrid == null || WallpaperCountText == null ||
+            EmptyState == null || SearchEmptyState == null)
+        {
+            return;
+        }
+
         var query = SearchBox?.Text?.Trim() ?? string.Empty;
         IEnumerable<WallpaperInfo> filtered = string.IsNullOrEmpty(query)
             ? _allWallpapers
