@@ -32,6 +32,7 @@ public sealed class PlaybackService : IPlaybackService
     private Timer? _pollTimer;
     private bool _disposed;
     private bool _isManuallyPaused;
+    private int _pollInProgress;
 
     private readonly Dictionary<string, bool> _monitorPaused = new();
 
@@ -92,6 +93,14 @@ public sealed class PlaybackService : IPlaybackService
 
     private void PollState(object? state)
     {
+        // Timer callbacks can overlap when desktop/window enumeration is slow. A
+        // second pass racing the first can otherwise pause and resume a monitor out
+        // of order, particularly while displays are being reconfigured.
+        if (Interlocked.Exchange(ref _pollInProgress, 1) != 0)
+        {
+            return;
+        }
+
         try
         {
             if (_isManuallyPaused)
@@ -176,6 +185,10 @@ public sealed class PlaybackService : IPlaybackService
         catch (Exception ex)
         {
             Log.Debug(ex, "PlaybackService poll error (non-fatal)");
+        }
+        finally
+        {
+            Volatile.Write(ref _pollInProgress, 0);
         }
     }
 

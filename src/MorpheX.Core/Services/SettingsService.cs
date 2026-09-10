@@ -51,7 +51,8 @@ public sealed class SettingsService : ISettingsService
                 }
                 catch (JsonException ex)
                 {
-                    Log.Warning(ex, "Failed to parse settings file, using defaults");
+                    BackupInvalidSettingsFile();
+                    Log.Warning(ex, "Failed to parse settings file; preserved a backup and using defaults");
                 }
                 catch (IOException ex)
                 {
@@ -105,5 +106,21 @@ public sealed class SettingsService : ISettingsService
         var tempPath = _settingsPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, ct);
         File.Move(tempPath, _settingsPath, overwrite: true);
+    }
+
+    private void BackupInvalidSettingsFile()
+    {
+        try
+        {
+            var backupPath = Path.Combine(
+                Path.GetDirectoryName(_settingsPath)!,
+                $"settings.corrupt.{DateTime.UtcNow:yyyyMMddHHmmss}.json");
+            File.Copy(_settingsPath, backupPath, overwrite: false);
+            Log.Information("Backed up unreadable settings to {Path}", backupPath);
+        }
+        catch (Exception ex)
+        {
+            Log.Debug(ex, "Could not back up unreadable settings file");
+        }
     }
 }

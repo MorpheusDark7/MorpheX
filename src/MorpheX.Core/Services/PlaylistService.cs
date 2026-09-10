@@ -21,6 +21,7 @@ public sealed class PlaylistService : IPlaylistService
     private readonly IPlaybackService _playbackService;
 
     private Timer? _rotationTimer;
+    private readonly SemaphoreSlim _rotationLock = new(1, 1);
     private readonly Random _random = new();
     private int _sequentialIndex;
     private string? _lastWallpaperId;
@@ -107,6 +108,14 @@ public sealed class PlaylistService : IPlaylistService
 
     public async Task TriggerNextWallpaperAsync()
     {
+        // A slow provider load must not allow timer ticks or hotkeys to start a
+        // second rotation concurrently and overwrite the first assignment.
+        if (!await _rotationLock.WaitAsync(0))
+        {
+            Log.Debug("PlaylistService: Rotation already in progress");
+            return;
+        }
+
         try
         {
             var config = _settingsService.Settings.Playlist;
@@ -169,6 +178,10 @@ public sealed class PlaylistService : IPlaylistService
         catch (Exception ex)
         {
             Log.Error(ex, "PlaylistService: Error rotating wallpaper");
+        }
+        finally
+        {
+            _rotationLock.Release();
         }
     }
 

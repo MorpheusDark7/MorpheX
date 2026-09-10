@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Threading;
+using System.IO;
 using Application = System.Windows.Application;
 using MorpheX.Core.Detection;
 using MorpheX.Core.Logging;
