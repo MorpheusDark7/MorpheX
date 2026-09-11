@@ -1,5 +1,7 @@
 #define MyAppName "MorpheX Live"
-#define MyAppVersion "0.1.6"
+#ifndef MyAppVersion
+#define MyAppVersion "0.1.9"
+#endif
 #define MyAppPublisher "MorpheusDark"
 #define MyAppExeName "MorpheX.exe"
 
