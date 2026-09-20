@@ -4,38 +4,66 @@ using System.Windows.Forms;
 
 namespace MorpheX;
 
-internal sealed class DarkContextMenuRenderer : ToolStripProfessionalRenderer
+/// <summary>
+/// Custom dark-theme renderer for the system-tray context menu.
+/// GDI resources (brushes, pens) are created once on construction and reused
+/// across all paint calls. GraphicsPath geometry is cached per-dimensions so
+/// the arc math in RoundedRect only runs when the menu size actually changes,
+/// which is essentially never during a single session.
+/// </summary>
+internal sealed class DarkContextMenuRenderer : ToolStripProfessionalRenderer, IDisposable
 {
+    // ── Cached GDI objects ───────────────────────────────────────────────
+    // All rendering occurs on the UI thread, so there is no concurrency concern.
+    private readonly SolidBrush _backgroundBrush = new(Color.FromArgb(255, 32, 32, 32));
+    private readonly SolidBrush _hoverBrush       = new(Color.FromArgb(255, 55, 55, 55));
+    private readonly Pen        _borderPen         = new(Color.FromArgb(255, 58, 58, 58));
+    private readonly Pen        _separatorPen      = new(Color.FromArgb(255, 58, 58, 58));
+
+    // ── Cached path geometry ─────────────────────────────────────────────
+    // Recomputed only when the dimensions change (practically never).
+    private GraphicsPath? _borderPath;
+    private Size          _borderSize;
+    private GraphicsPath? _hoverPath;
+    private Rectangle     _hoverBounds;
+
     public DarkContextMenuRenderer() : base(new DarkColorTable()) { }
 
     protected override void OnRenderToolStripBackground(ToolStripRenderEventArgs e)
     {
-        using var brush = new SolidBrush(Color.FromArgb(255, 32, 32, 32));
-        e.Graphics.FillRectangle(brush, e.AffectedBounds);
+        e.Graphics.FillRectangle(_backgroundBrush, e.AffectedBounds);
     }
 
     protected override void OnRenderToolStripBorder(ToolStripRenderEventArgs e)
     {
-        using var pen = new Pen(Color.FromArgb(255, 58, 58, 58));
         var rect = new Rectangle(0, 0, e.AffectedBounds.Width - 1, e.AffectedBounds.Height - 1);
-        using var path = RoundedRect(rect, 8);
+
+        if (_borderPath == null || _borderSize != rect.Size)
+        {
+            _borderPath?.Dispose();
+            _borderPath = RoundedRect(rect, 8);
+            _borderSize = rect.Size;
+        }
+
         e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-        e.Graphics.DrawPath(pen, path);
+        e.Graphics.DrawPath(_borderPen, _borderPath);
     }
 
     protected override void OnRenderMenuItemBackground(ToolStripItemRenderEventArgs e)
     {
-        var item = e.Item;
-        var g = e.Graphics;
-        var bounds = new Rectangle(4, 1, item.Width - 8, item.Height - 2);
+        if (!e.Item.Selected || !e.Item.Enabled) return;
 
-        if (item.Selected && item.Enabled)
+        var bounds = new Rectangle(4, 1, e.Item.Width - 8, e.Item.Height - 2);
+
+        if (_hoverPath == null || _hoverBounds != bounds)
         {
-            using var brush = new SolidBrush(Color.FromArgb(255, 55, 55, 55));
-            using var path = RoundedRect(bounds, 4);
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.FillPath(brush, path);
+            _hoverPath?.Dispose();
+            _hoverPath = RoundedRect(bounds, 4);
+            _hoverBounds = bounds;
         }
+
+        e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+        e.Graphics.FillPath(_hoverBrush, _hoverPath);
     }
 
     protected override void OnRenderItemText(ToolStripItemTextRenderEventArgs e)
@@ -48,15 +76,11 @@ internal sealed class DarkContextMenuRenderer : ToolStripProfessionalRenderer
 
     protected override void OnRenderSeparator(ToolStripSeparatorRenderEventArgs e)
     {
-        var g = e.Graphics;
         int y = e.Item.Height / 2;
-        using var pen = new Pen(Color.FromArgb(255, 58, 58, 58));
-        g.DrawLine(pen, 12, y, e.Item.Width - 12, y);
+        e.Graphics.DrawLine(_separatorPen, 12, y, e.Item.Width - 12, y);
     }
 
-    protected override void OnRenderImageMargin(ToolStripRenderEventArgs e)
-    {
-    }
+    protected override void OnRenderImageMargin(ToolStripRenderEventArgs e) { }
 
     protected override void OnRenderArrow(ToolStripArrowRenderEventArgs e)
     {
@@ -64,10 +88,20 @@ internal sealed class DarkContextMenuRenderer : ToolStripProfessionalRenderer
         base.OnRenderArrow(e);
     }
 
+    public void Dispose()
+    {
+        _backgroundBrush.Dispose();
+        _hoverBrush.Dispose();
+        _borderPen.Dispose();
+        _separatorPen.Dispose();
+        _borderPath?.Dispose();
+        _hoverPath?.Dispose();
+    }
+
     private static GraphicsPath RoundedRect(Rectangle bounds, int radius)
     {
         int diameter = radius * 2;
-        var arc = new Rectangle(bounds.Location, new Size(diameter, diameter));
+        var arc  = new Rectangle(bounds.Location, new Size(diameter, diameter));
         var path = new GraphicsPath();
 
         path.AddArc(arc, 180, 90);
@@ -84,20 +118,20 @@ internal sealed class DarkContextMenuRenderer : ToolStripProfessionalRenderer
 
     private sealed class DarkColorTable : ProfessionalColorTable
     {
-        public override Color MenuBorder => Color.FromArgb(255, 58, 58, 58);
-        public override Color MenuItemBorder => Color.Transparent;
-        public override Color MenuItemSelected => Color.FromArgb(255, 55, 55, 55);
-        public override Color MenuStripGradientBegin => Color.FromArgb(255, 32, 32, 32);
-        public override Color MenuStripGradientEnd => Color.FromArgb(255, 32, 32, 32);
+        public override Color MenuBorder                    => Color.FromArgb(255, 58, 58, 58);
+        public override Color MenuItemBorder                => Color.Transparent;
+        public override Color MenuItemSelected              => Color.FromArgb(255, 55, 55, 55);
+        public override Color MenuStripGradientBegin        => Color.FromArgb(255, 32, 32, 32);
+        public override Color MenuStripGradientEnd          => Color.FromArgb(255, 32, 32, 32);
         public override Color MenuItemSelectedGradientBegin => Color.FromArgb(255, 55, 55, 55);
-        public override Color MenuItemSelectedGradientEnd => Color.FromArgb(255, 55, 55, 55);
-        public override Color MenuItemPressedGradientBegin => Color.FromArgb(255, 65, 65, 65);
-        public override Color MenuItemPressedGradientEnd => Color.FromArgb(255, 65, 65, 65);
-        public override Color ImageMarginGradientBegin => Color.FromArgb(255, 32, 32, 32);
-        public override Color ImageMarginGradientMiddle => Color.FromArgb(255, 32, 32, 32);
-        public override Color ImageMarginGradientEnd => Color.FromArgb(255, 32, 32, 32);
-        public override Color SeparatorDark => Color.FromArgb(255, 58, 58, 58);
-        public override Color SeparatorLight => Color.FromArgb(255, 58, 58, 58);
-        public override Color ToolStripDropDownBackground => Color.FromArgb(255, 32, 32, 32);
+        public override Color MenuItemSelectedGradientEnd   => Color.FromArgb(255, 55, 55, 55);
+        public override Color MenuItemPressedGradientBegin  => Color.FromArgb(255, 65, 65, 65);
+        public override Color MenuItemPressedGradientEnd    => Color.FromArgb(255, 65, 65, 65);
+        public override Color ImageMarginGradientBegin      => Color.FromArgb(255, 32, 32, 32);
+        public override Color ImageMarginGradientMiddle     => Color.FromArgb(255, 32, 32, 32);
+        public override Color ImageMarginGradientEnd        => Color.FromArgb(255, 32, 32, 32);
+        public override Color SeparatorDark                 => Color.FromArgb(255, 58, 58, 58);
+        public override Color SeparatorLight                => Color.FromArgb(255, 58, 58, 58);
+        public override Color ToolStripDropDownBackground   => Color.FromArgb(255, 32, 32, 32);
     }
 }

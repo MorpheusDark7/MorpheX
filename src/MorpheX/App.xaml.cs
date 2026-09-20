@@ -543,14 +543,6 @@ public partial class App : Application
         };
         menu.Items.Add(nextItem);
 
-        menu.Opening += (_, _) =>
-        {
-            pauseResumeItem.Text = PlaybackService.IsManuallyPaused ? "Resume Wallpaper" : "Pause Wallpaper";
-
-            bool muted = !SettingsService.Settings.Audio.Enabled;
-            muteItem.Text = muted ? "Unmute Audio" : "Mute Audio";
-        };
-
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
         var openItem = new System.Windows.Forms.ToolStripMenuItem("Open MorpheX")
