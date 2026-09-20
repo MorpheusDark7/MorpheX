@@ -43,7 +43,7 @@ public sealed class WallpaperHostWindow : IDisposable
 
         EnsureClassRegistered();
 
-        uint exStyle = NativeMethods.WS_EX_LAYERED | NativeMethods.WS_EX_TRANSPARENT;
+        uint exStyle = NativeMethods.WS_EX_TRANSPARENT;
         uint style = NativeMethods.WS_CHILD | NativeMethods.WS_VISIBLE | NativeMethods.WS_CLIPCHILDREN | NativeMethods.WS_CLIPSIBLINGS;
 
         int clientX = x;
@@ -76,7 +76,6 @@ public sealed class WallpaperHostWindow : IDisposable
             return false;
         }
 
-        NativeMethods.SetLayeredWindowAttributes(_handle, 0, 255, NativeMethods.LWA_ALPHA);
 
         if (workerWHandle != IntPtr.Zero)
         {

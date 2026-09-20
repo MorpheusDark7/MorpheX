@@ -60,11 +60,9 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             _media.AddOption(":no-video-title-show");
             _media.AddOption(":input-repeat=65535");
             _media.AddOption(":no-mouse-events");
-            _media.AddOption(":file-caching=100");
+            _media.AddOption(":file-caching=300");
             _media.AddOption(":clock-jitter=0");
             _media.AddOption(":clock-synchro=0");
-            _media.AddOption(":avcodec-fast");
-            _media.AddOption(":avcodec-skiploopfilter=4");
 
             if (HardwareAccelerationEnabled)
             {
@@ -136,15 +134,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             State = WallpaperState.Playing;
             Log.Information("VideoProvider loaded: {Path}", wallpaper.EffectivePath);
 
-            _ = Task.Run(async () =>
-            {
-                try
-                {
-                    await Task.Delay(2500);
-                    Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
-                }
-                catch { }
-            });
+
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
@@ -268,18 +258,13 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
                 "--vout=direct3d11",
                 "--directx-hw-yuv",
                 "--direct3d11-hw-blending",
-                "--avcodec-fast",
-                "--avcodec-skiploopfilter=4",
-                "--file-caching=100",
+                "--file-caching=300",
                 "--live-caching=0",
                 "--disc-caching=0",
                 "--network-caching=0",
                 "--clock-jitter=0",
                 "--clock-synchro=0",
-                "--no-spu",
-                "--drop-late-frames",
-                "--skip-frames",
-                "--avcodec-threads=2"
+                "--no-spu"
             );
 
             Log.Information("LibVLC initialized with GPU hardware acceleration. Version: {Version}", _sharedLibVLC.Version);
