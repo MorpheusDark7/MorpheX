@@ -49,6 +49,15 @@ public interface IWallpaperService : IDisposable
     Task RecoverFromExplorerRestartAsync();
 
     Task ReloadActiveWallpapersAsync();
+
+    /// <summary>Apply brightness/contrast/saturation/colorTemp effects to all active wallpapers.</summary>
+    void ApplyEffectsToAll(float brightnessOverride = -1f);
+
+    /// <summary>Set playback speed on all active video wallpapers.</summary>
+    void SetPlaybackRate(float rate);
+
+    /// <summary>Pick a random wallpaper from the library and set it on the given monitor.</summary>
+    Task SetRandomWallpaperAsync(string monitorDeviceId);
 }
 
 public sealed class WallpaperService : IWallpaperService
@@ -57,6 +66,7 @@ public sealed class WallpaperService : IWallpaperService
     private readonly IMonitorService _monitorService;
     private readonly ISettingsService _settingsService;
     private readonly WallpaperProviderFactory _providerFactory;
+    private readonly ILibraryService? _libraryService;
 
     private readonly Dictionary<string, MonitorWallpaperState> _monitorStates = new();
 
@@ -65,11 +75,12 @@ public sealed class WallpaperService : IWallpaperService
     public bool IsAnyPlaying => _monitorStates.Values.Any(s => s.Provider?.State == WallpaperState.Playing);
 
     public WallpaperService(IMonitorService monitorService, ISettingsService settingsService,
-                             WallpaperProviderFactory providerFactory)
+                             WallpaperProviderFactory providerFactory, ILibraryService? libraryService = null)
     {
         _monitorService = monitorService;
         _settingsService = settingsService;
         _providerFactory = providerFactory;
+        _libraryService = libraryService;
     }
 
     public bool Initialize()
@@ -145,6 +156,7 @@ public sealed class WallpaperService : IWallpaperService
         {
             vwp.AudioEnabled = audioEnabled;
             vwp.HardwareAccelerationEnabled = _settingsService.Settings.Playback.HardwareAcceleration;
+            vwp.FadeInOnLoad = _settingsService.Settings.Playback.FadeInOnLoad;
         }
 
         try
@@ -186,6 +198,11 @@ public sealed class WallpaperService : IWallpaperService
         {
             await _settingsService.SaveAsync(ct);
         }
+
+        // Apply effects and playback rate after successful load
+        ApplyEffectsToAll();
+        if (provider is VideoWallpaperProvider loaded_vwp)
+            loaded_vwp.SetPlaybackRate(_settingsService.Settings.Playback.PlaybackRate);
 
         Utilities.MemoryOptimizer.TrimWorkingSet();
     }
@@ -315,6 +332,49 @@ public sealed class WallpaperService : IWallpaperService
         foreach (var monitor in _monitorService.Monitors)
         {
             await SetWallpaperAsync(monitor.DeviceId, wallpaper, ct);
+        }
+    }
+
+    /// <inheritdoc />
+    public void ApplyEffectsToAll(float brightnessOverride = -1f)
+    {
+        var effects = _settingsService.Settings.Effects;
+        foreach (var state in _monitorStates.Values)
+        {
+            if (state.Provider != null)
+                WallpaperEffectsService.Apply(state.Provider, effects, brightnessOverride);
+        }
+    }
+
+    /// <inheritdoc />
+    public void SetPlaybackRate(float rate)
+    {
+        foreach (var state in _monitorStates.Values)
+        {
+            if (state.Provider is VideoWallpaperProvider vwp)
+                vwp.SetPlaybackRate(rate);
+        }
+    }
+
+    /// <inheritdoc />
+    public async Task SetRandomWallpaperAsync(string monitorDeviceId)
+    {
+        try
+        {
+            var allWallpapers = _libraryService?.Wallpapers ?? (IReadOnlyList<WallpaperInfo>)Array.Empty<WallpaperInfo>();
+            if (allWallpapers.Count == 0) return;
+
+            var current = GetActiveWallpaper(monitorDeviceId);
+            var candidates = allWallpapers.Where(w => w.Id != current?.Id).ToList();
+            if (candidates.Count == 0) candidates = allWallpapers.ToList();
+
+            var pick = candidates[Random.Shared.Next(candidates.Count)];
+            await SetWallpaperAsync(monitorDeviceId, pick);
+            Log.Information("Random wallpaper selected: '{Name}' on {Monitor}", pick.Name, monitorDeviceId);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "SetRandomWallpaperAsync failed for monitor {Monitor}", monitorDeviceId);
         }
     }
 

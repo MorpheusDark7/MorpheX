@@ -18,6 +18,7 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
 
     private IntPtr _hostHandle;
     private Bitmap? _scaledBitmap;
+    private ColorMatrix? _colorMatrix;
     private bool _disposed;
 
     public WallpaperState State { get; private set; } = WallpaperState.Unloaded;
@@ -48,8 +49,6 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
             State = WallpaperState.Playing;
             Log.Information("ImageProvider loaded and painted: {Path} ({W}x{H} → {TW}x{TH})",
                 wallpaper.EffectivePath, sourceImage.Width, sourceImage.Height, width, height);
-
-            Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
         }
         catch (OutOfMemoryException)
         {
@@ -88,7 +87,18 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
         }
     }
 
-    public void SetVolume(float volume) {  }
+    public void SetVolume(float volume) { }
+
+    /// <summary>Apply a post-processing color matrix (brightness/contrast/saturation). Pass null to clear.</summary>
+    public void SetColorMatrix(ColorMatrix? matrix)
+    {
+        _colorMatrix = matrix;
+        if (_hostHandle != IntPtr.Zero)
+        {
+            NativeMethods.InvalidateRect(_hostHandle, IntPtr.Zero, false);
+            NativeMethods.UpdateWindow(_hostHandle);
+        }
+    }
 
     public void Resize(int width, int height)
     {
@@ -125,7 +135,19 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
             using var graphics = Graphics.FromHdc(hdc);
             graphics.CompositingMode = CompositingMode.SourceCopy;
             graphics.InterpolationMode = InterpolationMode.Default;
-            graphics.DrawImage(_scaledBitmap, 0, 0);
+
+            if (_colorMatrix != null)
+            {
+                using var ia = new ImageAttributes();
+                ia.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                var destRect = new System.Drawing.Rectangle(0, 0, _scaledBitmap.Width, _scaledBitmap.Height);
+                graphics.DrawImage(_scaledBitmap, destRect, 0, 0,
+                    _scaledBitmap.Width, _scaledBitmap.Height, GraphicsUnit.Pixel, ia);
+            }
+            else
+            {
+                graphics.DrawImage(_scaledBitmap, 0, 0);
+            }
         }
         catch (Exception ex)
         {

@@ -42,6 +42,7 @@ public partial class App : Application
     private SplashWindow? _splash;
     private CancellationTokenSource? _monitorChangeDebounceCts;
     private readonly SemaphoreSlim _monitorChangeLock = new(1, 1);
+    private MorpheX.Core.Services.AmbientDimService? _ambientDimService;
 
     protected override async void OnStartup(StartupEventArgs e)
     {
@@ -118,7 +119,7 @@ public partial class App : Application
             () => new GifWallpaperProvider(),
             new[] { ".gif" });
 
-        WallpaperService = new WallpaperService(MonitorService, SettingsService, _providerFactory);
+        WallpaperService = new WallpaperService(MonitorService, SettingsService, _providerFactory, LibraryService);
         if (!WallpaperService.Initialize())
         {
             Log.Error("Failed to initialize desktop wallpaper integration");
@@ -218,6 +219,9 @@ public partial class App : Application
 
         HotkeyService = new HotkeyService(SettingsService, PlaybackService, WallpaperService, PlaylistService);
         HotkeyService.Start();
+
+        _ambientDimService = new MorpheX.Core.Services.AmbientDimService(WallpaperService, SettingsService);
+        _ambientDimService.Start();
 
         SetupTrayIcon();
 
@@ -449,6 +453,9 @@ public partial class App : Application
             ContextMenuStrip = CreateTrayContextMenu()
         };
 
+        // Keep tooltip fresh: update on every right-click open via menu.Opening
+        // (already handled inside CreateTrayContextMenu)
+
         _trayIcon.MouseClick += (_, e) =>
         {
             if (e.Button == System.Windows.Forms.MouseButtons.Left)
@@ -474,7 +481,13 @@ public partial class App : Application
             Enabled = false,
             Font = new System.Drawing.Font(menu.Font, System.Drawing.FontStyle.Bold)
         };
+        var nowPlayingItem = new System.Windows.Forms.ToolStripMenuItem("")
+        {
+            Enabled = false,
+            ForeColor = System.Drawing.Color.FromArgb(160, 160, 160)
+        };
         menu.Items.Add(header);
+        menu.Items.Add(nowPlayingItem);
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
         var pauseResumeItem = new System.Windows.Forms.ToolStripMenuItem(
@@ -530,6 +543,20 @@ public partial class App : Application
         {
             pauseResumeItem.Text = PlaybackService.IsManuallyPaused ? "Resume Wallpaper" : "Pause Wallpaper";
             muteItem.Text = SettingsService.Settings.Audio.Enabled ? "Mute Audio" : "Unmute Audio";
+
+            // Update tray tooltip and now-playing label
+            var activeWallpapers = WallpaperService.GetAllActiveWallpapers();
+            string nowPlaying = activeWallpapers.Count > 0
+                ? "♪ " + string.Join(" / ", activeWallpapers.Select(w => w.Name))
+                : "No wallpaper active";
+            nowPlayingItem.Text = nowPlaying.Length > 63 ? nowPlaying[..60] + "…" : nowPlaying;
+
+            // Also update tray icon tooltip (max 63 chars for WinForms)
+            string tooltip = activeWallpapers.Count > 0
+                ? "MorpheX — " + activeWallpapers[0].Name
+                : "MorpheX Live";
+            if (_trayIcon != null)
+                _trayIcon.Text = tooltip.Length > 63 ? tooltip[..63] : tooltip;
         };
 
         var nextItem = new System.Windows.Forms.ToolStripMenuItem("Next Wallpaper");
@@ -617,6 +644,7 @@ public partial class App : Application
         PlaylistService?.Dispose();
         SystemMetricsService?.Dispose();
         PlaybackService?.Dispose();
+        _ambientDimService?.Dispose();
         WallpaperService?.Dispose();
         MonitorService?.Dispose();
 

@@ -134,6 +134,30 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             State = WallpaperState.Playing;
             Log.Information("VideoProvider loaded: {Path}", wallpaper.EffectivePath);
 
+            // Fade-in: ramp VLC brightness from 0 → 1 over 500 ms
+            if (FadeInOnLoad)
+            {
+                _ = Task.Run(async () =>
+                {
+                    try
+                    {
+                        const int steps = 10;
+                        for (int i = 0; i <= steps; i++)
+                        {
+                            if (State != WallpaperState.Playing) break;
+                            float b = i / (float)steps;
+                            _mediaPlayer?.SetAdjustFloat(VideoAdjustOption.Brightness, b);
+                            _mediaPlayer?.SetAdjustInt(VideoAdjustOption.Enable, 1);
+                            await Task.Delay(50);
+                        }
+                        // After fade-in, disable adjust unless effects are active
+                        if (!_adjustActive)
+                            _mediaPlayer?.SetAdjustInt(VideoAdjustOption.Enable, 0);
+                    }
+                    catch { }
+                });
+            }
+
 
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
@@ -193,6 +217,48 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             _mediaPlayer.Volume = Math.Clamp((int)Math.Round(volume * 100), 0, 100);
             _mediaPlayer.Mute = false;
         }
+    }
+
+    // ─── Effects & Rate ────────────────────────────────────────────────────
+
+    /// <summary>Whether fade-in should play when wallpaper first loads.</summary>
+    public bool FadeInOnLoad { get; set; } = true;
+
+    private bool _adjustActive;
+
+    /// <summary>
+    /// Apply VLC Adjust filter for brightness / contrast / saturation / hue.
+    /// Pass all 1.0 / 0 to disable the filter.
+    /// </summary>
+    public void SetVlcAdjust(float brightness, float contrast, float saturation, float hue)
+    {
+        if (_mediaPlayer == null) return;
+
+        bool isDefault = Math.Abs(brightness - 1f) < 0.01f &&
+                         Math.Abs(contrast  - 1f) < 0.01f &&
+                         Math.Abs(saturation - 1f) < 0.01f &&
+                         Math.Abs(hue) < 0.5f;
+
+        if (isDefault)
+        {
+            _mediaPlayer.SetAdjustInt(VideoAdjustOption.Enable, 0);
+            _adjustActive = false;
+            return;
+        }
+
+        _mediaPlayer.SetAdjustFloat(VideoAdjustOption.Brightness, Math.Clamp(brightness, 0f, 2f));
+        _mediaPlayer.SetAdjustFloat(VideoAdjustOption.Contrast,   Math.Clamp(contrast,   0f, 2f));
+        _mediaPlayer.SetAdjustFloat(VideoAdjustOption.Saturation, Math.Clamp(saturation, 0f, 3f));
+        _mediaPlayer.SetAdjustFloat(VideoAdjustOption.Hue,        Math.Clamp(hue, -180f, 180f));
+        _mediaPlayer.SetAdjustInt(VideoAdjustOption.Enable, 1);
+        _adjustActive = true;
+    }
+
+    /// <summary>Set playback speed (0.25 – 2.0). 1.0 = normal.</summary>
+    public void SetPlaybackRate(float rate)
+    {
+        if (_mediaPlayer == null) return;
+        _mediaPlayer.SetRate(Math.Clamp(rate, 0.25f, 2.0f));
     }
 
     public void Resize(int width, int height)

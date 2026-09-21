@@ -101,6 +101,42 @@ public partial class SettingsPage : Page
         AudioEnabledToggle.IsChecked = settings.Audio.Enabled;
         VolumeSlider.Value = settings.Audio.Volume;
 
+        // Effects
+        BrightnessSlider.Value = settings.Effects.Brightness * 100.0;
+        ContrastSlider.Value   = settings.Effects.Contrast   * 100.0;
+        SaturationSlider.Value = settings.Effects.Saturation * 100.0;
+        ColorTempSlider.Value  = settings.Effects.ColorTemperature;
+        UpdateEffectsLabels();
+
+        // Playback
+        FadeInToggle.IsChecked = settings.Playback.FadeInOnLoad;
+        string rateTag = settings.Playback.PlaybackRate.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
+        foreach (ComboBoxItem item in PlaybackRateCombo.Items)
+        {
+            if ((string)item.Tag == rateTag || Math.Abs(float.Parse((string)item.Tag,
+                System.Globalization.CultureInfo.InvariantCulture) - settings.Playback.PlaybackRate) < 0.01f)
+            {
+                PlaybackRateCombo.SelectedItem = item;
+                break;
+            }
+        }
+        if (PlaybackRateCombo.SelectedItem == null) PlaybackRateCombo.SelectedIndex = 3; // 1×
+
+        // Ambient Dim
+        AmbientDimToggle.IsChecked = settings.AmbientDim.Enabled;
+        string idleTag = settings.AmbientDim.IdleMinutes.ToString();
+        foreach (ComboBoxItem item in AmbientDimIdleCombo.Items)
+        {
+            if ((string)item.Tag == idleTag)
+            {
+                AmbientDimIdleCombo.SelectedItem = item;
+                break;
+            }
+        }
+        if (AmbientDimIdleCombo.SelectedItem == null) AmbientDimIdleCombo.SelectedIndex = 1; // 5 min
+        DimLevelSlider.Value = Math.Round(settings.AmbientDim.DimLevel * 100.0);
+        DimLevelValueText.Text = $"{(int)DimLevelSlider.Value}%";
+
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.2"}";
 
@@ -283,9 +319,10 @@ public partial class SettingsPage : Page
     private void UpdateHotkeyButtons()
     {
         var hotkeys = ((App)Application.Current).SettingsService.Settings.Hotkeys;
-        HotkeyPauseBtn.Content = _recordingTarget == "PauseResume" ? "Press shortcut..." : hotkeys.PauseResume.DisplayText;
-        HotkeyMuteBtn.Content = _recordingTarget == "MuteUnmute" ? "Press shortcut..." : hotkeys.MuteUnmute.DisplayText;
-        HotkeyNextBtn.Content = _recordingTarget == "NextWallpaper" ? "Press shortcut..." : hotkeys.NextWallpaper.DisplayText;
+        HotkeyPauseBtn.Content  = _recordingTarget == "PauseResume"    ? "Press shortcut..." : hotkeys.PauseResume.DisplayText;
+        HotkeyMuteBtn.Content   = _recordingTarget == "MuteUnmute"     ? "Press shortcut..." : hotkeys.MuteUnmute.DisplayText;
+        HotkeyNextBtn.Content   = _recordingTarget == "NextWallpaper"  ? "Press shortcut..." : hotkeys.NextWallpaper.DisplayText;
+        HotkeyRandomBtn.Content = _recordingTarget == "RandomWallpaper"? "Press shortcut..." : hotkeys.RandomWallpaper.DisplayText;
     }
 
     private void HotkeyPauseBtn_Click(object sender, RoutedEventArgs e)
@@ -381,9 +418,10 @@ public partial class SettingsPage : Page
 
         HotkeyBinding? targetBinding = _recordingTarget switch
         {
-            "PauseResume" => hotkeys.PauseResume,
-            "MuteUnmute" => hotkeys.MuteUnmute,
-            "NextWallpaper" => hotkeys.NextWallpaper,
+            "PauseResume"    => hotkeys.PauseResume,
+            "MuteUnmute"     => hotkeys.MuteUnmute,
+            "NextWallpaper"  => hotkeys.NextWallpaper,
+            "RandomWallpaper" => hotkeys.RandomWallpaper,
             _ => null
         };
 
@@ -402,6 +440,25 @@ public partial class SettingsPage : Page
         UpdateHotkeyButtons();
         e.Handled = true;
     }
+
+    private void HotkeyRandomBtn_Click(object sender, RoutedEventArgs e)
+    {
+        _recordingTarget = "RandomWallpaper";
+        UpdateHotkeyButtons();
+    }
+
+    private async void HotkeyRandomClearBtn_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var binding = app.SettingsService.Settings.Hotkeys.RandomWallpaper;
+        binding.Key = "None";
+        binding.Modifiers = "None";
+        binding.Enabled = false;
+        app.HotkeyService.UpdateBindings();
+        await app.SettingsService.SaveAsync();
+        UpdateHotkeyButtons();
+    }
+
     #endregion
 
     #region Audio
@@ -544,5 +601,126 @@ public partial class SettingsPage : Page
             InstallUpdateBtn.Content = "Retry Update";
         }
     }
+    #endregion
+
+    #region Wallpaper Effects
+
+    private bool _effectsThrottling;
+
+    private void UpdateEffectsLabels()
+    {
+        BrightnessValueText.Text = $"{(int)BrightnessSlider.Value}%";
+        ContrastValueText.Text   = $"{(int)ContrastSlider.Value}%";
+        SaturationValueText.Text = $"{(int)SaturationSlider.Value}%";
+        int t = (int)ColorTempSlider.Value;
+        ColorTempValueText.Text  = t == 0 ? "Neutral" : (t > 0 ? $"+{t} Warm" : $"{t} Cool");
+    }
+
+    private void ApplyEffectsNow()
+    {
+        if (_effectsThrottling) return;
+        _effectsThrottling = true;
+        // Debounce so we don't hammer the renderer on every slider tick
+        Dispatcher.BeginInvoke(async () =>
+        {
+            await System.Threading.Tasks.Task.Delay(80);
+            var app = (App)Application.Current;
+            var fx = app.SettingsService.Settings.Effects;
+            fx.Brightness       = (float)(BrightnessSlider.Value / 100.0);
+            fx.Contrast         = (float)(ContrastSlider.Value   / 100.0);
+            fx.Saturation       = (float)(SaturationSlider.Value / 100.0);
+            fx.ColorTemperature = (int)ColorTempSlider.Value;
+            UpdateEffectsLabels();
+            app.WallpaperService.ApplyEffectsToAll();
+            await app.SettingsService.SaveAsync();
+            _effectsThrottling = false;
+        });
+    }
+
+    private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    { if (!_isInitializing) ApplyEffectsNow(); else BrightnessValueText.Text = $"{(int)e.NewValue}%"; }
+
+    private void ContrastSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    { if (!_isInitializing) ApplyEffectsNow(); else ContrastValueText.Text = $"{(int)e.NewValue}%"; }
+
+    private void SaturationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    { if (!_isInitializing) ApplyEffectsNow(); else SaturationValueText.Text = $"{(int)e.NewValue}%"; }
+
+    private void ColorTempSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (!_isInitializing) ApplyEffectsNow();
+        else { int t = (int)e.NewValue; ColorTempValueText.Text = t == 0 ? "Neutral" : (t > 0 ? $"+{t} Warm" : $"{t} Cool"); }
+    }
+
+    private async void ResetEffectsBtn_Click(object sender, RoutedEventArgs e)
+    {
+        _isInitializing = true;
+        BrightnessSlider.Value = 100;
+        ContrastSlider.Value   = 100;
+        SaturationSlider.Value = 100;
+        ColorTempSlider.Value  = 0;
+        _isInitializing = false;
+
+        var app = (App)Application.Current;
+        var fx = app.SettingsService.Settings.Effects;
+        fx.Brightness = 1.0f; fx.Contrast = 1.0f; fx.Saturation = 1.0f; fx.ColorTemperature = 0;
+        UpdateEffectsLabels();
+        app.WallpaperService.ApplyEffectsToAll();
+        await app.SettingsService.SaveAsync();
+    }
+
+    #endregion
+
+    #region Playback
+
+    private async void PlaybackRateCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (PlaybackRateCombo.SelectedItem is not ComboBoxItem item) return;
+        float rate = float.Parse((string)item.Tag, System.Globalization.CultureInfo.InvariantCulture);
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Playback.PlaybackRate = rate;
+        app.WallpaperService.SetPlaybackRate(rate);
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void FadeInToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Playback.FadeInOnLoad = FadeInToggle.IsChecked == true;
+        await app.SettingsService.SaveAsync();
+    }
+
+    #endregion
+
+    #region Ambient Dim
+
+    private async void AmbientDimToggle_Toggled(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.AmbientDim.Enabled = AmbientDimToggle.IsChecked == true;
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void AmbientDimIdleCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (AmbientDimIdleCombo.SelectedItem is not ComboBoxItem item) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.AmbientDim.IdleMinutes = int.Parse((string)item.Tag);
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void DimLevelSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.AmbientDim.DimLevel = (float)(e.NewValue / 100.0);
+        DimLevelValueText.Text = $"{(int)e.NewValue}%";
+        await app.SettingsService.SaveAsync();
+    }
+
     #endregion
 }

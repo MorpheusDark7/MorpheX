@@ -18,6 +18,7 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
     private int _currentFrame;
     private int[] _frameDelays = Array.Empty<int>();
     private int _width, _height;
+    private ColorMatrix? _colorMatrix;
     private bool _disposed;
     private readonly object _renderLock = new();
 
@@ -80,7 +81,15 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
         State = WallpaperState.Playing;
     }
 
-    public void SetVolume(float volume) {  }
+    public void SetVolume(float volume) { }
+
+    /// <summary>Apply a post-processing color matrix. Pass null to clear.</summary>
+    public void SetColorMatrix(ColorMatrix? matrix)
+    {
+        _colorMatrix = matrix;
+        if (State is WallpaperState.Playing or WallpaperState.Paused)
+            DrawCurrentFrame();
+    }
 
     public void Resize(int width, int height)
     {
@@ -136,7 +145,20 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.Clear(Color.Black);
-                graphics.DrawImage(_gifImage, 0, 0, _width, _height);
+
+                if (_colorMatrix != null)
+                {
+                    using var ia = new ImageAttributes();
+                    ia.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    graphics.DrawImage(_gifImage,
+                        new System.Drawing.Rectangle(0, 0, _width, _height),
+                        0, 0, _gifImage.Width, _gifImage.Height,
+                        GraphicsUnit.Pixel, ia);
+                }
+                else
+                {
+                    graphics.DrawImage(_gifImage, 0, 0, _width, _height);
+                }
             }
         }
         catch (Exception ex)

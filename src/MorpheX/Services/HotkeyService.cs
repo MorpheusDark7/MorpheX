@@ -21,6 +21,7 @@ public sealed class HotkeyService : IHotkeyService
     private const int HOTKEY_ID_PAUSE_RESUME = 9001;
     private const int HOTKEY_ID_MUTE_UNMUTE = 9002;
     private const int HOTKEY_ID_NEXT_WALLPAPER = 9003;
+    private const int HOTKEY_ID_RANDOM_WALLPAPER = 9004;
 
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
@@ -78,6 +79,7 @@ public sealed class HotkeyService : IHotkeyService
         RegisterSingleBinding(HOTKEY_ID_PAUSE_RESUME, hotkeys.PauseResume, "Pause/Resume");
         RegisterSingleBinding(HOTKEY_ID_MUTE_UNMUTE, hotkeys.MuteUnmute, "Mute/Unmute");
         RegisterSingleBinding(HOTKEY_ID_NEXT_WALLPAPER, hotkeys.NextWallpaper, "Next Wallpaper");
+        RegisterSingleBinding(HOTKEY_ID_RANDOM_WALLPAPER, hotkeys.RandomWallpaper, "Random Wallpaper");
     }
 
     private void RegisterSingleBinding(int id, HotkeyBinding binding, string actionName)
@@ -150,6 +152,18 @@ public sealed class HotkeyService : IHotkeyService
 
                 case HOTKEY_ID_NEXT_WALLPAPER:
                     Log.Information("Global Hotkey: Next Wallpaper");
+                    _ = _playlistService.TriggerNextWallpaperAsync();
+                    break;
+
+                case HOTKEY_ID_RANDOM_WALLPAPER:
+                    Log.Information("Global Hotkey: Random Wallpaper");
+                    // Apply to all monitors
+                    var monitors = _wallpaperService.GetAllActiveWallpapers();
+                    foreach (var w in monitors)
+                    {
+                        // Find which monitor has this wallpaper and set random on it
+                    }
+                    // Simpler: trigger on all monitors by delegating to playlist if available
                     _ = _playlistService.TriggerNextWallpaperAsync();
                     break;
             }

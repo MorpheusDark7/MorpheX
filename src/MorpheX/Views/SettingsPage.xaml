@@ -115,6 +115,107 @@
                               Checked="ResumePositionToggle_Toggled" Unchecked="ResumePositionToggle_Toggled" />
             </ui:CardControl>
 
+            <TextBlock Text="WALLPAPER EFFECTS" Style="{StaticResource SectionHeaderStyle}" />
+            <TextBlock
+                Text="Visual post-processing applied to all wallpaper types. 100% = original. Changes take effect immediately."
+                Style="{StaticResource SettingDescriptionStyle}"
+                Margin="0,0,0,10" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Brightness" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock x:Name="BrightnessValueText" Text="100%" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <Slider x:Name="BrightnessSlider" Width="200"
+                        Minimum="0" Maximum="200" Value="100" SmallChange="1" LargeChange="10"
+                        ValueChanged="BrightnessSlider_ValueChanged" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Contrast" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock x:Name="ContrastValueText" Text="100%" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <Slider x:Name="ContrastSlider" Width="200"
+                        Minimum="0" Maximum="200" Value="100" SmallChange="1" LargeChange="10"
+                        ValueChanged="ContrastSlider_ValueChanged" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Saturation" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock x:Name="SaturationValueText" Text="100%" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <Slider x:Name="SaturationSlider" Width="200"
+                        Minimum="0" Maximum="200" Value="100" SmallChange="1" LargeChange="10"
+                        ValueChanged="SaturationSlider_ValueChanged" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Color temperature" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock x:Name="ColorTempValueText" Text="Neutral" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Vertical" Width="200">
+                    <Slider x:Name="ColorTempSlider"
+                            Minimum="-50" Maximum="50" Value="0" SmallChange="1" LargeChange="5"
+                            ValueChanged="ColorTempSlider_ValueChanged" />
+                    <Grid Margin="0,2,0,0">
+                        <TextBlock Text="❄ Cool" FontSize="10" Opacity="0.5" HorizontalAlignment="Left" />
+                        <TextBlock Text="Warm 🔥" FontSize="10" Opacity="0.5" HorizontalAlignment="Right" />
+                    </Grid>
+                </StackPanel>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Reset effects" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Restore brightness, contrast, saturation and color to defaults" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:Button x:Name="ResetEffectsBtn" Content="Reset" Icon="{ui:SymbolIcon ArrowReset24}" Click="ResetEffectsBtn_Click" Width="110" />
+            </ui:CardControl>
+
+            <TextBlock Text="PLAYBACK" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Playback speed" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Video wallpaper playback rate multiplier" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="PlaybackRateCombo" Width="160" SelectionChanged="PlaybackRateCombo_SelectionChanged">
+                    <ComboBoxItem Content="0.25×" Tag="0.25" />
+                    <ComboBoxItem Content="0.5×" Tag="0.5" />
+                    <ComboBoxItem Content="0.75×" Tag="0.75" />
+                    <ComboBoxItem Content="1× (Normal)" Tag="1.0" />
+                    <ComboBoxItem Content="1.25×" Tag="1.25" />
+                    <ComboBoxItem Content="1.5×" Tag="1.5" />
+                    <ComboBoxItem Content="2×" Tag="2.0" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Fade in on load" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Smoothly fade wallpaper brightness from black when it first loads" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="FadeInToggle"
+                              Checked="FadeInToggle_Toggled" Unchecked="FadeInToggle_Toggled" />
+            </ui:CardControl>
+
             <TextBlock Text="AUDIO" Style="{StaticResource SectionHeaderStyle}" />
 
             <ui:CardControl Margin="0,0,0,3">
@@ -139,6 +240,47 @@
                         Width="200"
                         Minimum="0" Maximum="100" Value="50"
                         ValueChanged="VolumeSlider_ValueChanged" />
+            </ui:CardControl>
+
+            <TextBlock Text="AMBIENT DIM" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Dim when idle" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Automatically reduce wallpaper brightness when the system has been idle" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ui:ToggleSwitch x:Name="AmbientDimToggle"
+                              Checked="AmbientDimToggle_Toggled" Unchecked="AmbientDimToggle_Toggled" />
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Idle threshold" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="How long the system must be idle before dimming activates" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="AmbientDimIdleCombo" Width="160" SelectionChanged="AmbientDimIdleCombo_SelectionChanged">
+                    <ComboBoxItem Content="2 minutes" Tag="2" />
+                    <ComboBoxItem Content="5 minutes" Tag="5" />
+                    <ComboBoxItem Content="10 minutes" Tag="10" />
+                    <ComboBoxItem Content="15 minutes" Tag="15" />
+                    <ComboBoxItem Content="30 minutes" Tag="30" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Dim level" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock x:Name="DimLevelValueText" Text="30%" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <Slider x:Name="DimLevelSlider" Width="200"
+                        Minimum="10" Maximum="80" Value="30" SmallChange="5" LargeChange="10"
+                        ValueChanged="DimLevelSlider_ValueChanged" />
             </ui:CardControl>
 
             <TextBlock Text="PLAYLIST &amp; AUTO-ROTATION" Style="{StaticResource SectionHeaderStyle}" />
@@ -280,6 +422,19 @@
                 <StackPanel Orientation="Horizontal">
                     <Button x:Name="HotkeyNextBtn" Content="Not Assigned" Width="160" Click="HotkeyNextBtn_Click" Margin="0,0,6,0" />
                     <Button x:Name="HotkeyNextClearBtn" Content="✕" Width="34" Click="HotkeyNextClearBtn_Click" ToolTip="Clear shortcut" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Random Wallpaper" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Pick a random wallpaper from your library" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyRandomBtn" Content="Not Assigned" Width="160" Click="HotkeyRandomBtn_Click" Margin="0,0,6,0" />
+                    <Button x:Name="HotkeyRandomClearBtn" Content="✕" Width="34" Click="HotkeyRandomClearBtn_Click" ToolTip="Clear shortcut" />
                 </StackPanel>
             </ui:CardControl>
 
