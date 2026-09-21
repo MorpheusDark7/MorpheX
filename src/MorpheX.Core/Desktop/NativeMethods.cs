@@ -163,6 +163,8 @@ internal static partial class NativeMethods
     internal const int GWL_STYLE = -16;
     internal const int GWL_EXSTYLE = -20;
 
+    internal const uint CS_OWNDC = 0x0020;
+
     internal const uint WS_CHILD = 0x40000000;
     internal const uint WS_VISIBLE = 0x10000000;
     internal const uint WS_CLIPCHILDREN = 0x02000000;

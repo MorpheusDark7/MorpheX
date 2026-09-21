@@ -43,7 +43,7 @@ public sealed class WallpaperHostWindow : IDisposable
 
         EnsureClassRegistered();
 
-        uint exStyle = NativeMethods.WS_EX_TRANSPARENT;
+        uint exStyle = NativeMethods.WS_EX_NOACTIVATE;
         uint style = NativeMethods.WS_CHILD | NativeMethods.WS_VISIBLE | NativeMethods.WS_CLIPCHILDREN | NativeMethods.WS_CLIPSIBLINGS;
 
         int clientX = x;
@@ -171,7 +171,7 @@ public sealed class WallpaperHostWindow : IDisposable
             var wc = new NativeMethods.WNDCLASSEX
             {
                 cbSize = (uint)Marshal.SizeOf<NativeMethods.WNDCLASSEX>(),
-                style = 0,
+                style = NativeMethods.CS_OWNDC,
                 lpfnWndProc = _wndProcDelegate,
                 cbClsExtra = 0,
                 cbWndExtra = 0,
