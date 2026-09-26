@@ -84,9 +84,6 @@ public sealed class WorkerWInterop
             if (childWorkerW != IntPtr.Zero)
             {
                 Log.Information("Found WorkerW child of Progman: 0x{Handle:X}", childWorkerW);
-                NativeMethods.SetWindowPos(childWorkerW, new IntPtr(1) , 0, 0, 0, 0,
-                    NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_SHOWWINDOW);
-                NativeMethods.UpdateWindow(childWorkerW);
                 return childWorkerW;
             }
 
@@ -119,9 +116,6 @@ public sealed class WorkerWInterop
 
             if (targetWorkerW != IntPtr.Zero)
             {
-                NativeMethods.SetWindowPos(targetWorkerW, new IntPtr(1) , 0, 0, 0, 0,
-                    NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_SHOWWINDOW);
-                NativeMethods.UpdateWindow(targetWorkerW);
                 Log.Information("Found desktop WorkerW: 0x{Handle:X} (parent of icons: 0x{Parent:X})",
                     targetWorkerW, defViewParent);
                 return targetWorkerW;

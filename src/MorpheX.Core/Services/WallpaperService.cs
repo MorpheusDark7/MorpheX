@@ -122,9 +122,11 @@ public sealed class WallpaperService : IWallpaperService
 
         var host = new WallpaperHostWindow();
 
+        bool isLayered = wallpaper.Type is WallpaperType.Image or WallpaperType.AnimatedImage;
         if (!host.Create(_workerW.WorkerWHandle,
             monitor.Bounds.X, monitor.Bounds.Y,
-            monitor.Bounds.Width, monitor.Bounds.Height))
+            monitor.Bounds.Width, monitor.Bounds.Height,
+            isLayered))
         {
             Log.Error("Failed to create wallpaper host window on monitor {DeviceId}", monitorDeviceId);
             host.Dispose();
@@ -506,6 +508,9 @@ public sealed class WallpaperService : IWallpaperService
             return;
         }
 
+        // Only re-init WorkerW when the handle is truly gone. Calling Initialize() every
+        // display-change sends 0x052C to Progman, which itself triggers another
+        // DisplaySettingsChanged — creating a loop that wipes image/GIF paints.
         if (!_workerW.IsAttached)
         {
             Log.Information("WorkerW handle lost during monitor change, re-initializing...");
@@ -530,6 +535,14 @@ public sealed class WallpaperService : IWallpaperService
                 state.Host?.Reposition(monitor.Bounds.X, monitor.Bounds.Y,
                     monitor.Bounds.Width, monitor.Bounds.Height);
                 state.Provider?.Resize(monitor.Bounds.Width, monitor.Bounds.Height);
+
+                // Image/GIF providers render via WM_PAINT. After Windows refreshes the
+                // desktop layer on DisplaySettingsChanged, the painted content is lost.
+                // Force a repaint so the wallpaper reappears immediately.
+                if (state.Provider is ImageWallpaperProvider or GifWallpaperProvider)
+                {
+                    state.Host?.Repaint();
+                }
             }
         }
     }

@@ -33,7 +33,7 @@ public sealed class WallpaperHostWindow : IDisposable
         }
     }
 
-    public bool Create(IntPtr workerWHandle, int x, int y, int width, int height)
+    public bool Create(IntPtr workerWHandle, int x, int y, int width, int height, bool isLayered = false)
     {
         if (_handle != IntPtr.Zero)
         {
@@ -43,7 +43,9 @@ public sealed class WallpaperHostWindow : IDisposable
 
         EnsureClassRegistered();
 
-        uint exStyle = NativeMethods.WS_EX_NOACTIVATE;
+        uint exStyle = isLayered
+            ? (NativeMethods.WS_EX_LAYERED | NativeMethods.WS_EX_TRANSPARENT)
+            : NativeMethods.WS_EX_NOACTIVATE;
         uint style = NativeMethods.WS_CHILD | NativeMethods.WS_VISIBLE | NativeMethods.WS_CLIPCHILDREN | NativeMethods.WS_CLIPSIBLINGS;
 
         int clientX = x;
@@ -76,6 +78,10 @@ public sealed class WallpaperHostWindow : IDisposable
             return false;
         }
 
+        if (isLayered)
+        {
+            NativeMethods.SetLayeredWindowAttributes(_handle, 0, 255, NativeMethods.LWA_ALPHA);
+        }
 
         if (workerWHandle != IntPtr.Zero)
         {
@@ -94,8 +100,8 @@ public sealed class WallpaperHostWindow : IDisposable
 
         NativeMethods.UpdateWindow(_handle);
 
-        Log.Information("Created wallpaper host window 0x{Handle:X} at Screen({X},{Y}) Client({CX},{CY}) {W}x{H} (Parent: 0x{Parent:X})",
-            _handle, x, y, clientX, clientY, width, height, workerWHandle);
+        Log.Information("Created wallpaper host window 0x{Handle:X} (Layered={Layered}) at Screen({X},{Y}) Client({CX},{CY}) {W}x{H} (Parent: 0x{Parent:X})",
+            _handle, isLayered, x, y, clientX, clientY, width, height, workerWHandle);
         return true;
     }
 
@@ -171,7 +177,7 @@ public sealed class WallpaperHostWindow : IDisposable
             var wc = new NativeMethods.WNDCLASSEX
             {
                 cbSize = (uint)Marshal.SizeOf<NativeMethods.WNDCLASSEX>(),
-                style = NativeMethods.CS_OWNDC,
+                style = 0,
                 lpfnWndProc = _wndProcDelegate,
                 cbClsExtra = 0,
                 cbWndExtra = 0,

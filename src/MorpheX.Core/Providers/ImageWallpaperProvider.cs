@@ -20,6 +20,7 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
     private Bitmap? _scaledBitmap;
     private ColorMatrix? _colorMatrix;
     private bool _disposed;
+    private CancellationTokenSource? _repaintCts;
 
     public WallpaperState State { get; private set; } = WallpaperState.Unloaded;
     public string? ErrorMessage { get; private set; }
@@ -47,8 +48,15 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
             NativeMethods.UpdateWindow(hostHandle);
 
             State = WallpaperState.Playing;
-            Log.Information("ImageProvider loaded and painted: {Path} ({W}x{H} → {TW}x{TH})",
+            Log.Information("ImageProvider loaded and painted: {Path} ({W}x{H} \u2192 {TW}x{TH})",
                 wallpaper.EffectivePath, sourceImage.Width, sourceImage.Height, width, height);
+
+            // Windows desktop may repaint over our image (WorkerW has no WS_CLIPCHILDREN).
+            // Fire deferred repaints at increasing intervals to ensure the image stays visible
+            // after any desktop refresh cycle that follows the initial paint.
+            _repaintCts?.Cancel();
+            _repaintCts = new CancellationTokenSource();
+            _ = RepaintLoopAsync(_repaintCts.Token);
         }
         catch (OutOfMemoryException)
         {
@@ -113,6 +121,9 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
     {
         State = WallpaperState.Stopping;
 
+        _repaintCts?.Cancel();
+        _repaintCts = null;
+
         if (_hostHandle != IntPtr.Zero)
         {
             WallpaperHostWindow.SetPaintHandler(_hostHandle, null);
@@ -124,6 +135,27 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
         ErrorMessage = null;
         State = WallpaperState.Unloaded;
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Fires repeated InvalidateRect calls at increasing intervals after load.
+    /// This counteracts Windows repainting over our host window (WorkerW background
+    /// flush) which would otherwise leave the image invisible after the first paint.
+    /// </summary>
+    private async Task RepaintLoopAsync(CancellationToken ct)
+    {
+        int[] delays = { 250, 800 };
+        foreach (var delay in delays)
+        {
+            try { await Task.Delay(delay, ct); }
+            catch (OperationCanceledException) { return; }
+
+            if (ct.IsCancellationRequested || _hostHandle == IntPtr.Zero) return;
+
+            NativeMethods.InvalidateRect(_hostHandle, IntPtr.Zero, false);
+            NativeMethods.UpdateWindow(_hostHandle);
+            Log.Debug("ImageProvider deferred repaint fired (delay={Delay}ms)", delay);
+        }
     }
 
     private void PaintToHdc(IntPtr hdc)
@@ -213,6 +245,9 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
     {
         if (_disposed) return;
         _disposed = true;
+
+        _repaintCts?.Cancel();
+        _repaintCts = null;
 
         if (_hostHandle != IntPtr.Zero)
         {
