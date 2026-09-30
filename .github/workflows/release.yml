@@ -38,7 +38,9 @@ jobs:
       - name: Publish MorpheX Standalone Executable
         run: |
           dotnet publish src/MorpheX/MorpheX.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
-          Remove-Item -Path ./publish/*.pdb, ./publish/*.xml -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/*.pdb, ./publish/*.xml, ./publish/libvlc/win-x64/*.lib, ./publish/libvlc/win-x64/vlc-cache-gen.exe -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/lua, ./publish/libvlc/win-x64/hrtfs, ./publish/runtimes -Recurse -Force -ErrorAction SilentlyContinue
+          Get-ChildItem -Path ./publish -Directory | Where-Object { (Get-ChildItem $_.FullName -Recurse -File).Count -eq 0 } | Remove-Item -Recurse -Force
 
       - name: Compile Inno Setup Installer
         run: |

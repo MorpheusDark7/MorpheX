@@ -21,6 +21,8 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
     private ColorMatrix? _colorMatrix;
     private bool _disposed;
     private CancellationTokenSource? _repaintCts;
+    private string? _currentFilePath;
+    private ScalingMode _scaling;
 
     public WallpaperState State { get; private set; } = WallpaperState.Unloaded;
     public string? ErrorMessage { get; private set; }
@@ -40,6 +42,8 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
             using var sourceImage = Image.FromFile(wallpaper.EffectivePath);
             ct.ThrowIfCancellationRequested();
 
+            _currentFilePath = wallpaper.EffectivePath;
+            _scaling = scaling;
             _scaledBitmap = ScaleImage(sourceImage, width, height, scaling);
 
             WallpaperHostWindow.SetPaintHandler(hostHandle, PaintToHdc);
@@ -110,6 +114,23 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
 
     public void Resize(int width, int height)
     {
+        if (width <= 0 || height <= 0) return;
+
+        if (State is WallpaperState.Playing or WallpaperState.Paused && _currentFilePath != null && File.Exists(_currentFilePath))
+        {
+            try
+            {
+                using var sourceImage = Image.FromFile(_currentFilePath);
+                var oldBitmap = _scaledBitmap;
+                _scaledBitmap = ScaleImage(sourceImage, width, height, _scaling);
+                oldBitmap?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Log.Debug(ex, "Failed to rescale image during resize");
+            }
+        }
+
         if (State is WallpaperState.Playing or WallpaperState.Paused && _hostHandle != IntPtr.Zero)
         {
             NativeMethods.InvalidateRect(_hostHandle, IntPtr.Zero, false);
@@ -131,6 +152,7 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
 
         _scaledBitmap?.Dispose();
         _scaledBitmap = null;
+        _currentFilePath = null;
         _hostHandle = IntPtr.Zero;
         ErrorMessage = null;
         State = WallpaperState.Unloaded;
@@ -256,5 +278,6 @@ public sealed class ImageWallpaperProvider : IWallpaperProvider
 
         _scaledBitmap?.Dispose();
         _scaledBitmap = null;
+        _currentFilePath = null;
     }
 }

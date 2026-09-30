@@ -13,7 +13,8 @@
     <Description>Lightweight live wallpapers for Windows.</Description>
     <Company>MorpheusDark</Company>
     <Product>MorpheX Live</Product>
-    <Version>0.1.16</Version>
+    <Version>0.1.17</Version>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationManifest>app.manifest</ApplicationManifest>
@@ -28,8 +29,14 @@
   <Target Name="RemoveUnusedLibVlcRuntimes" AfterTargets="Publish">
     <RemoveDir Directories="$(PublishDir)libvlc\win-arm64" />
     <RemoveDir Directories="$(PublishDir)libvlc\win-x86" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\lua" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\hrtfs" />
+    <RemoveDir Directories="$(PublishDir)runtimes" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\*.lib" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\vlc-cache-gen.exe" />
     <Delete Files="$(PublishDir)*.pdb" />
     <Delete Files="$(PublishDir)*.xml" />
+    <Delete Files="$(PublishDir)WebView2Loader.dll" />
   </Target>
 
   <ItemGroup>
@@ -39,7 +46,6 @@
   <ItemGroup>
     <PackageReference Include="WPF-UI" Version="3.*" />
     <PackageReference Include="VideoLAN.LibVLC.Windows" Version="3.*" />
-    <PackageReference Include="Microsoft.Web.WebView2" Version="1.*" />
   </ItemGroup>
 
   <ItemGroup>

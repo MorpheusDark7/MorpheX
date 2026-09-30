@@ -56,8 +56,10 @@ public sealed class FullscreenDetector
                 return true;
 
             EvaluateWindow(hWnd, monitorBounds, workArea, out foundFullscreen, out foundMaximized);
+            if (foundFullscreen || foundMaximized)
+                return false;
 
-            return false;
+            return true;
         }, IntPtr.Zero);
 
         isFullscreen = foundFullscreen;
