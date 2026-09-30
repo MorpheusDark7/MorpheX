@@ -120,7 +120,11 @@ public partial class App : Application
             new[] { ".gif" });
 
         WallpaperService = new WallpaperService(MonitorService, SettingsService, _providerFactory, LibraryService);
-        if (!WallpaperService.Initialize())
+
+        // Run WorkerW interop init on a background thread to keep the UI thread
+        // (and the splash screen) responsive during SendMessageTimeout + Thread.Sleep calls.
+        var initOk = await Task.Run(() => WallpaperService.Initialize());
+        if (!initOk)
         {
             Log.Error("Failed to initialize desktop wallpaper integration");
         }
