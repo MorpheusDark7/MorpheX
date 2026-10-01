@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using MorpheX.Core.Configuration;
 using MorpheX.Services;
 using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace MorpheX.Widgets;
 
@@ -105,6 +106,8 @@ public partial class MediaWidget : Window
 
     public void RefreshVisualizerStyle()
     {
+        ApplyAppearance();
+
         var brush = GetVisualizerBrush();
         var glow  = GetBarGlow();
 
@@ -137,12 +140,51 @@ public partial class MediaWidget : Window
         }
     }
 
+    private void ApplyAppearance()
+    {
+        if (_settings.MediaShowBackground)
+        {
+            MainCardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x10));
+            MainCardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
+            MainCardBorder.BorderThickness = new Thickness(1);
+            MainCardBorder.Effect = (Effect)Resources["WidgetShadow"];
+            MainCardBorder.Margin = new Thickness(8);
+        }
+        else
+        {
+            MainCardBorder.Background = Brushes.Transparent;
+            MainCardBorder.BorderThickness = new Thickness(0);
+            MainCardBorder.Effect = null;
+            MainCardBorder.Margin = new Thickness(2);
+        }
+
+        if (_settings.MediaShowTrackDetails)
+        {
+            HeaderRow.Visibility = Visibility.Visible;
+            TrackInfoRow.Visibility = Visibility.Visible;
+            ControlsRow.Visibility = Visibility.Visible;
+            MinHeight = 110;
+        }
+        else
+        {
+            HeaderRow.Visibility = Visibility.Collapsed;
+            TrackInfoRow.Visibility = Visibility.Collapsed;
+            ControlsRow.Visibility = Visibility.Collapsed;
+            MinHeight = 35;
+        }
+
+        ToggleCardMenu.Header = _settings.MediaShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+        ToggleDetailsMenu.Header = _settings.MediaShowTrackDetails ? "🎵  Hide Track Details" : "🎵  Show Track Details";
+    }
+
     private System.Windows.Media.Brush GetVisualizerBrush()
     {
         return _settings.VisualizerColorMode switch
         {
             1 => (System.Windows.Media.Brush)Resources["BarBrushCyan"],
             2 => (System.Windows.Media.Brush)Resources["BarBrushViolet"],
+            3 => (System.Windows.Media.Brush)Resources["BarBrushMint"],
+            4 => (System.Windows.Media.Brush)Resources["BarBrushAmber"],
             _ => (System.Windows.Media.Brush)Resources["BarBrushWhite"]
         };
     }
@@ -153,6 +195,8 @@ public partial class MediaWidget : Window
         {
             1 => (System.Windows.Media.Color.FromRgb(56, 189, 248),  0.8),  // cyan glow
             2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.8),  // violet glow
+            3 => (System.Windows.Media.Color.FromRgb(74, 222, 128),  0.8),  // emerald mint glow
+            4 => (System.Windows.Media.Color.FromRgb(251, 146, 60),  0.8),  // sunset amber glow
             _ => (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
         };
         return new DropShadowEffect { BlurRadius = 12, ShadowDepth = 0, Color = col, Opacity = op };
@@ -310,6 +354,20 @@ public partial class MediaWidget : Window
         ScheduleDebouncedSave();
     }
 
+    private void ToggleCard_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.MediaShowBackground = !_settings.MediaShowBackground;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ToggleDetails_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.MediaShowTrackDetails = !_settings.MediaShowTrackDetails;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
     private void ColorWhite_Click(object sender, RoutedEventArgs e)
     {
         _settings.VisualizerColorMode = 0;
@@ -327,6 +385,20 @@ public partial class MediaWidget : Window
     private void ColorViolet_Click(object sender, RoutedEventArgs e)
     {
         _settings.VisualizerColorMode = 2;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorMint_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 3;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorAmber_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 4;
         RefreshVisualizerStyle();
         ScheduleDebouncedSave();
     }

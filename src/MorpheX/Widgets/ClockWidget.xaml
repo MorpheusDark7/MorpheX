@@ -11,13 +11,38 @@
     Topmost="False"
     ResizeMode="NoResize">
 
+    <Window.Resources>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>
+    </Window.Resources>
+
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem Header="⏰  Toggle 12h / 24h" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleFormatMenu" Header="⏰  Toggle 12h / 24h" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleDateMenu" Header="📅  Toggle Date Line" Click="ToggleDate_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="🔡  Small" Click="SizeSmall_Click" Foreground="#AAFFFFFF"/>
-            <MenuItem Header="🔡  Medium" Click="SizeMedium_Click" Foreground="#AAFFFFFF"/>
-            <MenuItem Header="🔡  Large" Click="SizeLarge_Click" Foreground="#AAFFFFFF"/>
+            <MenuItem Header="📏  Size">
+                <MenuItem Header="Small (40px)" Click="SizePreset_Click" Tag="0"/>
+                <MenuItem Header="Medium (64px)" Click="SizePreset_Click" Tag="1"/>
+                <MenuItem Header="Large (88px)" Click="SizePreset_Click" Tag="2"/>
+                <MenuItem Header="Huge (112px)" Click="SizePreset_Click" Tag="3"/>
+                <MenuItem Header="Giant (140px)" Click="SizePreset_Click" Tag="4"/>
+            </MenuItem>
+            <MenuItem Header="🎨  Color Theme">
+                <MenuItem Header="⚪  Pure White" Click="ColorPreset_Click" Tag="0"/>
+                <MenuItem Header="🔘  Dim Slate" Click="ColorPreset_Click" Tag="1"/>
+                <MenuItem Header="🔵  Electric Cyan" Click="ColorPreset_Click" Tag="2"/>
+                <MenuItem Header="🟢  Neon Mint" Click="ColorPreset_Click" Tag="3"/>
+                <MenuItem Header="🟣  Cyber Violet" Click="ColorPreset_Click" Tag="4"/>
+                <MenuItem Header="🟠  Sunset Orange" Click="ColorPreset_Click" Tag="5"/>
+                <MenuItem Header="🟡  Amber Gold" Click="ColorPreset_Click" Tag="6"/>
+            </MenuItem>
+            <MenuItem Header="🔤  Font Style">
+                <MenuItem Header="📐  Bahnschrift Light" Click="FontPreset_Click" Tag="0"/>
+                <MenuItem Header="✍️  Segoe UI Light" Click="FontPreset_Click" Tag="1"/>
+                <MenuItem Header="🚀  Anurati Numbers" Click="FontPreset_Click" Tag="2"/>
+                <MenuItem Header="💻  Consolas Monospace" Click="FontPreset_Click" Tag="3"/>
+            </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
@@ -25,34 +50,38 @@
         </ContextMenu>
     </Window.ContextMenu>
 
-    <!-- Pure floating text — no background box, Rainmeter style -->
-    <StackPanel
+    <!-- Clock Container -->
+    <Border
+        x:Name="CardBorder"
+        Background="Transparent"
+        BorderThickness="0"
+        CornerRadius="16"
+        Padding="6,4"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
-        Cursor="SizeAll"
-        Margin="4,0">
+        Cursor="SizeAll">
 
-        <!-- Big time: 23:54 -->
-        <TextBlock
-            x:Name="TimeText"
-            Text="00:00"
-            FontSize="72"
-            FontWeight="Thin"
-            FontFamily="Bahnschrift Light, Segoe UI Light, Segoe UI"
-            Foreground="#EEFFFFFF"
-            TextOptions.TextRenderingMode="ClearType"
-            HorizontalAlignment="Left"
-            LineHeight="70"/>
+        <StackPanel Margin="4,0">
+            <!-- Big time: 23:54 (no seconds, as requested) -->
+            <TextBlock
+                x:Name="TimeText"
+                Text="00:00"
+                FontSize="64"
+                FontWeight="Light"
+                FontFamily="Bahnschrift Light, Segoe UI Light, Segoe UI"
+                Foreground="#EEFFFFFF"
+                TextOptions.TextRenderingMode="ClearType"
+                HorizontalAlignment="Left"/>
 
-        <!-- Date + day below -->
-        <TextBlock
-            x:Name="DateText"
-            Text="Sunday, January 1"
-            FontSize="14"
-            FontWeight="Light"
-            FontFamily="Segoe UI Light, Segoe UI"
-            Foreground="#88FFFFFF"
-            HorizontalAlignment="Left"
-            Margin="4,-4,0,0"/>
-
-    </StackPanel>
+            <!-- Date below (optional) -->
+            <TextBlock
+                x:Name="DateText"
+                Text="Sunday, January 1"
+                FontSize="14"
+                FontWeight="Light"
+                FontFamily="Segoe UI Light, Segoe UI"
+                Foreground="#88FFFFFF"
+                HorizontalAlignment="Left"
+                Margin="2,-2,0,2"/>
+        </StackPanel>
+    </Border>
 </Window>

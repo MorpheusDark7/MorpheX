@@ -11,7 +11,7 @@
             <!-- Page Title -->
             <TextBlock Text="Widgets" Style="{StaticResource PageTitleStyle}"/>
             <TextBlock
-                Text="Transparent desktop overlays — drag to reposition, right-click for options."
+                Text="Transparent desktop overlays inspired by Rainmeter — drag to reposition, right-click for quick actions."
                 Style="{StaticResource PageSubtitleStyle}"
                 Margin="0,4,0,0"/>
 
@@ -26,7 +26,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                         <TextBlock Text="🔒  Lock Widget Positions" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Prevent widgets from being accidentally dragged. Right-click any widget to unlock." Style="{StaticResource SettingDescriptionStyle}"/>
+                        <TextBlock Text="Pin all widgets in place so they cannot be accidentally moved." Style="{StaticResource SettingDescriptionStyle}"/>
                     </StackPanel>
                     <ui:ToggleSwitch
                         x:Name="LockWidgetsToggle"
@@ -43,46 +43,291 @@
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Floating Clock" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Large HH:MM with date below — pure transparent text, no box." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="ClockToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="ClockToggle_Changed" Unchecked="ClockToggle_Changed"/>
-                </Grid>
-            </Border>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Clock Widget" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Clean time display without seconds. Double-click widget to flip 12h/24h." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="ClockToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="ClockToggle_Changed" Unchecked="ClockToggle_Changed"/>
+                    </Grid>
 
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="24-Hour Format" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Toggle 24h (23:54) vs 12h (11:54 PM). Double-click the widget to switch quickly." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="ClockFormatToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="ClockFormatToggle_Changed" Unchecked="ClockFormatToggle_Changed"/>
-                </Grid>
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Size" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="ClockSizeCombo" SelectionChanged="ClockSetting_Changed">
+                                    <ComboBoxItem Content="Small (40px)" Tag="0"/>
+                                    <ComboBoxItem Content="Medium (64px)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (88px)" Tag="2"/>
+                                    <ComboBoxItem Content="Huge (112px)" Tag="3"/>
+                                    <ComboBoxItem Content="Giant (140px)" Tag="4"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="ClockColorCombo" SelectionChanged="ClockSetting_Changed">
+                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
+                                    <ComboBoxItem Content="🔘  Dim Slate" Tag="1"/>
+                                    <ComboBoxItem Content="🔵  Electric Cyan" Tag="2"/>
+                                    <ComboBoxItem Content="🟢  Neon Mint" Tag="3"/>
+                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="4"/>
+                                    <ComboBoxItem Content="🟠  Sunset Orange" Tag="5"/>
+                                    <ComboBoxItem Content="🟡  Amber Gold" Tag="6"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Font Style" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="ClockFontCombo" SelectionChanged="ClockSetting_Changed">
+                                    <ComboBoxItem Content="📐  Bahnschrift Light" Tag="0"/>
+                                    <ComboBoxItem Content="✍️  Segoe UI Light" Tag="1"/>
+                                    <ComboBoxItem Content="🚀  Anurati Numbers" Tag="2"/>
+                                    <ComboBoxItem Content="💻  Consolas Monospace" Tag="3"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                <CheckBox x:Name="ClockFormatCheck" Content="24-Hour Format" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                                <CheckBox x:Name="ClockDateCheck" Content="Show Date Below" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                                <CheckBox x:Name="ClockCardCheck" Content="Frosted Background Card" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- ─── DAY NAME ────────────────────────────────────── -->
-            <TextBlock Text="DAY NAME" Style="{StaticResource SectionHeaderStyle}"/>
+            <TextBlock Text="DAY NAME (ANURATI &amp; MOND)" Style="{StaticResource SectionHeaderStyle}"/>
 
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Large Day Name" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text='Big "SUNDAY" style floating text. Right-click to change size and colour.' Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="DayToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="DayToggle_Changed" Unchecked="DayToggle_Changed"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Large Weekday" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text='Sci-fi geometric cutouts in Anurati font with kerning compensation for "FRIDAY".' Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="DayToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="DayToggle_Changed" Unchecked="DayToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Size" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DaySizeCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="Small (42px)" Tag="0"/>
+                                    <ComboBoxItem Content="Medium (64px)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (86px)" Tag="2"/>
+                                    <ComboBoxItem Content="Huge (110px)" Tag="3"/>
+                                    <ComboBoxItem Content="Giant (140px)" Tag="4"/>
+                                    <ComboBoxItem Content="Massive (180px)" Tag="5"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DayColorCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
+                                    <ComboBoxItem Content="🔘  Dim Slate" Tag="1"/>
+                                    <ComboBoxItem Content="🔵  Electric Cyan" Tag="2"/>
+                                    <ComboBoxItem Content="🟢  Neon Mint" Tag="3"/>
+                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="4"/>
+                                    <ComboBoxItem Content="🟠  Sunset Orange" Tag="5"/>
+                                    <ComboBoxItem Content="🟡  Amber Gold" Tag="6"/>
+                                    <ComboBoxItem Content="🔴  Rose Pink" Tag="7"/>
+                                    <ComboBoxItem Content="🌹  Crimson Red" Tag="8"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Font Family" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DayFontCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="🚀  Anurati (Mond Sci-Fi)" Tag="0"/>
+                                    <ComboBoxItem Content="📐  Bahnschrift Light" Tag="1"/>
+                                    <ComboBoxItem Content="✍️  Segoe UI Light" Tag="2"/>
+                                    <ComboBoxItem Content="💻  Consolas Monospace" Tag="3"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Letter Casing" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DayCaseCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="🔠  UPPERCASE (Mond Default)" Tag="0"/>
+                                    <ComboBoxItem Content="🔤  Title Case" Tag="1"/>
+                                    <ComboBoxItem Content="🔡  lowercase" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Letter Spacing (Tracking)" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DaySpacingCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="Compact" Tag="0"/>
+                                    <ComboBoxItem Content="Wide (Mond Tracking)" Tag="1"/>
+                                    <ComboBoxItem Content="Ultra Wide (Cinematic)" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                <CheckBox x:Name="DayCardCheck" Content="Frosted Background Card" Checked="DayOption_Changed" Unchecked="DayOption_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ─── SYSTEM MONITOR (SIMPLICITY CIRCLES) ────────────── -->
+            <TextBlock Text="SYSTEM MONITOR (SIMPLICITY CIRCLES)" Style="{StaticResource SectionHeaderStyle}"/>
+
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Simplicity Circles" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Minimalist circular progress dials for CPU, RAM, GPU, and DISK." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="SysMonToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="SysMonToggle_Changed" Unchecked="SysMonToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Dial Size" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="SysMonSizeCombo" SelectionChanged="SysMonSetting_Changed">
+                                    <ComboBoxItem Content="Small (44px)" Tag="0"/>
+                                    <ComboBoxItem Content="Medium (56px)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (72px)" Tag="2"/>
+                                    <ComboBoxItem Content="Extra Large (90px)" Tag="3"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="SysMonColorCombo" SelectionChanged="SysMonSetting_Changed">
+                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
+                                    <ComboBoxItem Content="🔵  Cyan Neon" Tag="1"/>
+                                    <ComboBoxItem Content="🟢  Emerald Mint" Tag="2"/>
+                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="3"/>
+                                    <ComboBoxItem Content="🟠  Sunset Amber" Tag="4"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Layout" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="SysMonLayoutCombo" SelectionChanged="SysMonSetting_Changed">
+                                    <ComboBoxItem Content="➡️  Horizontal Row" Tag="0"/>
+                                    <ComboBoxItem Content="⬇️  Vertical Column" Tag="1"/>
+                                    <ComboBoxItem Content="⊞  2x2 Grid" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
+                                <CheckBox x:Name="SysMonCardCheck" Content="Frosted Background Card" Margin="0,0,0,4" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                <WrapPanel Margin="0,2,0,0">
+                                    <CheckBox x:Name="SysMonCpuCheck" Content="CPU" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                    <CheckBox x:Name="SysMonRamCheck" Content="RAM" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                    <CheckBox x:Name="SysMonGpuCheck" Content="GPU" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                    <CheckBox x:Name="SysMonDiskCheck" Content="DISK" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                </WrapPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+            <!-- ─── AUDIO VISUALIZER & MEDIA ─────────────────────── -->
+            <TextBlock Text="AUDIO VISUALIZER &amp; MEDIA" Style="{StaticResource SectionHeaderStyle}"/>
+
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Audio Visualizer &amp; Media" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Live equalizer spectrum with optional track details &amp; controls. Resize from corner." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="MediaToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="MediaToggle_Changed" Unchecked="MediaToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Visualizer Style" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="VisualizerStyleCombo" SelectionChanged="MediaSetting_Changed">
+                                    <ComboBoxItem Content="📊  Equalizer Bars" Tag="0"/>
+                                    <ComboBoxItem Content="🪞  Mirrored Center" Tag="1"/>
+                                    <ComboBoxItem Content="🌊  Waveform Curve" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="VisualizerColorCombo" SelectionChanged="MediaSetting_Changed">
+                                    <ComboBoxItem Content="⚪  Minimalist White" Tag="0"/>
+                                    <ComboBoxItem Content="🔵  Cyber Neon Cyan" Tag="1"/>
+                                    <ComboBoxItem Content="🟣  Violet Glow" Tag="2"/>
+                                    <ComboBoxItem Content="🟢  Emerald Mint" Tag="3"/>
+                                    <ComboBoxItem Content="🟠  Sunset Amber" Tag="4"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
+                                <CheckBox x:Name="MediaCardCheck" Content="Show Frosted Background Card" Margin="0,0,24,0" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
+                                <CheckBox x:Name="MediaDetailsCheck" Content="Show Track Details &amp; Controls" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- ─── CALENDAR ─────────────────────────────────────── -->
@@ -95,75 +340,11 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                         <TextBlock Text="Monthly Calendar" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Shows current month with today highlighted. Minimal dark frosted card." Style="{StaticResource SettingDescriptionStyle}"/>
+                        <TextBlock Text="Shows current month with today highlighted. Minimal frosted dark card." Style="{StaticResource SettingDescriptionStyle}"/>
                     </StackPanel>
                     <ui:ToggleSwitch x:Name="CalendarToggle" Grid.Column="1" VerticalAlignment="Center"
                         Checked="CalendarToggle_Changed" Unchecked="CalendarToggle_Changed"/>
                 </Grid>
-            </Border>
-
-            <!-- ─── SYSTEM MONITOR ───────────────────────────────── -->
-            <TextBlock Text="SYSTEM MONITOR" Style="{StaticResource SectionHeaderStyle}"/>
-
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="CPU / GPU / RAM Circles" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Horizontal row of circular dials — no box, pure floating indicators." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="SysMonToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="SysMonToggle_Changed" Unchecked="SysMonToggle_Changed"/>
-                </Grid>
-            </Border>
-
-            <!-- ─── AUDIO VISUALIZER ─────────────────────────────── -->
-            <TextBlock Text="AUDIO VISUALIZER &amp; MEDIA" Style="{StaticResource SectionHeaderStyle}"/>
-
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <StackPanel>
-                    <Grid>
-                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Audio Visualizer &amp; Now Playing" Style="{StaticResource SettingLabelStyle}"/>
-                            <TextBlock Text="Live equalizer bars, track info (Spotify, YouTube, etc.), media controls. Resize from corner." Style="{StaticResource SettingDescriptionStyle}"/>
-                        </StackPanel>
-                        <ui:ToggleSwitch x:Name="MediaToggle" Grid.Column="1" VerticalAlignment="Center"
-                            Checked="MediaToggle_Changed" Unchecked="MediaToggle_Changed"/>
-                    </Grid>
-
-                    <!-- Visualizer Style + Color -->
-                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
-                                <TextBlock Text="Visualizer Style" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
-                                <ComboBox x:Name="VisualizerStyleCombo" SelectionChanged="VisualizerStyleCombo_SelectionChanged">
-                                    <ComboBoxItem Content="📊  Equalizer Bars" Tag="0"/>
-                                    <ComboBoxItem Content="🪞  Mirrored Center" Tag="1"/>
-                                    <ComboBoxItem Content="🌊  Waveform Curve" Tag="2"/>
-                                </ComboBox>
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
-                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
-                                <ComboBox x:Name="VisualizerColorCombo" SelectionChanged="VisualizerColorCombo_SelectionChanged">
-                                    <ComboBoxItem Content="⚪  Minimalist White" Tag="0"/>
-                                    <ComboBoxItem Content="🔵  Cyber Neon Cyan" Tag="1"/>
-                                    <ComboBoxItem Content="🟣  Violet Glow" Tag="2"/>
-                                </ComboBox>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
-                </StackPanel>
             </Border>
 
             <!-- ─── NOTES ─────────────────────────────────────────── -->
@@ -176,7 +357,7 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                         <TextBlock Text="Sticky Notes" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Editable text on your desktop. Resize from the corner. Text saves automatically." Style="{StaticResource SettingDescriptionStyle}"/>
+                        <TextBlock Text="Editable desktop note with auto-save. Resizable from bottom-right corner." Style="{StaticResource SettingDescriptionStyle}"/>
                     </StackPanel>
                     <ui:ToggleSwitch x:Name="NotesToggle" Grid.Column="1" VerticalAlignment="Center"
                         Checked="NotesToggle_Changed" Unchecked="NotesToggle_Changed"/>
@@ -193,44 +374,27 @@
                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                         <TextBlock Text="Motivational Quote" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="A floating quote card. Double-click or right-click to cycle quotes." Style="{StaticResource SettingDescriptionStyle}"/>
+                        <TextBlock Text="Floating quote card with 30 curated quotes. Double-click to cycle." Style="{StaticResource SettingDescriptionStyle}"/>
                     </StackPanel>
                     <ui:ToggleSwitch x:Name="QuoteToggle" Grid.Column="1" VerticalAlignment="Center"
                         Checked="QuoteToggle_Changed" Unchecked="QuoteToggle_Changed"/>
                 </Grid>
             </Border>
 
-            <!-- ─── TASKBAR STATS ──────────────────────────────────── -->
-            <TextBlock Text="TASKBAR STATS" Style="{StaticResource SectionHeaderStyle}"/>
-
-            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="CPU · RAM · GPU · Disk Strip" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text='Slim pill that sits inside your taskbar. Enable, then right-click → "Snap to Taskbar".' Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="TaskbarStatsToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="TaskbarStatsToggle_Changed" Unchecked="TaskbarStatsToggle_Changed"/>
-                </Grid>
-            </Border>
-
             <Border Background="#0A38BDF8" BorderBrush="#1A38BDF8" BorderThickness="1"
                     CornerRadius="8" Padding="14,10" Margin="0,20,0,0">
                 <StackPanel>
-                    <TextBlock Text="💡  Tips" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8" Margin="0,0,0,4"/>
+                    <TextBlock Text="💡  Desktop Customization Tips" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8" Margin="0,0,0,4"/>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#AAFFFFFF" LineHeight="18">
-                        <Run>• Drag any widget to reposition — position saves automatically.</Run>
+                        <Run>• Drag any widget to reposition — coordinates save automatically on release.</Run>
                         <LineBreak/>
-                        <Run>• Right-click any widget to Lock/Unlock, change size/colour, or close.</Run>
+                        <Run>• Right-click any widget to Lock, customize sizes, choose colors, or switch layouts on the fly.</Run>
                         <LineBreak/>
-                        <Run>• Double-click Clock or Quote widget for quick actions.</Run>
+                        <Run>• Double-click Clock to flip between 12h and 24h format.</Run>
                         <LineBreak/>
-                        <Run>• Audio Visualizer and Notes are resizable from the corner.</Run>
+                        <Run>• Audio Visualizer &amp; Notes are resizable from the bottom-right corner.</Run>
                         <LineBreak/>
-                        <Run>• Widgets float above the wallpaper, behind all app windows.</Run>
+                        <Run>• Widgets stay pinned behind your apps (HWND_BOTTOM) and consume negligible resources.</Run>
                     </TextBlock>
                 </StackPanel>
             </Border>

@@ -11,13 +11,38 @@
     Topmost="False"
     ResizeMode="NoResize">
 
+    <Window.Resources>
+        <DropShadowEffect x:Key="CardShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>
+    </Window.Resources>
+
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem Header="⚡  System Monitor" IsEnabled="False" Foreground="#88FFFFFF"/>
+            <MenuItem Header="📏  Size">
+                <MenuItem Header="Small (44px)" Click="SizePreset_Click" Tag="0"/>
+                <MenuItem Header="Medium (56px)" Click="SizePreset_Click" Tag="1"/>
+                <MenuItem Header="Large (72px)" Click="SizePreset_Click" Tag="2"/>
+                <MenuItem Header="Extra Large (90px)" Click="SizePreset_Click" Tag="3"/>
+            </MenuItem>
+            <MenuItem Header="🎨  Color Theme">
+                <MenuItem Header="⚪  Pure White" Click="ColorPreset_Click" Tag="0"/>
+                <MenuItem Header="🔵  Cyan Neon" Click="ColorPreset_Click" Tag="1"/>
+                <MenuItem Header="🟢  Emerald Mint" Click="ColorPreset_Click" Tag="2"/>
+                <MenuItem Header="🟣  Cyber Violet" Click="ColorPreset_Click" Tag="3"/>
+                <MenuItem Header="🟠  Sunset Amber" Click="ColorPreset_Click" Tag="4"/>
+            </MenuItem>
+            <MenuItem Header="📐  Layout">
+                <MenuItem Header="➡️  Horizontal Row" Click="LayoutPreset_Click" Tag="0"/>
+                <MenuItem Header="⬇️  Vertical Column" Click="LayoutPreset_Click" Tag="1"/>
+                <MenuItem Header="⊞  2x2 Grid" Click="LayoutPreset_Click" Tag="2"/>
+            </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="🔡  Small" Click="SizeSmall_Click" Foreground="#AAFFFFFF"/>
-            <MenuItem Header="🔡  Medium" Click="SizeMedium_Click" Foreground="#AAFFFFFF"/>
-            <MenuItem Header="🔡  Large" Click="SizeLarge_Click" Foreground="#AAFFFFFF"/>
+            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Show Background Card" Click="ToggleCard_Click"/>
+            <MenuItem Header="⚙️  Active Circles">
+                <MenuItem x:Name="ToggleCpuMenu" Header="CPU" Click="ToggleCpu_Click"/>
+                <MenuItem x:Name="ToggleRamMenu" Header="RAM" Click="ToggleRam_Click"/>
+                <MenuItem x:Name="ToggleGpuMenu" Header="GPU" Click="ToggleGpu_Click"/>
+                <MenuItem x:Name="ToggleDiskMenu" Header="DISK" Click="ToggleDisk_Click"/>
+            </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
@@ -25,106 +50,100 @@
         </ContextMenu>
     </Window.ContextMenu>
 
-    <!-- Pure floating UI — no background box, Rainmeter style -->
-    <StackPanel
-        x:Name="RootPanel"
-        Orientation="Horizontal"
+    <!-- Simplicity Circles container -->
+    <Border
+        x:Name="CardBorder"
+        Background="Transparent"
+        BorderThickness="0"
+        CornerRadius="16"
+        Padding="6"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
-        Cursor="SizeAll"
-        Margin="0">
+        Cursor="SizeAll">
 
-        <!-- CPU -->
-        <StackPanel x:Name="CpuPanel" Margin="0,0,16,0" HorizontalAlignment="Center">
-            <Grid x:Name="CpuGrid" Width="52" Height="52">
-                <!-- Track ring -->
-                <Ellipse Stroke="#25FFFFFF" StrokeThickness="3.5" Width="46" Height="46"/>
-                <!-- Progress arc -->
-                <Path x:Name="CpuArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                <!-- % text -->
-                <TextBlock x:Name="CpuText" Text="0%"
-                           FontSize="11" FontWeight="SemiBold"
-                           FontFamily="Segoe UI"
-                           Foreground="#FFFFFF"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Grid>
-            <TextBlock Text="CPU"
-                       FontSize="10" FontWeight="Light"
-                       FontFamily="Segoe UI Light, Segoe UI"
-                       Foreground="#88FFFFFF"
-                       HorizontalAlignment="Center"
-                       Margin="0,4,0,0"/>
-        </StackPanel>
-
-        <!-- GPU -->
-        <StackPanel x:Name="GpuPanel" Margin="0,0,16,0" HorizontalAlignment="Center">
-            <Grid x:Name="GpuGrid" Width="52" Height="52">
-                <Ellipse Stroke="#25FFFFFF" StrokeThickness="3.5" Width="46" Height="46"/>
-                <Path x:Name="GpuArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                <TextBlock x:Name="GpuText" Text="0%"
-                           FontSize="11" FontWeight="SemiBold"
-                           FontFamily="Segoe UI"
-                           Foreground="#FFFFFF"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Grid>
-            <TextBlock Text="GPU"
-                       FontSize="10" FontWeight="Light"
-                       FontFamily="Segoe UI Light, Segoe UI"
-                       Foreground="#88FFFFFF"
-                       HorizontalAlignment="Center"
-                       Margin="0,4,0,0"/>
-        </StackPanel>
-
-        <!-- RAM -->
-        <StackPanel x:Name="RamPanel" Margin="0,0,16,0" HorizontalAlignment="Center">
-            <Grid x:Name="RamGrid" Width="52" Height="52">
-                <Ellipse Stroke="#25FFFFFF" StrokeThickness="3.5" Width="46" Height="46"/>
-                <Path x:Name="RamArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
-                      StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
-                <TextBlock x:Name="RamText" Text="0%"
-                           FontSize="11" FontWeight="SemiBold"
-                           FontFamily="Segoe UI"
-                           Foreground="#FFFFFF"
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
-            </Grid>
-            <TextBlock Text="RAM"
-                       FontSize="10" FontWeight="Light"
-                       FontFamily="Segoe UI Light, Segoe UI"
-                       Foreground="#88FFFFFF"
-                       HorizontalAlignment="Center"
-                       Margin="0,4,0,0"/>
-        </StackPanel>
-
-        <!-- RAM GB detail (optional, shown as 4th element) -->
-        <StackPanel x:Name="RamGbPanel" Margin="0,0,0,0" HorizontalAlignment="Center">
-            <Grid x:Name="RamGbGrid" Width="52" Height="52">
-                <Ellipse Stroke="#18FFFFFF" StrokeThickness="3.5" Width="46" Height="46"/>
-                <!-- No arc for this one — just text -->
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                    <TextBlock x:Name="RamUsedText" Text="0"
+        <StackPanel Orientation="Horizontal">
+            <!-- CPU Circle -->
+            <StackPanel x:Name="CpuPanel" HorizontalAlignment="Center" Margin="6">
+                <Grid x:Name="CpuGrid" Width="56" Height="56">
+                    <Ellipse x:Name="CpuTrack" Stroke="#20FFFFFF" StrokeThickness="3.5" Width="50" Height="50"/>
+                    <Path x:Name="CpuArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <TextBlock x:Name="CpuText" Text="0%"
                                FontSize="12" FontWeight="SemiBold"
                                FontFamily="Segoe UI"
-                               Foreground="#CCFFFFFF"
-                               HorizontalAlignment="Center"/>
-                    <TextBlock Text="GB"
-                               FontSize="8" FontWeight="Light"
-                               FontFamily="Segoe UI Light"
-                               Foreground="#66FFFFFF"
+                               Foreground="#FFFFFF"
                                HorizontalAlignment="Center"
-                               Margin="0,-2,0,0"/>
-                </StackPanel>
-            </Grid>
-            <TextBlock Text="MEM"
-                       FontSize="10" FontWeight="Light"
-                       FontFamily="Segoe UI Light, Segoe UI"
-                       Foreground="#88FFFFFF"
-                       HorizontalAlignment="Center"
-                       Margin="0,4,0,0"/>
-        </StackPanel>
+                               VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock x:Name="CpuLabel" Text="CPU"
+                           FontSize="10" FontWeight="Light"
+                           FontFamily="Segoe UI Light, Segoe UI"
+                           Foreground="#88FFFFFF"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
 
-    </StackPanel>
+            <!-- RAM Circle -->
+            <StackPanel x:Name="RamPanel" HorizontalAlignment="Center" Margin="6">
+                <Grid x:Name="RamGrid" Width="56" Height="56">
+                    <Ellipse x:Name="RamTrack" Stroke="#20FFFFFF" StrokeThickness="3.5" Width="50" Height="50"/>
+                    <Path x:Name="RamArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <TextBlock x:Name="RamText" Text="0%"
+                               FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Segoe UI"
+                               Foreground="#FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock x:Name="RamLabel" Text="RAM"
+                           FontSize="10" FontWeight="Light"
+                           FontFamily="Segoe UI Light, Segoe UI"
+                           Foreground="#88FFFFFF"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- GPU Circle -->
+            <StackPanel x:Name="GpuPanel" HorizontalAlignment="Center" Margin="6">
+                <Grid x:Name="GpuGrid" Width="56" Height="56">
+                    <Ellipse x:Name="GpuTrack" Stroke="#20FFFFFF" StrokeThickness="3.5" Width="50" Height="50"/>
+                    <Path x:Name="GpuArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <TextBlock x:Name="GpuText" Text="0%"
+                               FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Segoe UI"
+                               Foreground="#FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock x:Name="GpuLabel" Text="GPU"
+                           FontSize="10" FontWeight="Light"
+                           FontFamily="Segoe UI Light, Segoe UI"
+                           Foreground="#88FFFFFF"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+
+            <!-- DISK Circle -->
+            <StackPanel x:Name="DiskPanel" HorizontalAlignment="Center" Margin="6">
+                <Grid x:Name="DiskGrid" Width="56" Height="56">
+                    <Ellipse x:Name="DiskTrack" Stroke="#20FFFFFF" StrokeThickness="3.5" Width="50" Height="50"/>
+                    <Path x:Name="DiskArc" Stroke="#DDFFFFFF" StrokeThickness="3.5"
+                          StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    <TextBlock x:Name="DiskText" Text="0%"
+                               FontSize="12" FontWeight="SemiBold"
+                               FontFamily="Segoe UI"
+                               Foreground="#FFFFFF"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"/>
+                </Grid>
+                <TextBlock x:Name="DiskLabel" Text="DISK"
+                           FontSize="10" FontWeight="Light"
+                           FontFamily="Segoe UI Light, Segoe UI"
+                           Foreground="#88FFFFFF"
+                           HorizontalAlignment="Center"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+        </StackPanel>
+    </Border>
 </Window>

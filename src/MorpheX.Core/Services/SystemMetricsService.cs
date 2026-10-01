@@ -11,6 +11,7 @@ public sealed record SystemMetrics
     public double RamUsedGb { get; init; }
     public double RamTotalGb { get; init; }
     public float RamPercent { get; init; }
+    public float DiskPercent { get; init; }
     public long AppWorkingSetMb { get; init; }
 }
 
@@ -41,12 +42,14 @@ public sealed class SystemMetricsService : ISystemMetricsService
     private bool _isGpuSampling;
     private DateTime _lastGpuSample = DateTime.MinValue;
     private DateTime _lastGpuCountersRefresh = DateTime.MinValue;
+    private PerformanceCounter? _diskCounter;
 
     public void Start()
     {
         if (_timer != null) return;
 
         SampleCpu();
+        InitDiskCounter();
 
         _timer = new Timer(async _ => await SampleAllMetricsAsync(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1.0));
         Log.Debug("SystemMetricsService started");
@@ -57,7 +60,40 @@ public sealed class SystemMetricsService : ISystemMetricsService
         _timer?.Dispose();
         _timer = null;
         DisposeGpuCounters();
+        DisposeDiskCounter();
         Log.Debug("SystemMetricsService stopped");
+    }
+
+    private void InitDiskCounter()
+    {
+        if (_diskCounter != null) return;
+        try
+        {
+            _diskCounter = new PerformanceCounter("PhysicalDisk", "% Disk Time", "_Total", true);
+            _diskCounter.NextValue();
+        }
+        catch { _diskCounter = null; }
+    }
+
+    private void DisposeDiskCounter()
+    {
+        try { _diskCounter?.Dispose(); } catch { }
+        _diskCounter = null;
+    }
+
+    private float SampleDisk()
+    {
+        if (_diskCounter == null)
+        {
+            InitDiskCounter();
+            if (_diskCounter == null) return 0f;
+        }
+
+        try
+        {
+            return (float)Math.Clamp(_diskCounter.NextValue(), 0.0, 100.0);
+        }
+        catch { return 0f; }
     }
 
     private async Task SampleAllMetricsAsync()
@@ -70,6 +106,7 @@ public sealed class SystemMetricsService : ISystemMetricsService
             float cpu = SampleCpu();
             (double ramUsed, double ramTotal, float ramPct) = SampleRam();
             long appRam = SampleAppWorkingSet();
+            float disk = SampleDisk();
 
             // Trigger non-blocking GPU sample every ~3s if not already sampling
             if (!_isGpuSampling && (DateTime.UtcNow - _lastGpuSample).TotalSeconds >= 3.0)
@@ -94,6 +131,7 @@ public sealed class SystemMetricsService : ISystemMetricsService
                 RamUsedGb = ramUsed,
                 RamTotalGb = ramTotal,
                 RamPercent = ramPct,
+                DiskPercent = disk,
                 AppWorkingSetMb = appRam
             };
 

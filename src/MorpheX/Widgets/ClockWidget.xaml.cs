@@ -1,8 +1,12 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Threading;
 using MorpheX.Core.Configuration;
 using Application = System.Windows.Application;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace MorpheX.Widgets;
 
@@ -10,6 +14,11 @@ public partial class ClockWidget : Window
 {
     private readonly DispatcherTimer _timer;
     private readonly WidgetSettings _settings;
+
+    private static readonly System.Windows.Media.FontFamily BahnschriftFont = new("Bahnschrift Light, Segoe UI Light, Segoe UI");
+    private static readonly System.Windows.Media.FontFamily SegoeUiFont = new("Segoe UI Light, Segoe UI");
+    private static readonly System.Windows.Media.FontFamily AnuratiFont = new("/MorpheX;component/Assets/Fonts/Anurati-Regular.otf#Anurati, Bahnschrift Light");
+    private static readonly System.Windows.Media.FontFamily ConsolasFont = new("Consolas, Courier New");
 
     public ClockWidget(WidgetSettings settings)
     {
@@ -19,7 +28,7 @@ public partial class ClockWidget : Window
         Left = settings.ClockX;
         Top  = settings.ClockY;
 
-        ApplyFontSize();
+        ApplyAppearance();
         UpdateLockMenuHeader();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
@@ -30,7 +39,11 @@ public partial class ClockWidget : Window
         Closing += OnClosing;
     }
 
-    public void RefreshFormat() => Tick();
+    public void RefreshFormat()
+    {
+        ApplyAppearance();
+        Tick();
+    }
 
     private void Tick()
     {
@@ -42,17 +55,95 @@ public partial class ClockWidget : Window
         DateText.Text = now.ToString("dddd, MMMM d");
     }
 
-    private void ApplyFontSize()
+    public void ApplyAppearance()
     {
         double size = _settings.ClockFontSize switch
         {
-            0 => 48,
-            2 => 96,
-            _ => 72
+            0 => 40,
+            1 => 64,
+            2 => 88,
+            3 => 112,
+            4 => 140,
+            _ => 64
         };
+
         TimeText.FontSize = size;
-        TimeText.LineHeight = size - 2;
-        DateText.FontSize = size switch { >= 96 => 16, <= 48 => 11, _ => 14 };
+        DateText.FontSize = size switch { >= 110 => 18, >= 80 => 16, <= 40 => 11, _ => 13 };
+
+        // Color
+        var (timeBrush, dateBrush) = GetColorBrushes();
+        TimeText.Foreground = timeBrush;
+        DateText.Foreground = dateBrush;
+
+        // Font
+        var fontFamily = _settings.ClockFontMode switch
+        {
+            1 => SegoeUiFont,
+            2 => AnuratiFont,
+            3 => ConsolasFont,
+            _ => BahnschriftFont
+        };
+        TimeText.FontFamily = fontFamily;
+
+        // Date visibility
+        DateText.Visibility = _settings.ClockShowDate ? Visibility.Visible : Visibility.Collapsed;
+
+        // Card background
+        if (_settings.ClockShowBackground)
+        {
+            CardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x12));
+            CardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
+            CardBorder.BorderThickness = new Thickness(1);
+            CardBorder.Effect = (Effect)Resources["CardShadow"];
+            CardBorder.Padding = new Thickness(12, 8, 12, 8);
+        }
+        else
+        {
+            CardBorder.Background = Brushes.Transparent;
+            CardBorder.BorderThickness = new Thickness(0);
+            CardBorder.Effect = null;
+            CardBorder.Padding = new Thickness(4, 2, 4, 2);
+        }
+
+        // Context menu headers
+        ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "⏰  Format: 24-Hour (Click for 12h)" : "⏰  Format: 12-Hour (Click for 24h)";
+        ToggleDateMenu.Header = _settings.ClockShowDate ? "📅  Hide Date Line" : "📅  Show Date Line";
+        ToggleCardMenu.Header = _settings.ClockShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+    }
+
+    private (System.Windows.Media.Brush time, System.Windows.Media.Brush date) GetColorBrushes()
+    {
+        return _settings.ClockColorMode switch
+        {
+            1 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(200, 203, 213, 225)), // Dim Slate
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(120, 148, 163, 184))
+            ),
+            2 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248)),        // Electric Cyan
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 56, 189, 248))
+            ),
+            3 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(74, 222, 128)),        // Neon Mint
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 74, 222, 128))
+            ),
+            4 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 132, 252)),       // Cyber Violet
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 192, 132, 252))
+            ),
+            5 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 146, 60)),        // Sunset Orange
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 146, 60))
+            ),
+            6 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 191, 36)),        // Amber Gold
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 191, 36))
+            ),
+            _ => (
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(240, 255, 255, 255)), // Pure White
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(140, 255, 255, 255))
+            )
+        };
     }
 
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -62,6 +153,7 @@ public partial class ClockWidget : Window
         if (e.ClickCount == 2)
         {
             _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
+            ApplyAppearance();
             Tick();
             Save();
             return;
@@ -73,13 +165,54 @@ public partial class ClockWidget : Window
     private void ToggleFormat_Click(object sender, RoutedEventArgs e)
     {
         _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
+        ApplyAppearance();
         Tick();
         Save();
     }
 
-    private void SizeSmall_Click(object sender, RoutedEventArgs e)  { _settings.ClockFontSize = 0; ApplyFontSize(); Save(); }
-    private void SizeMedium_Click(object sender, RoutedEventArgs e) { _settings.ClockFontSize = 1; ApplyFontSize(); Save(); }
-    private void SizeLarge_Click(object sender, RoutedEventArgs e)  { _settings.ClockFontSize = 2; ApplyFontSize(); Save(); }
+    private void ToggleDate_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockShowDate = !_settings.ClockShowDate;
+        ApplyAppearance();
+        Save();
+    }
+
+    private void ToggleCard_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockShowBackground = !_settings.ClockShowBackground;
+        ApplyAppearance();
+        Save();
+    }
+
+    private void SizePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.ClockFontSize = val;
+            ApplyAppearance();
+            Save();
+        }
+    }
+
+    private void ColorPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.ClockColorMode = val;
+            ApplyAppearance();
+            Save();
+        }
+    }
+
+    private void FontPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.ClockFontMode = val;
+            ApplyAppearance();
+            Save();
+        }
+    }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {

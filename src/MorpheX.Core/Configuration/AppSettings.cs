@@ -22,33 +22,68 @@ public sealed class AppSettings
 
 public sealed class WidgetSettings
 {
+    // ── Clock ──────────────────────────────────────────────────────────
     public bool ClockEnabled { get; set; } = false;
     public bool ClockIs24Hour { get; set; } = true;
-    /// <summary>0=Small(48px) 1=Medium(72px) 2=Large(96px)</summary>
+    public bool ClockShowDate { get; set; } = true;
+    public bool ClockShowBackground { get; set; } = false;
+    /// <summary>0=Small(40px) 1=Medium(64px) 2=Large(88px) 3=Huge(112px)</summary>
     public int ClockFontSize { get; set; } = 1;
+    /// <summary>0=White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold</summary>
+    public int ClockColorMode { get; set; } = 0;
+    /// <summary>0=Bahnschrift Light 1=Segoe UI Light 2=Consolas</summary>
+    public int ClockFontMode { get; set; } = 0;
 
+    // ── System Monitor (Simplicity Circles) ───────────────────────────
     public bool SystemMonitorEnabled { get; set; } = false;
-    /// <summary>0=Small 1=Medium 2=Large</summary>
+    /// <summary>0=Small(44px) 1=Medium(56px) 2=Large(72px) 3=ExtraLarge(88px)</summary>
     public int SysMonSize { get; set; } = 1;
+    /// <summary>0=White 1=Cyan Neon 2=Emerald Mint 3=Cyber Violet 4=Sunset Amber</summary>
+    public int SysMonColorMode { get; set; } = 0;
+    /// <summary>0=Horizontal Row 1=Vertical Column 2=Grid 2x2</summary>
+    public int SysMonOrientation { get; set; } = 0;
+    public bool SysMonShowBackground { get; set; } = false;
+    public bool SysMonShowCpu { get; set; } = true;
+    public bool SysMonShowRam { get; set; } = true;
+    public bool SysMonShowGpu { get; set; } = true;
+    public bool SysMonShowDisk { get; set; } = true;
 
+    // ── Audio Visualizer & Media ───────────────────────────────────────
     public bool MediaEnabled { get; set; } = false;
+    /// <summary>Visualizer style: 0=Bars 1=Mirrored 2=Waveform</summary>
+    public int VisualizerStyle { get; set; } = 0;
+    /// <summary>Visualizer color: 0=White 1=Neon Cyan 2=Violet Glow 3=Emerald Mint 4=Sunset Amber</summary>
+    public int VisualizerColorMode { get; set; } = 0;
+    public bool MediaShowBackground { get; set; } = false;
+    public bool MediaShowTrackDetails { get; set; } = true;
 
+    // ── Day Name ───────────────────────────────────────────────────────
     public bool DayEnabled { get; set; } = false;
-    /// <summary>0=Small(48) 1=Medium(72) 2=Large(96)</summary>
+    /// <summary>0=Small(42) 1=Medium(64) 2=Large(86) 3=Huge(110) 4=Giant(140)</summary>
     public int DayFontSize { get; set; } = 1;
-    /// <summary>0=White(80%) 1=Dim White(55%) 2=Cyan</summary>
+    /// <summary>0=Pure White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold 7=Rose Pink</summary>
     public int DayColorMode { get; set; } = 0;
+    /// <summary>0=Anurati (Mond) 1=Bahnschrift Light 2=Segoe UI Light</summary>
+    public int DayFontMode { get; set; } = 0;
+    /// <summary>0=UPPERCASE 1=Title Case 2=lowercase</summary>
+    public int DayCaseMode { get; set; } = 0;
+    /// <summary>0=Compact 1=Wide (Mond style) 2=Ultra Wide</summary>
+    public int DaySpacingMode { get; set; } = 1;
+    public bool DayShowBackground { get; set; } = false;
 
+    // ── Other widgets ──────────────────────────────────────────────────
     public bool CalendarEnabled { get; set; } = false;
     public bool NotesEnabled { get; set; } = false;
     public bool QuoteEnabled { get; set; } = false;
+
+    [Obsolete("Merged into SystemMonitor Simplicity Circles")]
     public bool TaskbarStatsEnabled { get; set; } = false;
 
     public bool WidgetsLocked { get; set; } = false;
 
-    // ── Saved positions per widget ──────────────────────────────────
-    public double TaskbarStatsX { get; set; } = 800;
-    public double TaskbarStatsY { get; set; } = 0;
+    // ── Saved positions & dimensions ───────────────────────────────────
+    [Obsolete] public double TaskbarStatsX { get; set; } = 800;
+    [Obsolete] public double TaskbarStatsY { get; set; } = 0;
 
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;
@@ -76,11 +111,6 @@ public sealed class WidgetSettings
     public double QuoteX { get; set; } = 30;
     public double QuoteY { get; set; } = 600;
     public int QuoteIndex { get; set; } = 0;
-
-    /// <summary>Visualizer style: 0=Bars 1=Mirrored 2=Waveform</summary>
-    public int VisualizerStyle { get; set; } = 0;
-    /// <summary>Visualizer color: 0=White 1=Neon Cyan 2=Violet Glow</summary>
-    public int VisualizerColorMode { get; set; } = 0;
 }
 
 public sealed class GeneralSettings

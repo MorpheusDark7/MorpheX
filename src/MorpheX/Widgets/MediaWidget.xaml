@@ -14,13 +14,20 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
+            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Show Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleDetailsMenu" Header="🎵  Show Track Details" Click="ToggleDetails_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="📊  Equalizer Bars" Click="StyleBars_Click" Foreground="#FFFFFF"/>
             <MenuItem Header="🪞  Mirrored Center" Click="StyleMirrored_Click" Foreground="#FFFFFF"/>
             <MenuItem Header="🌊  Waveform Curve" Click="StyleWaveform_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="⚪  Minimalist White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
-            <MenuItem Header="🔵  Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
-            <MenuItem Header="🟣  Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
+            <MenuItem Header="🎨  Color Theme">
+                <MenuItem Header="⚪  Minimalist White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
+                <MenuItem Header="🔵  Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
+                <MenuItem Header="🟣  Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
+                <MenuItem Header="🟢  Emerald Mint" Click="ColorMint_Click" Foreground="#4ADE80"/>
+                <MenuItem Header="🟠  Sunset Amber" Click="ColorAmber_Click" Foreground="#FB923C"/>
+            </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
@@ -49,11 +56,22 @@
             <GradientStop Color="#CCA855F7" Offset="0.5"/>
             <GradientStop Color="#FFE0AAFF" Offset="1"/>
         </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushMint" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#40059669" Offset="0"/>
+            <GradientStop Color="#CC34D399" Offset="0.5"/>
+            <GradientStop Color="#FFA7F3D0" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushAmber" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#40EA580C" Offset="0"/>
+            <GradientStop Color="#CCFB923C" Offset="0.5"/>
+            <GradientStop Color="#FFFDE047" Offset="1"/>
+        </LinearGradientBrush>
 
         <SolidColorBrush x:Key="IdleBrush" Color="#28FFFFFF"/>
     </Window.Resources>
 
     <Border
+        x:Name="MainCardBorder"
         Margin="8"
         CornerRadius="14"
         Background="#D90E0E10"
@@ -63,7 +81,7 @@
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
         Cursor="SizeAll">
 
-        <Grid Margin="14,10,14,8">
+        <Grid x:Name="RootGrid" Margin="14,10,14,8">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -73,7 +91,7 @@
             </Grid.RowDefinitions>
 
             <!-- Row 0: Header + Live Indicator -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,4">
+            <DockPanel x:Name="HeaderRow" Grid.Row="0" Margin="0,0,0,4">
                 <TextBlock
                     Text="NOW PLAYING"
                     FontSize="9"
@@ -90,7 +108,7 @@
             </DockPanel>
 
             <!-- Row 1: Track Title & Artist -->
-            <StackPanel Grid.Row="1" Margin="0,0,0,6">
+            <StackPanel x:Name="TrackInfoRow" Grid.Row="1" Margin="0,0,0,6">
                 <TextBlock
                     x:Name="TrackTitleText"
                     Text="No Media Playing"
@@ -110,7 +128,7 @@
             </StackPanel>
 
             <!-- Row 2: Media Playback Controls -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
+            <StackPanel x:Name="ControlsRow" Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                 <!-- Previous Track -->
                 <Button x:Name="PrevBtn"
                     Content="⏮"

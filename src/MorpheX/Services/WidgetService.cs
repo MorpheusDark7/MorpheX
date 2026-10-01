@@ -25,7 +25,6 @@ public sealed class WidgetService : IDisposable
     private CalendarWidget?      _calendar;
     private NotesWidget?         _notes;
     private QuoteWidget?         _quote;
-    private TaskbarStatsWidget?  _taskbarStats;
 
     private bool _disposed;
 
@@ -62,18 +61,27 @@ public sealed class WidgetService : IDisposable
         _media?.Dispatcher.InvokeAsync(() => _media.RefreshVisualizerStyle());
     }
 
+    public void RefreshDay()
+    {
+        _day?.Dispatcher.InvokeAsync(() => _day.RefreshDisplay());
+    }
+
+    public void RefreshSysMon()
+    {
+        _sysmon?.Dispatcher.InvokeAsync(() => _sysmon.RefreshDisplay());
+    }
+
     // ── Core (must run on UI thread) ─────────────────────────────────────────
 
     private void ApplySettingsCore()
     {
-        SetWidget(ref _clock,        _settings.ClockEnabled,          () => new ClockWidget(_settings));
-        SetWidget(ref _sysmon,       _settings.SystemMonitorEnabled,   () => new SystemMonitorWidget(_settings));
-        SetWidget(ref _media,        _settings.MediaEnabled,           () => new MediaWidget(_settings));
-        SetWidget(ref _day,          _settings.DayEnabled,             () => new DayWidget(_settings));
-        SetWidget(ref _calendar,     _settings.CalendarEnabled,        () => new CalendarWidget(_settings));
-        SetWidget(ref _notes,        _settings.NotesEnabled,           () => new NotesWidget(_settings));
-        SetWidget(ref _quote,        _settings.QuoteEnabled,           () => new QuoteWidget(_settings));
-        SetWidget(ref _taskbarStats, _settings.TaskbarStatsEnabled,    () => new TaskbarStatsWidget(_settings));
+        SetWidget(ref _clock,    _settings.ClockEnabled,          () => new ClockWidget(_settings));
+        SetWidget(ref _sysmon,   _settings.SystemMonitorEnabled,   () => new SystemMonitorWidget(_settings));
+        SetWidget(ref _media,    _settings.MediaEnabled,           () => new MediaWidget(_settings));
+        SetWidget(ref _day,      _settings.DayEnabled,             () => new DayWidget(_settings));
+        SetWidget(ref _calendar, _settings.CalendarEnabled,        () => new CalendarWidget(_settings));
+        SetWidget(ref _notes,    _settings.NotesEnabled,           () => new NotesWidget(_settings));
+        SetWidget(ref _quote,    _settings.QuoteEnabled,           () => new QuoteWidget(_settings));
     }
 
     private void SetWidget<T>(ref T? field, bool enabled, Func<T> factory)
@@ -121,7 +129,6 @@ public sealed class WidgetService : IDisposable
             CloseWidget(ref _calendar);
             CloseWidget(ref _notes);
             CloseWidget(ref _quote);
-            CloseWidget(ref _taskbarStats);
         });
     }
 

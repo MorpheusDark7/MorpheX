@@ -1,10 +1,17 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using MorpheX.Core.Configuration;
 using MorpheX.Core.Services;
 using Application = System.Windows.Application;
+using Panel = System.Windows.Controls.Panel;
+using StackPanel = System.Windows.Controls.StackPanel;
+using Orientation = System.Windows.Controls.Orientation;
+using Brushes = System.Windows.Media.Brushes;
 
 namespace MorpheX.Widgets;
 
@@ -21,12 +28,14 @@ public partial class SystemMonitorWidget : Window
         Left = settings.SystemMonitorX;
         Top  = settings.SystemMonitorY;
 
-        ApplySize();
+        ApplyStylingAndLayout();
         UpdateLockMenuHeader();
 
         Loaded  += OnLoaded;
         Closing += OnClosing;
     }
+
+    public void RefreshDisplay() => ApplyStylingAndLayout();
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
@@ -46,17 +55,22 @@ public partial class SystemMonitorWidget : Window
 
     private void ApplyMetrics(SystemMetrics m)
     {
-        CpuText.Text = $"{m.CpuPercent:0}%";
-        GpuText.Text = $"{m.GpuPercent:0}%";
-        RamText.Text = $"{m.RamPercent:0}%";
-        RamUsedText.Text = $"{m.RamUsedGb:0.0}";
+        CpuText.Text  = $"{m.CpuPercent:0}%";
+        RamText.Text  = $"{m.RamPercent:0}%";
+        GpuText.Text  = $"{m.GpuPercent:0}%";
+        DiskText.Text = $"{m.DiskPercent:0}%";
 
-        UpdateArc(CpuArc, m.CpuPercent);
-        UpdateArc(GpuArc, m.GpuPercent);
-        UpdateArc(RamArc, m.RamPercent);
+        double gridSize = GetGridSize();
+        double radius = (gridSize - 6) / 2.0;
+        double center = gridSize / 2.0;
+
+        UpdateArc(CpuArc, m.CpuPercent, radius, center, center);
+        UpdateArc(RamArc, m.RamPercent, radius, center, center);
+        UpdateArc(GpuArc, m.GpuPercent, radius, center, center);
+        UpdateArc(DiskArc, m.DiskPercent, radius, center, center);
     }
 
-    private static void UpdateArc(Path path, double percent, double radius = 23, double cx = 26, double cy = 26)
+    private static void UpdateArc(Path path, double percent, double radius, double cx, double cy)
     {
         percent = Math.Clamp(percent, 0, 99.9);
         if (percent < 0.5) { path.Data = Geometry.Empty; return; }
@@ -83,45 +97,149 @@ public partial class SystemMonitorWidget : Window
         path.Data = geom;
     }
 
-    private void ApplySize()
+    private double GetGridSize()
     {
-        double gridSize = _settings.SysMonSize switch { 0 => 40, 2 => 64, _ => 52 };
-        double fontSize = _settings.SysMonSize switch { 0 => 9,  2 => 14, _ => 11 };
-        double labelSize = _settings.SysMonSize switch { 0 => 8, 2 => 12, _ => 10 };
-
-        foreach (var panel in new[] { CpuPanel, GpuPanel, RamPanel, RamGbPanel })
+        return _settings.SysMonSize switch
         {
-            foreach (var child in panel.Children)
-            {
-                if (child is Grid g)
-                {
-                    g.Width  = gridSize;
-                    g.Height = gridSize;
-                    // Update ellipses inside
-                    foreach (var gc in g.Children)
-                    {
-                        if (gc is Ellipse el)
-                        {
-                            el.Width  = gridSize - 6;
-                            el.Height = gridSize - 6;
-                        }
-                        else if (gc is TextBlock tb)
-                        {
-                            tb.FontSize = fontSize;
-                        }
-                        else if (gc is StackPanel sp)
-                        {
-                            foreach (var spc in sp.Children)
-                                if (spc is TextBlock stb) stb.FontSize = fontSize;
-                        }
-                    }
-                }
-                else if (child is TextBlock ltb)
-                {
-                    ltb.FontSize = labelSize;
-                }
-            }
+            0 => 44,
+            1 => 56,
+            2 => 72,
+            3 => 90,
+            _ => 56
+        };
+    }
+
+    public void ApplyStylingAndLayout()
+    {
+        double gridSize = GetGridSize();
+        double ringSize = gridSize - 6;
+        double fontSize = _settings.SysMonSize switch { 0 => 10, 1 => 12, 2 => 15, 3 => 18, _ => 12 };
+        double labelSize = _settings.SysMonSize switch { 0 => 9, 1 => 10, 2 => 12, 3 => 14, _ => 10 };
+        double thickness = _settings.SysMonSize switch { 0 => 2.8, 1 => 3.5, 2 => 4.2, 3 => 5.0, _ => 3.5 };
+
+        var (arcBrush, trackBrush, textBrush, labelBrush, glow) = GetColorScheme();
+
+        // 1. Rebuild CirclesHost panel layout
+        Panel newHost = _settings.SysMonOrientation switch
+        {
+            1 => new StackPanel { Orientation = Orientation.Vertical },
+            2 => new UniformGrid { Columns = 2 },
+            _ => new StackPanel { Orientation = Orientation.Horizontal }
+        };
+
+        // Detach panels from current container
+        if (CardBorder.Child is Panel oldPanel)
+        {
+            oldPanel.Children.Clear();
         }
+
+        CardBorder.Child = newHost;
+
+        // 2. Configure individual panels
+        var pairs = new[]
+        {
+            (CpuPanel,  CpuGrid,  CpuTrack,  CpuArc,  CpuText,  CpuLabel,  _settings.SysMonShowCpu),
+            (RamPanel,  RamGrid,  RamTrack,  RamArc,  RamText,  RamLabel,  _settings.SysMonShowRam),
+            (GpuPanel,  GpuGrid,  GpuTrack,  GpuArc,  GpuText,  GpuLabel,  _settings.SysMonShowGpu),
+            (DiskPanel, DiskGrid, DiskTrack, DiskArc, DiskText, DiskLabel, _settings.SysMonShowDisk)
+        };
+
+        foreach (var (panel, grid, track, arc, text, label, visible) in pairs)
+        {
+            panel.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            if (visible)
+            {
+                newHost.Children.Add(panel);
+            }
+
+            grid.Width  = gridSize;
+            grid.Height = gridSize;
+
+            track.Width  = ringSize;
+            track.Height = ringSize;
+            track.Stroke = trackBrush;
+            track.StrokeThickness = thickness;
+
+            arc.Stroke = arcBrush;
+            arc.StrokeThickness = thickness;
+            arc.Effect = glow;
+
+            text.FontSize = fontSize;
+            text.Foreground = textBrush;
+
+            label.FontSize = labelSize;
+            label.Foreground = labelBrush;
+        }
+
+        // 3. Background Card Styling
+        if (_settings.SysMonShowBackground)
+        {
+            CardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x12));
+            CardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
+            CardBorder.BorderThickness = new Thickness(1);
+            CardBorder.Effect = (Effect)Resources["CardShadow"];
+            CardBorder.Padding = new Thickness(10);
+        }
+        else
+        {
+            CardBorder.Background = Brushes.Transparent;
+            CardBorder.BorderThickness = new Thickness(0);
+            CardBorder.Effect = null;
+            CardBorder.Padding = new Thickness(4);
+        }
+
+        // Update menu checkmarks
+        ToggleCardMenu.Header = _settings.SysMonShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+        ToggleCpuMenu.IsChecked  = _settings.SysMonShowCpu;
+        ToggleRamMenu.IsChecked  = _settings.SysMonShowRam;
+        ToggleGpuMenu.IsChecked  = _settings.SysMonShowGpu;
+        ToggleDiskMenu.IsChecked = _settings.SysMonShowDisk;
+
+        // Force arc redraw with current metrics
+        if (_metricsService?.CurrentMetrics != null)
+            ApplyMetrics(_metricsService.CurrentMetrics);
+    }
+
+    private (System.Windows.Media.Brush arc, System.Windows.Media.Brush track, System.Windows.Media.Brush text, System.Windows.Media.Brush label, DropShadowEffect? glow) GetColorScheme()
+    {
+        return _settings.SysMonColorMode switch
+        {
+            1 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 56, 189, 248)),
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(224, 242, 254)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 56, 189, 248)),
+                new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(56, 189, 248), Opacity = 0.6 }
+            ),
+            2 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(74, 222, 128)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 74, 222, 128)),
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(220, 252, 231)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 74, 222, 128)),
+                new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(74, 222, 128), Opacity = 0.6 }
+            ),
+            3 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(168, 85, 247)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 168, 85, 247)),
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(243, 232, 255)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 168, 85, 247)),
+                new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(168, 85, 247), Opacity = 0.6 }
+            ),
+            4 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 146, 60)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 251, 146, 60)),
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 237, 213)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 251, 146, 60)),
+                new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(251, 146, 60), Opacity = 0.6 }
+            ),
+            _ => (
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x22, 255, 255, 255)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255)),
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 255, 255, 255)),
+                new DropShadowEffect { BlurRadius = 8, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(255, 255, 255), Opacity = 0.35 }
+            )
+        };
     }
 
     private void Widget_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -130,9 +248,70 @@ public partial class SystemMonitorWidget : Window
         DragMove();
     }
 
-    private void SizeSmall_Click(object sender, RoutedEventArgs e)  { _settings.SysMonSize = 0; ApplySize(); Save(); }
-    private void SizeMedium_Click(object sender, RoutedEventArgs e) { _settings.SysMonSize = 1; ApplySize(); Save(); }
-    private void SizeLarge_Click(object sender, RoutedEventArgs e)  { _settings.SysMonSize = 2; ApplySize(); Save(); }
+    private void SizePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.SysMonSize = val;
+            ApplyStylingAndLayout();
+            Save();
+        }
+    }
+
+    private void ColorPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.SysMonColorMode = val;
+            ApplyStylingAndLayout();
+            Save();
+        }
+    }
+
+    private void LayoutPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
+        {
+            _settings.SysMonOrientation = val;
+            ApplyStylingAndLayout();
+            Save();
+        }
+    }
+
+    private void ToggleCard_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowBackground = !_settings.SysMonShowBackground;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void ToggleCpu_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowCpu = !_settings.SysMonShowCpu;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void ToggleRam_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowRam = !_settings.SysMonShowRam;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void ToggleGpu_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowGpu = !_settings.SysMonShowGpu;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void ToggleDisk_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowDisk = !_settings.SysMonShowDisk;
+        ApplyStylingAndLayout();
+        Save();
+    }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {

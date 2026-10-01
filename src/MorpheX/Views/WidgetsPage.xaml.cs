@@ -23,19 +23,48 @@ public partial class WidgetsPage : Page
         var app = (App)Application.Current;
         var w = app.SettingsService.Settings.Widgets;
 
-        ClockToggle.IsChecked        = w.ClockEnabled;
-        ClockFormatToggle.IsChecked  = w.ClockIs24Hour;
-        SysMonToggle.IsChecked       = w.SystemMonitorEnabled;
-        MediaToggle.IsChecked        = w.MediaEnabled;
-        DayToggle.IsChecked          = w.DayEnabled;
-        CalendarToggle.IsChecked     = w.CalendarEnabled;
-        NotesToggle.IsChecked        = w.NotesEnabled;
-        QuoteToggle.IsChecked        = w.QuoteEnabled;
-        LockWidgetsToggle.IsChecked  = w.WidgetsLocked;
-        TaskbarStatsToggle.IsChecked = w.TaskbarStatsEnabled;
+        LockWidgetsToggle.IsChecked = w.WidgetsLocked;
 
+        // Clock
+        ClockToggle.IsChecked       = w.ClockEnabled;
+        ClockFormatCheck.IsChecked  = w.ClockIs24Hour;
+        ClockDateCheck.IsChecked    = w.ClockShowDate;
+        ClockCardCheck.IsChecked    = w.ClockShowBackground;
+        SelectComboItem(ClockSizeCombo,  w.ClockFontSize);
+        SelectComboItem(ClockColorCombo, w.ClockColorMode);
+        SelectComboItem(ClockFontCombo,  w.ClockFontMode);
+
+        // Day Name
+        DayToggle.IsChecked     = w.DayEnabled;
+        DayCardCheck.IsChecked  = w.DayShowBackground;
+        SelectComboItem(DaySizeCombo,    w.DayFontSize);
+        SelectComboItem(DayColorCombo,   w.DayColorMode);
+        SelectComboItem(DayFontCombo,    w.DayFontMode);
+        SelectComboItem(DayCaseCombo,    w.DayCaseMode);
+        SelectComboItem(DaySpacingCombo, w.DaySpacingMode);
+
+        // System Monitor (Simplicity Circles)
+        SysMonToggle.IsChecked    = w.SystemMonitorEnabled;
+        SysMonCardCheck.IsChecked = w.SysMonShowBackground;
+        SysMonCpuCheck.IsChecked  = w.SysMonShowCpu;
+        SysMonRamCheck.IsChecked  = w.SysMonShowRam;
+        SysMonGpuCheck.IsChecked  = w.SysMonShowGpu;
+        SysMonDiskCheck.IsChecked = w.SysMonShowDisk;
+        SelectComboItem(SysMonSizeCombo,   w.SysMonSize);
+        SelectComboItem(SysMonColorCombo,  w.SysMonColorMode);
+        SelectComboItem(SysMonLayoutCombo, w.SysMonOrientation);
+
+        // Media & Visualizer
+        MediaToggle.IsChecked       = w.MediaEnabled;
+        MediaCardCheck.IsChecked    = w.MediaShowBackground;
+        MediaDetailsCheck.IsChecked = w.MediaShowTrackDetails;
         SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
         SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
+
+        // Other widgets
+        CalendarToggle.IsChecked = w.CalendarEnabled;
+        NotesToggle.IsChecked    = w.NotesEnabled;
+        QuoteToggle.IsChecked    = w.QuoteEnabled;
 
         _isInitializing = false;
     }
@@ -52,7 +81,17 @@ public partial class WidgetsPage : Page
         }
     }
 
-    // ── Toggle handlers ──────────────────────────────────────────────────────
+    // ── Master / Lock ────────────────────────────────────────────────────────
+
+    private async void LockWidgetsToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
+        await app.SettingsService.SaveAsync();
+    }
+
+    // ── Clock ────────────────────────────────────────────────────────────────
 
     private async void ClockToggle_Changed(object sender, RoutedEventArgs e)
     {
@@ -63,14 +102,82 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
-    private async void ClockFormatToggle_Changed(object sender, RoutedEventArgs e)
+    private async void ClockSetting_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
         var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.ClockIs24Hour = ClockFormatToggle.IsChecked == true;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (ClockSizeCombo.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.ClockFontSize = sz;
+        if (ClockColorCombo.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.ClockColorMode = col;
+        if (ClockFontCombo.SelectedItem is ComboBoxItem fi && int.TryParse(fi.Tag?.ToString(), out int font))
+            w.ClockFontMode = font;
+
         app.WidgetService.RefreshClock();
         await app.SettingsService.SaveAsync();
     }
+
+    private async void ClockOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.ClockIs24Hour       = ClockFormatCheck.IsChecked == true;
+        w.ClockShowDate       = ClockDateCheck.IsChecked == true;
+        w.ClockShowBackground = ClockCardCheck.IsChecked == true;
+
+        app.WidgetService.RefreshClock();
+        await app.SettingsService.SaveAsync();
+    }
+
+    // ── Day Name ─────────────────────────────────────────────────────────────
+
+    private async void DayToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.DayEnabled = DayToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void DaySetting_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (DaySizeCombo.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.DayFontSize = sz;
+        if (DayColorCombo.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.DayColorMode = col;
+        if (DayFontCombo.SelectedItem is ComboBoxItem fi && int.TryParse(fi.Tag?.ToString(), out int font))
+            w.DayFontMode = font;
+        if (DayCaseCombo.SelectedItem is ComboBoxItem cse && int.TryParse(cse.Tag?.ToString(), out int cs))
+            w.DayCaseMode = cs;
+        if (DaySpacingCombo.SelectedItem is ComboBoxItem sp && int.TryParse(sp.Tag?.ToString(), out int space))
+            w.DaySpacingMode = space;
+
+        app.WidgetService.RefreshDay();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void DayOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.DayShowBackground = DayCardCheck.IsChecked == true;
+
+        app.WidgetService.RefreshDay();
+        await app.SettingsService.SaveAsync();
+    }
+
+    // ── System Monitor (Simplicity Circles) ───────────────────────────────────
 
     private async void SysMonToggle_Changed(object sender, RoutedEventArgs e)
     {
@@ -81,6 +188,41 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
+    private async void SysMonSetting_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (SysMonSizeCombo.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.SysMonSize = sz;
+        if (SysMonColorCombo.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.SysMonColorMode = col;
+        if (SysMonLayoutCombo.SelectedItem is ComboBoxItem li && int.TryParse(li.Tag?.ToString(), out int lay))
+            w.SysMonOrientation = lay;
+
+        app.WidgetService.RefreshSysMon();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void SysMonOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.SysMonShowBackground = SysMonCardCheck.IsChecked == true;
+        w.SysMonShowCpu        = SysMonCpuCheck.IsChecked == true;
+        w.SysMonShowRam        = SysMonRamCheck.IsChecked == true;
+        w.SysMonShowGpu        = SysMonGpuCheck.IsChecked == true;
+        w.SysMonShowDisk       = SysMonDiskCheck.IsChecked == true;
+
+        app.WidgetService.RefreshSysMon();
+        await app.SettingsService.SaveAsync();
+    }
+
+    // ── Audio Visualizer & Media ─────────────────────────────────────────────
+
     private async void MediaToggle_Changed(object sender, RoutedEventArgs e)
     {
         if (_isInitializing) return;
@@ -90,14 +232,35 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
-    private async void DayToggle_Changed(object sender, RoutedEventArgs e)
+    private async void MediaSetting_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
         var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.DayEnabled = DayToggle.IsChecked == true;
-        app.WidgetService.ApplySettings();
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (VisualizerStyleCombo.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int st))
+            w.VisualizerStyle = st;
+        if (VisualizerColorCombo.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.VisualizerColorMode = col;
+
+        app.WidgetService.RefreshMedia();
         await app.SettingsService.SaveAsync();
     }
+
+    private async void MediaOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.MediaShowBackground   = MediaCardCheck.IsChecked == true;
+        w.MediaShowTrackDetails = MediaDetailsCheck.IsChecked == true;
+
+        app.WidgetService.RefreshMedia();
+        await app.SettingsService.SaveAsync();
+    }
+
+    // ── Calendar, Notes, Quote ───────────────────────────────────────────────
 
     private async void CalendarToggle_Changed(object sender, RoutedEventArgs e)
     {
@@ -124,48 +287,5 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
-    }
-
-    private async void TaskbarStatsToggle_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_isInitializing) return;
-        var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.TaskbarStatsEnabled = TaskbarStatsToggle.IsChecked == true;
-        app.WidgetService.ApplySettings();
-        await app.SettingsService.SaveAsync();
-    }
-
-    private async void LockWidgetsToggle_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_isInitializing) return;
-        var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
-        await app.SettingsService.SaveAsync();
-    }
-
-    private async void VisualizerStyleCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isInitializing) return;
-        if (VisualizerStyleCombo.SelectedItem is ComboBoxItem item &&
-            item.Tag is string s && int.TryParse(s, out int styleVal))
-        {
-            var app = (App)Application.Current;
-            app.SettingsService.Settings.Widgets.VisualizerStyle = styleVal;
-            app.WidgetService.RefreshMedia();
-            await app.SettingsService.SaveAsync();
-        }
-    }
-
-    private async void VisualizerColorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isInitializing) return;
-        if (VisualizerColorCombo.SelectedItem is ComboBoxItem item &&
-            item.Tag is string s && int.TryParse(s, out int colVal))
-        {
-            var app = (App)Application.Current;
-            app.SettingsService.Settings.Widgets.VisualizerColorMode = colVal;
-            app.WidgetService.RefreshMedia();
-            await app.SettingsService.SaveAsync();
-        }
     }
 }
