@@ -17,6 +17,22 @@ public sealed class AppSettings
     public AmbientDimSettings AmbientDim { get; set; } = new();
 
     public Dictionary<string, MonitorAssignment> MonitorAssignments { get; set; } = new();
+    public WidgetSettings Widgets { get; set; } = new();
+}
+
+public sealed class WidgetSettings
+{
+    public bool ClockEnabled { get; set; } = false;
+    public bool SystemMonitorEnabled { get; set; } = false;
+    public bool MediaEnabled { get; set; } = false;
+
+    // Saved positions per widget (desktop coordinates)
+    public double ClockX { get; set; } = 20;
+    public double ClockY { get; set; } = 20;
+    public double SystemMonitorX { get; set; } = 20;
+    public double SystemMonitorY { get; set; } = 120;
+    public double MediaX { get; set; } = 20;
+    public double MediaY { get; set; } = 310;
 }
 
 public sealed class GeneralSettings

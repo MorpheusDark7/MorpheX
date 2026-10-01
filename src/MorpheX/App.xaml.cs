@@ -30,6 +30,7 @@ public partial class App : Application
     public HotkeyService HotkeyService { get; private set; } = null!;
     public SystemMetricsService SystemMetricsService { get; } = new();
     public UpdateService UpdateService { get; } = new();
+    public WidgetService WidgetService { get; private set; } = null!;
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -255,6 +256,10 @@ public partial class App : Application
         {
             _ = CheckForUpdatesInBackgroundAsync();
         }
+
+        // Initialise widgets (after all services are ready)
+        WidgetService = new WidgetService(SettingsService.Settings.Widgets);
+        WidgetService.ApplySettings();
     }
 
     private async Task CheckForUpdatesInBackgroundAsync()
@@ -649,6 +654,7 @@ public partial class App : Application
         SystemMetricsService?.Dispose();
         PlaybackService?.Dispose();
         _ambientDimService?.Dispose();
+        WidgetService?.Dispose();
         WallpaperService?.Dispose();
         MonitorService?.Dispose();
 

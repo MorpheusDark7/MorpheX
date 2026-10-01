@@ -22,6 +22,7 @@ public partial class MainWindow : FluentWindow
         NavLibrary.Click += (_, _) => NavigateTo(typeof(LibraryPage));
         NavFavorites.Click += (_, _) => NavigateTo(typeof(FavoritesPage));
         NavDisplays.Click += (_, _) => NavigateTo(typeof(DisplaysPage));
+        NavWidgets.Click += (_, _) => NavigateTo(typeof(WidgetsPage));
         NavSettings.Click += (_, _) => NavigateTo(typeof(SettingsPage));
 
         Loaded += MainWindow_Loaded;

@@ -86,6 +86,11 @@
                         Content="Displays"
                         Icon="{ui:SymbolIcon Desktop24}"
                         TargetPageType="{x:Type local:DisplaysPage}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavWidgets"
+                        Content="Widgets"
+                        Icon="{ui:SymbolIcon AppsList24}"
+                        TargetPageType="{x:Type local:WidgetsPage}" />
                 </ui:NavigationView.MenuItems>
 
                 <ui:NavigationView.FooterMenuItems>

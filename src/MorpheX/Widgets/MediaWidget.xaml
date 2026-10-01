@@ -1,0 +1,121 @@
+<Window
+    x:Class="MorpheX.Widgets.MediaWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="MorpheX Media Widget"
+    Width="210" Height="115"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ShowInTaskbar="False"
+    Topmost="False"
+    ResizeMode="NoResize">
+
+    <Window.Resources>
+        <DropShadowEffect x:Key="WidgetShadow" BlurRadius="18" ShadowDepth="4" Color="#000000" Opacity="0.55"/>
+    </Window.Resources>
+
+    <Border
+        CornerRadius="12"
+        Background="#CC0F0F0F"
+        BorderBrush="#33FFFFFF"
+        BorderThickness="1"
+        Effect="{StaticResource WidgetShadow}"
+        MouseLeftButtonDown="Widget_MouseLeftButtonDown"
+        Cursor="SizeAll">
+
+        <StackPanel Margin="16,12">
+
+            <!-- Header -->
+            <TextBlock
+                Text="NOW PLAYING"
+                FontSize="9"
+                FontWeight="Bold"
+                FontFamily="Segoe UI"
+                Foreground="#66FFFFFF"
+                Margin="0,0,0,6"/>
+
+            <!-- Wallpaper name -->
+            <TextBlock
+                x:Name="WallpaperNameText"
+                Text="No wallpaper active"
+                FontSize="12"
+                FontWeight="Medium"
+                FontFamily="Segoe UI"
+                Foreground="White"
+                TextTrimming="CharacterEllipsis"
+                Margin="0,0,0,2"/>
+
+            <!-- Type label -->
+            <TextBlock
+                x:Name="WallpaperTypeText"
+                Text=""
+                FontSize="10"
+                FontFamily="Segoe UI"
+                Foreground="#55FFFFFF"
+                Margin="0,0,0,10"/>
+
+            <!-- Controls -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+
+                <!-- Pause/Resume -->
+                <Button x:Name="PauseResumeBtn"
+                    Content="⏸"
+                    FontSize="14"
+                    Width="34" Height="28"
+                    Background="#22FFFFFF"
+                    Foreground="White"
+                    BorderThickness="1"
+                    BorderBrush="#33FFFFFF"
+                    Cursor="Hand"
+                    Margin="0,0,6,0"
+                    Click="PauseResumeBtn_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="7" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#44FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#66FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <!-- Next -->
+                <Button x:Name="NextBtn"
+                    Content="⏭"
+                    FontSize="14"
+                    Width="34" Height="28"
+                    Background="#22FFFFFF"
+                    Foreground="White"
+                    BorderThickness="1"
+                    BorderBrush="#33FFFFFF"
+                    Cursor="Hand"
+                    Click="NextBtn_Click">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}" CornerRadius="7" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#44FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#66FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
