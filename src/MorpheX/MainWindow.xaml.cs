@@ -40,13 +40,16 @@ public partial class MainWindow : FluentWindow
         var app = (App)System.Windows.Application.Current;
         if (WindowState == WindowState.Minimized)
         {
-            app.SystemMetricsService.Stop();
+            if (!app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
+            {
+                app.SystemMetricsService.Stop();
+            }
             Hide();
             MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
         }
         else if (WindowState == WindowState.Normal || WindowState == WindowState.Maximized)
         {
-            if (app.SettingsService.Settings.Appearance.ShowSystemStats)
+            if (app.SettingsService.Settings.Appearance.ShowSystemStats || app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
             {
                 app.SystemMetricsService.Start();
             }
@@ -65,7 +68,7 @@ public partial class MainWindow : FluentWindow
         bool show = app.SettingsService.Settings.Appearance.ShowSystemStats;
         SystemStatsBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
 
-        if (show && IsVisible && WindowState != WindowState.Minimized)
+        if ((show && IsVisible && WindowState != WindowState.Minimized) || app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
         {
             app.SystemMetricsService.Start();
         }
@@ -250,7 +253,10 @@ public partial class MainWindow : FluentWindow
         {
             e.Cancel = true;
             var app = (App)System.Windows.Application.Current;
-            app.SystemMetricsService.Stop();
+            if (!app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
+            {
+                app.SystemMetricsService.Stop();
+            }
             Hide();
             MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
             return;

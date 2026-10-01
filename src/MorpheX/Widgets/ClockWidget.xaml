@@ -3,17 +3,22 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     Title="MorpheX Clock Widget"
-    SizeToContent="WidthAndHeight"
+    Width="220" Height="85"
+    MinWidth="160" MinHeight="60"
+    SizeToContent="Manual"
     WindowStyle="None"
     AllowsTransparency="True"
     Background="Transparent"
     ShowInTaskbar="False"
     Topmost="False"
-    ResizeMode="NoResize">
+    ResizeMode="CanResizeWithGrip">
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem Header="⏰  Toggle 12h / 24h" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
@@ -31,34 +36,37 @@
         BorderThickness="1"
         Effect="{StaticResource WidgetShadow}"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
-        ToolTip="Drag to move • Double-click to toggle 12h / 24h"
+        ToolTip="Drag to move • Right-click for options • Resize from corner"
         Cursor="SizeAll">
 
-        <Grid Margin="18,12">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+        <!-- Viewbox lets all content scale proportionally with window resize -->
+        <Viewbox Stretch="Uniform" Margin="10,8">
+            <Grid Width="200" Height="60">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-            <TextBlock
-                x:Name="TimeText"
-                Grid.Row="0"
-                Text="00:00:00"
-                FontSize="28"
-                FontWeight="Light"
-                FontFamily="Segoe UI"
-                Foreground="#FFFFFF"
-                HorizontalAlignment="Center" />
+                <TextBlock
+                    x:Name="TimeText"
+                    Grid.Row="0"
+                    Text="00:00:00"
+                    FontSize="28"
+                    FontWeight="Light"
+                    FontFamily="Segoe UI"
+                    Foreground="#FFFFFF"
+                    HorizontalAlignment="Center" />
 
-            <TextBlock
-                x:Name="DateText"
-                Grid.Row="1"
-                Text="Monday, January 1"
-                FontSize="11"
-                FontFamily="Segoe UI"
-                Foreground="#88FFFFFF"
-                HorizontalAlignment="Center"
-                Margin="0,3,0,0" />
-        </Grid>
+                <TextBlock
+                    x:Name="DateText"
+                    Grid.Row="1"
+                    Text="Monday, January 1"
+                    FontSize="11"
+                    FontFamily="Segoe UI"
+                    Foreground="#88FFFFFF"
+                    HorizontalAlignment="Center"
+                    Margin="0,3,0,0" />
+            </Grid>
+        </Viewbox>
     </Border>
 </Window>

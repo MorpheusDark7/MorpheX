@@ -27,11 +27,19 @@ public sealed class WidgetSettings
     public bool SystemMonitorEnabled { get; set; } = false;
     public bool MediaEnabled { get; set; } = false;
 
+    public bool WidgetsLocked { get; set; } = false;
+
     // Saved positions and sizes per widget (desktop coordinates)
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;
+    public double ClockWidth { get; set; } = 220;
+    public double ClockHeight { get; set; } = 85;
+
     public double SystemMonitorX { get; set; } = 20;
     public double SystemMonitorY { get; set; } = 120;
+    public double SystemMonitorWidth { get; set; } = 260;
+    public double SystemMonitorHeight { get; set; } = 150;
+
     public double MediaX { get; set; } = 20;
     public double MediaY { get; set; } = 260;
     public double MediaWidth { get; set; } = 300;

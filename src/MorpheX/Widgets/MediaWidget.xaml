@@ -22,6 +22,9 @@
             <MenuItem Header="🔵  Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
             <MenuItem Header="🟣  Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
     </Window.ContextMenu>
@@ -45,6 +48,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <!-- Visualizer fills ALL remaining vertical space -->
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
@@ -174,10 +178,15 @@
                 </Button>
             </StackPanel>
 
-            <!-- Row 3: Audio Visualizer Equalizer Bars & Waveform -->
-            <Grid Grid.Row="3" x:Name="VisualizerContainer" VerticalAlignment="Bottom" Height="28" ClipToBounds="True">
-                <UniformGrid x:Name="BarsGrid" Rows="1" VerticalAlignment="Bottom" Height="28"/>
-                <Path x:Name="WavePath" StrokeThickness="2.5" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Bottom" Height="28" Visibility="Collapsed"/>
+            <!-- Row 3: Audio Visualizer — stretches to fill all remaining space -->
+            <Grid Grid.Row="3" x:Name="VisualizerContainer"
+                  VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                  ClipToBounds="True" MinHeight="16">
+                <UniformGrid x:Name="BarsGrid" Rows="1"
+                             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+                <Path x:Name="WavePath" StrokeThickness="2.5"
+                      StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      VerticalAlignment="Stretch" Visibility="Collapsed"/>
             </Grid>
 
         </Grid>

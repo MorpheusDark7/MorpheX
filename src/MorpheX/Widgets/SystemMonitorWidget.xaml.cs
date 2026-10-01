@@ -11,21 +11,27 @@ public partial class SystemMonitorWidget : Window
 {
     private readonly WidgetSettings _settings;
     private ISystemMetricsService? _metricsService;
+    private System.Windows.Threading.DispatcherTimer? _saveDebounceTimer;
 
     public SystemMonitorWidget(WidgetSettings settings)
     {
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.SystemMonitorX;
-        Top  = settings.SystemMonitorY;
+        Left   = settings.SystemMonitorX;
+        Top    = settings.SystemMonitorY;
+        Width  = Math.Max(180, settings.SystemMonitorWidth);
+        Height = Math.Max(110, settings.SystemMonitorHeight);
 
-        Loaded += OnLoaded;
-        Closing += OnClosing;
+        Loaded      += OnLoaded;
+        Closing     += OnClosing;
+        SizeChanged += OnSizeChanged;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        UpdateLockMenuHeader();
+
         var app = (App)Application.Current;
         _metricsService = app.SystemMetricsService;
         _metricsService.MetricsUpdated += OnMetricsUpdated;
@@ -98,7 +104,33 @@ public partial class SystemMonitorWidget : Window
 
     private void Widget_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
+        if (_settings.WidgetsLocked) return;
         DragMove();
+    }
+
+    private void LockPosition_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetsLocked = !_settings.WidgetsLocked;
+        UpdateLockMenuHeader();
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void ResetSize_Click(object sender, RoutedEventArgs e)
+    {
+        Width  = 260;
+        Height = 150;
+        _settings.SystemMonitorWidth  = Width;
+        _settings.SystemMonitorHeight = Height;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void UpdateLockMenuHeader()
+    {
+        LockMenuItem.Header = _settings.WidgetsLocked
+            ? "\ud83d\udd13  Unlock Position"
+            : "\ud83d\udd12  Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
@@ -109,13 +141,22 @@ public partial class SystemMonitorWidget : Window
         Close();
     }
 
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        _settings.SystemMonitorWidth  = ActualWidth;
+        _settings.SystemMonitorHeight = ActualHeight;
+        ScheduleDebouncedSave();
+    }
+
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         if (_metricsService != null)
             _metricsService.MetricsUpdated -= OnMetricsUpdated;
 
-        _settings.SystemMonitorX = Left;
-        _settings.SystemMonitorY = Top;
+        _settings.SystemMonitorX      = Left;
+        _settings.SystemMonitorY      = Top;
+        _settings.SystemMonitorWidth  = ActualWidth;
+        _settings.SystemMonitorHeight = ActualHeight;
         var app = (App)Application.Current;
         _ = app.SettingsService.SaveAsync();
     }
@@ -125,5 +166,21 @@ public partial class SystemMonitorWidget : Window
         base.OnLocationChanged(e);
         _settings.SystemMonitorX = Left;
         _settings.SystemMonitorY = Top;
+    }
+
+    private void ScheduleDebouncedSave()
+    {
+        _saveDebounceTimer?.Stop();
+        _saveDebounceTimer = new System.Windows.Threading.DispatcherTimer
+        {
+            Interval = TimeSpan.FromMilliseconds(500)
+        };
+        _saveDebounceTimer.Tick += (_, _) =>
+        {
+            _saveDebounceTimer.Stop();
+            var app = (App)Application.Current;
+            _ = app.SettingsService.SaveAsync();
+        };
+        _saveDebounceTimer.Start();
     }
 }

@@ -152,9 +152,10 @@ public sealed class SystemMetricsService : ISystemMetricsService
         double totalGb = memStatus.ullTotalPhys / (1024.0 * 1024 * 1024);
         double availGb = memStatus.ullAvailPhys / (1024.0 * 1024 * 1024);
         double usedGb = Math.Max(0, totalGb - availGb);
-        float pct = memStatus.dwMemoryLoad;
+        // Use (used/total)*100 to match Task Manager exactly (dwMemoryLoad includes cache)
+        float pct = totalGb > 0 ? (float)(usedGb / totalGb * 100.0) : 0f;
 
-        return (Math.Round(usedGb, 1), Math.Round(totalGb, 1), pct);
+        return (Math.Round(usedGb, 1), Math.Round(totalGb, 1), Math.Clamp(pct, 0f, 100f));
     }
 
     private static long SampleAppWorkingSet()
@@ -180,6 +181,8 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
             if (_gpuCounters.Count == 0) return 0f;
 
+            // Sum per-node counters (each represents a different node/engine type, not per-process)
+            // Clamp to 100f in case multiple engines add up beyond
             float totalGpu = 0f;
             foreach (var counter in _gpuCounters)
             {
@@ -207,24 +210,42 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
         try
         {
+            // "GPU Engine" category has per-process per-engine instances; summing all leads to > 100%.
+            // Instead, use "GPU Adapter Memory" or fall back to a single representative counter.
+            // Best match for Task Manager: use one counter per unique GPU node (engtype_3D only)
+            // and group by luid (adapter). We take one representative entry per luid.
             if (!PerformanceCounterCategory.Exists("GPU Engine")) return;
 
             var category = new PerformanceCounterCategory("GPU Engine");
             var instanceNames = category.GetInstanceNames();
 
+            // Collect unique luid_phys_eng adapter+node combinations
+            // Instance name format: pid_XXX_luid_0x000000000000XXXX_phys_X_eng_Y_engtype_3D
+            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             foreach (var name in instanceNames)
             {
-                if (name.Contains("engtype_3D", StringComparison.OrdinalIgnoreCase) ||
-                    name.Contains("engtype_VideoDecode", StringComparison.OrdinalIgnoreCase))
+                if (!name.Contains("engtype_3D", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                // Build a key that identifies the unique GPU node (luid + phys + eng), ignoring pid
+                // so we get one entry per physical engine, not per process
+                string nodeKey = name;
+                int pidEnd = name.IndexOf('_', 4); // skip "pid_"
+                if (pidEnd > 0)
+                    nodeKey = name[(pidEnd + 1)..]; // strip "pid_XXX_" prefix
+
+                // Only add one counter per unique GPU engine node
+                if (seen.Contains(nodeKey)) continue;
+                seen.Add(nodeKey);
+
+                try
                 {
-                    try
-                    {
-                        var counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", name, true);
-                        counter.NextValue();
-                        _gpuCounters.Add(counter);
-                    }
-                    catch { }
+                    var counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", name, true);
+                    counter.NextValue(); // prime
+                    _gpuCounters.Add(counter);
                 }
+                catch { }
             }
         }
         catch (Exception ex)

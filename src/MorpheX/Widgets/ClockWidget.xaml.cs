@@ -10,21 +10,26 @@ public partial class ClockWidget : Window
 {
     private readonly DispatcherTimer _timer;
     private readonly WidgetSettings _settings;
+    private DispatcherTimer? _saveDebounceTimer;
 
     public ClockWidget(WidgetSettings settings)
     {
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.ClockX;
-        Top  = settings.ClockY;
+        Left   = settings.ClockX;
+        Top    = settings.ClockY;
+        Width  = Math.Max(160, settings.ClockWidth);
+        Height = Math.Max(60,  settings.ClockHeight);
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
         Tick();
 
-        Closing += OnClosing;
+        Loaded   += (_, _) => UpdateLockMenuHeader();
+        Closing  += OnClosing;
+        SizeChanged += OnSizeChanged;
     }
 
     public void RefreshFormat()
@@ -43,9 +48,10 @@ public partial class ClockWidget : Window
 
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (_settings.WidgetsLocked) return;
+
         if (e.ClickCount == 2)
         {
-            // Double click toggles 12h / 24h format
             _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
             Tick();
             var app = (App)Application.Current;
@@ -64,6 +70,31 @@ public partial class ClockWidget : Window
         _ = app.SettingsService.SaveAsync();
     }
 
+    private void LockPosition_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetsLocked = !_settings.WidgetsLocked;
+        UpdateLockMenuHeader();
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void ResetSize_Click(object sender, RoutedEventArgs e)
+    {
+        Width  = 220;
+        Height = 85;
+        _settings.ClockWidth  = Width;
+        _settings.ClockHeight = Height;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void UpdateLockMenuHeader()
+    {
+        LockMenuItem.Header = _settings.WidgetsLocked
+            ? "\ud83d\udd13  Unlock Position"
+            : "\ud83d\udd12  Lock Position";
+    }
+
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
     {
         _settings.ClockEnabled = false;
@@ -72,11 +103,20 @@ public partial class ClockWidget : Window
         Close();
     }
 
+    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        _settings.ClockWidth  = ActualWidth;
+        _settings.ClockHeight = ActualHeight;
+        ScheduleDebouncedSave();
+    }
+
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        _settings.ClockX = Left;
-        _settings.ClockY = Top;
+        _settings.ClockX      = Left;
+        _settings.ClockY      = Top;
+        _settings.ClockWidth  = ActualWidth;
+        _settings.ClockHeight = ActualHeight;
         var app = (App)Application.Current;
         _ = app.SettingsService.SaveAsync();
     }
@@ -86,5 +126,18 @@ public partial class ClockWidget : Window
         base.OnLocationChanged(e);
         _settings.ClockX = Left;
         _settings.ClockY = Top;
+    }
+
+    private void ScheduleDebouncedSave()
+    {
+        _saveDebounceTimer?.Stop();
+        _saveDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        _saveDebounceTimer.Tick += (_, _) =>
+        {
+            _saveDebounceTimer.Stop();
+            var app = (App)Application.Current;
+            _ = app.SettingsService.SaveAsync();
+        };
+        _saveDebounceTimer.Start();
     }
 }

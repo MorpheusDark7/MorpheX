@@ -25,6 +25,7 @@ public partial class WidgetsPage : Page
         ClockFormatToggle.IsChecked = w.ClockIs24Hour;
         SysMonToggle.IsChecked = w.SystemMonitorEnabled;
         MediaToggle.IsChecked = w.MediaEnabled;
+        LockWidgetsToggle.IsChecked = w.WidgetsLocked;
 
         foreach (ComboBoxItem item in VisualizerStyleCombo.Items)
         {
@@ -53,6 +54,14 @@ public partial class WidgetsPage : Page
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.ClockEnabled = ClockToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void LockWidgetsToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
         await app.SettingsService.SaveAsync();
     }
 

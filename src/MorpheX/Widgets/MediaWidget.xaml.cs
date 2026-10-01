@@ -152,6 +152,7 @@ public partial class MediaWidget : Window
         float peak = _peakMeter.GetPeak();
         _time += 0.25;
 
+        // Use the full available height of the visualizer container
         double maxBarHeight = Math.Max(16.0, VisualizerContainer.ActualHeight - 2);
 
         if (peak > 0.005f)
@@ -273,6 +274,7 @@ public partial class MediaWidget : Window
 
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
+        if (_settings.WidgetsLocked) return;
         DragMove();
     }
 
@@ -316,6 +318,31 @@ public partial class MediaWidget : Window
         _settings.VisualizerColorMode = 2;
         RefreshVisualizerStyle();
         ScheduleDebouncedSave();
+    }
+
+    private void LockPosition_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetsLocked = !_settings.WidgetsLocked;
+        UpdateLockMenuHeader();
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void ResetSize_Click(object sender, RoutedEventArgs e)
+    {
+        Width = 300;
+        Height = 130;
+        _settings.MediaWidth = Width;
+        _settings.MediaHeight = Height;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void UpdateLockMenuHeader()
+    {
+        LockMenuItem.Header = _settings.WidgetsLocked
+            ? "🔓  Unlock Position"
+            : "🔒  Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
