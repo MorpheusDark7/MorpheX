@@ -16,6 +16,7 @@
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem x:Name="ToggleCardMenu" Header="🔲  Show Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="ToggleDetailsMenu" Header="🎵  Show Track Details" Click="ToggleDetails_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleGlowMenu" Header="✨  Toggle Glow Effect" Click="ToggleGlow_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="📊  Equalizer Bars" Click="StyleBars_Click" Foreground="#FFFFFF"/>
             <MenuItem Header="🪞  Mirrored Center" Click="StyleMirrored_Click" Foreground="#FFFFFF"/>

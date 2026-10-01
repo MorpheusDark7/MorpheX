@@ -40,6 +40,7 @@ jobs:
           dotnet publish src/MorpheX/MorpheX.csproj -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -o ./publish
           Remove-Item -Path ./publish/*.pdb, ./publish/*.xml, ./publish/libvlc/win-x64/*.lib, ./publish/libvlc/win-x64/vlc-cache-gen.exe -Force -ErrorAction SilentlyContinue
           Remove-Item -Path ./publish/libvlc/win-x64/lua, ./publish/libvlc/win-x64/hrtfs, ./publish/runtimes -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-arm64, ./publish/libvlc/win-x86 -Recurse -Force -ErrorAction SilentlyContinue
           Get-ChildItem -Path ./publish -Directory | Where-Object { (Get-ChildItem $_.FullName -Recurse -File).Count -eq 0 } | Remove-Item -Recurse -Force
 
       - name: Compile Inno Setup Installer
@@ -64,3 +65,19 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+      - name: Deploy Installer to GitHub Pages Docs
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin main
+          git checkout main
+          Remove-Item -Path docs/MorpheX-Live-Setup-*.exe -Force -ErrorAction SilentlyContinue
+          $setup = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
+          if ($setup) {
+            Copy-Item -Path $setup.FullName -Destination "docs/$($setup.Name)" -Force
+            git add docs/
+            git commit -m "release: update direct installer to $($setup.Name) for Microsoft Store" || exit 0
+            git push origin main
+          }

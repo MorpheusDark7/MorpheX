@@ -322,8 +322,9 @@
                             </StackPanel>
 
                             <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" Margin="0,4,0,0">
-                                <CheckBox x:Name="MediaCardCheck" Content="Show Frosted Background Card" Margin="0,0,24,0" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
-                                <CheckBox x:Name="MediaDetailsCheck" Content="Show Track Details &amp; Controls" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
+                                <CheckBox x:Name="MediaCardCheck" Content="Frosted Background Card" Margin="0,0,16,0" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
+                                <CheckBox x:Name="MediaDetailsCheck" Content="Track Details" Margin="0,0,16,0" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
+                                <CheckBox x:Name="MediaGlowCheck" Content="Neon Glow" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
                             </StackPanel>
                         </Grid>
                     </Border>

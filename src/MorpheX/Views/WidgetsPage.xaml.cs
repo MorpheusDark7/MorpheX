@@ -58,6 +58,7 @@ public partial class WidgetsPage : Page
         MediaToggle.IsChecked       = w.MediaEnabled;
         MediaCardCheck.IsChecked    = w.MediaShowBackground;
         MediaDetailsCheck.IsChecked = w.MediaShowTrackDetails;
+        MediaGlowCheck.IsChecked    = w.VisualizerGlow;
         SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
         SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
 
@@ -256,6 +257,7 @@ public partial class WidgetsPage : Page
 
         w.MediaShowBackground   = MediaCardCheck.IsChecked == true;
         w.MediaShowTrackDetails = MediaDetailsCheck.IsChecked == true;
+        w.VisualizerGlow        = MediaGlowCheck.IsChecked == true;
 
         app.WidgetService.RefreshMedia();
         await app.SettingsService.SaveAsync();

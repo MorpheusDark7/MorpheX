@@ -164,6 +164,7 @@ public partial class MediaWidget : Window
 
         ToggleCardMenu.Header = _settings.MediaShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
         ToggleDetailsMenu.Header = _settings.MediaShowTrackDetails ? "🎵  Hide Track Details" : "🎵  Show Track Details";
+        ToggleGlowMenu.Header = _settings.VisualizerGlow ? "✨  Hide Glow Effect" : "✨  Show Glow Effect";
     }
 
     private System.Windows.Media.Brush GetVisualizerBrush()
@@ -178,17 +179,19 @@ public partial class MediaWidget : Window
         };
     }
 
-    private DropShadowEffect GetBarGlow()
+    private DropShadowEffect? GetBarGlow()
     {
+        if (!_settings.VisualizerGlow) return null;
+
         var (col, op) = _settings.VisualizerColorMode switch
         {
-            1 => (System.Windows.Media.Color.FromRgb(56, 189, 248),  0.8),  // cyan glow
-            2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.8),  // violet glow
-            3 => (System.Windows.Media.Color.FromRgb(74, 222, 128),  0.8),  // emerald mint glow
-            4 => (System.Windows.Media.Color.FromRgb(251, 146, 60),  0.8),  // sunset amber glow
+            1 => (System.Windows.Media.Color.FromRgb(56, 189, 248),  0.75),  // cyan glow
+            2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.75),  // violet glow
+            3 => (System.Windows.Media.Color.FromRgb(74, 222, 128),  0.75),  // emerald mint glow
+            4 => (System.Windows.Media.Color.FromRgb(251, 146, 60),  0.75),  // sunset amber glow
             _ => (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
         };
-        return new DropShadowEffect { BlurRadius = 12, ShadowDepth = 0, Color = col, Opacity = op };
+        return new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = col, Opacity = op };
     }
 
     private void OnAnimTick(object? sender, EventArgs e)
@@ -353,6 +356,13 @@ public partial class MediaWidget : Window
     private void ToggleDetails_Click(object sender, RoutedEventArgs e)
     {
         _settings.MediaShowTrackDetails = !_settings.MediaShowTrackDetails;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ToggleGlow_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerGlow = !_settings.VisualizerGlow;
         RefreshVisualizerStyle();
         ScheduleDebouncedSave();
     }

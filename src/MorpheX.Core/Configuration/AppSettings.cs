@@ -56,6 +56,7 @@ public sealed class WidgetSettings
     public int VisualizerColorMode { get; set; } = 0;
     public bool MediaShowBackground { get; set; } = false;
     public bool MediaShowTrackDetails { get; set; } = true;
+    public bool VisualizerGlow { get; set; } = false;
 
     // ── Day Name ───────────────────────────────────────────────────────
     public bool DayEnabled { get; set; } = false;
