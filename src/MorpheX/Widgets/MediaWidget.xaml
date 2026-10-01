@@ -31,6 +31,26 @@
 
     <Window.Resources>
         <DropShadowEffect x:Key="WidgetShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>
+        <DropShadowEffect x:Key="BarGlow" BlurRadius="10" ShadowDepth="0" Color="#FFFFFF" Opacity="0.55"/>
+
+        <!-- Gradient brush for bars: teal bottom → white top -->
+        <LinearGradientBrush x:Key="BarBrushWhite" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#4038BDF8" Offset="0"/>
+            <GradientStop Color="#BBFFFFFF" Offset="0.55"/>
+            <GradientStop Color="#FFFFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushCyan" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#400EA5E8" Offset="0"/>
+            <GradientStop Color="#CC38BDF8" Offset="0.5"/>
+            <GradientStop Color="#FF7EE8FF" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushViolet" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#406D28D9" Offset="0"/>
+            <GradientStop Color="#CCA855F7" Offset="0.5"/>
+            <GradientStop Color="#FFE0AAFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <SolidColorBrush x:Key="IdleBrush" Color="#28FFFFFF"/>
     </Window.Resources>
 
     <Border
@@ -181,10 +201,18 @@
             <!-- Row 3: Audio Visualizer — stretches to fill all remaining space -->
             <Grid Grid.Row="3" x:Name="VisualizerContainer"
                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
-                  ClipToBounds="True" MinHeight="16">
+                  ClipToBounds="True" MinHeight="20">
+
+                <!-- Subtle floor line -->
+                <Rectangle Height="1" VerticalAlignment="Bottom"
+                           Fill="#18FFFFFF" Margin="0,0,0,0"/>
+
                 <UniformGrid x:Name="BarsGrid" Rows="1"
-                             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
-                <Path x:Name="WavePath" StrokeThickness="2.5"
+                             VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+                             Margin="0,2,0,2"/>
+
+                <!-- Waveform path -->
+                <Path x:Name="WavePath" StrokeThickness="2"
                       StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
                       VerticalAlignment="Stretch" Visibility="Collapsed"/>
             </Grid>

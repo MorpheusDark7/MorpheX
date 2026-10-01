@@ -42,10 +42,14 @@ public sealed class WidgetSettings
     public bool CalendarEnabled { get; set; } = false;
     public bool NotesEnabled { get; set; } = false;
     public bool QuoteEnabled { get; set; } = false;
+    public bool TaskbarStatsEnabled { get; set; } = false;
 
     public bool WidgetsLocked { get; set; } = false;
 
     // ── Saved positions per widget ──────────────────────────────────
+    public double TaskbarStatsX { get; set; } = 800;
+    public double TaskbarStatsY { get; set; } = 0;
+
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;
 

@@ -75,15 +75,19 @@ public partial class MediaWidget : Window
         // Build equalizer bar elements
         BarsGrid.Children.Clear();
         var brush = GetVisualizerBrush();
+        var glow  = GetBarGlow();
         for (int i = 0; i < BarCount; i++)
         {
             var bar = new Border
             {
-                Margin = new Thickness(1, 0, 1, 0),
-                CornerRadius = new CornerRadius(1.5),
+                Margin = new Thickness(1.5, 0, 1.5, 0),
+                CornerRadius = new CornerRadius(3, 3, 1, 1),
                 Background = brush,
                 VerticalAlignment = VerticalAlignment.Bottom,
-                Height = MinBarHeight
+                Height = MinBarHeight,
+                Effect = glow,
+                // Cache mode for GPU-accelerated rendering
+                CacheMode = new BitmapCache { RenderAtScale = 1.0 }
             };
             _bars[i] = bar;
             BarsGrid.Children.Add(bar);
@@ -101,12 +105,14 @@ public partial class MediaWidget : Window
     public void RefreshVisualizerStyle()
     {
         var brush = GetVisualizerBrush();
+        var glow  = GetBarGlow();
 
         if (_settings.VisualizerStyle == 2) // Waveform
         {
             BarsGrid.Visibility = Visibility.Collapsed;
             WavePath.Visibility = Visibility.Visible;
             WavePath.Stroke = brush;
+            WavePath.Effect = glow;
         }
         else
         {
@@ -114,8 +120,8 @@ public partial class MediaWidget : Window
             WavePath.Visibility = Visibility.Collapsed;
 
             var valignment = _settings.VisualizerStyle == 1
-                ? VerticalAlignment.Center // Mirrored
-                : VerticalAlignment.Bottom; // Classic
+                ? VerticalAlignment.Center
+                : VerticalAlignment.Bottom;
 
             BarsGrid.VerticalAlignment = valignment;
             for (int i = 0; i < BarCount; i++)
@@ -124,6 +130,7 @@ public partial class MediaWidget : Window
                 {
                     _bars[i].VerticalAlignment = valignment;
                     _bars[i].Background = brush;
+                    _bars[i].Effect = glow;
                 }
             }
         }
@@ -133,18 +140,21 @@ public partial class MediaWidget : Window
     {
         return _settings.VisualizerColorMode switch
         {
-            1 => new LinearGradientBrush(
-                System.Windows.Media.Color.FromRgb(0, 242, 254),
-                System.Windows.Media.Color.FromRgb(79, 172, 254),
-                new System.Windows.Point(0, 1),
-                new System.Windows.Point(0, 0)),
-            2 => new LinearGradientBrush(
-                System.Windows.Media.Color.FromRgb(250, 112, 154),
-                System.Windows.Media.Color.FromRgb(155, 81, 224),
-                new System.Windows.Point(0, 1),
-                new System.Windows.Point(0, 0)),
-            _ => new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255))
+            1 => (System.Windows.Media.Brush)Resources["BarBrushCyan"],
+            2 => (System.Windows.Media.Brush)Resources["BarBrushViolet"],
+            _ => (System.Windows.Media.Brush)Resources["BarBrushWhite"]
         };
+    }
+
+    private DropShadowEffect GetBarGlow()
+    {
+        var (col, op) = _settings.VisualizerColorMode switch
+        {
+            1 => (System.Windows.Media.Color.FromRgb(56, 189, 248),  0.8),  // cyan glow
+            2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.8),  // violet glow
+            _ => (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
+        };
+        return new DropShadowEffect { BlurRadius = 12, ShadowDepth = 0, Color = col, Opacity = op };
     }
 
     private void OnAnimTick(object? sender, EventArgs e)

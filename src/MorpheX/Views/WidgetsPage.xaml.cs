@@ -32,6 +32,7 @@ public partial class WidgetsPage : Page
         NotesToggle.IsChecked        = w.NotesEnabled;
         QuoteToggle.IsChecked        = w.QuoteEnabled;
         LockWidgetsToggle.IsChecked  = w.WidgetsLocked;
+        TaskbarStatsToggle.IsChecked = w.TaskbarStatsEnabled;
 
         SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
         SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
@@ -121,6 +122,15 @@ public partial class WidgetsPage : Page
         if (_isInitializing) return;
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void TaskbarStatsToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.TaskbarStatsEnabled = TaskbarStatsToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
     }
