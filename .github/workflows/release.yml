@@ -68,16 +68,33 @@ jobs:
 
       - name: Deploy Installer to GitHub Pages Docs
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        shell: pwsh
         run: |
+          # Step 1: Find installer and copy to TEMP before switching branches
+          $setup = Get-ChildItem -Path dist/*.exe -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $setup) { Write-Host "No installer found in dist/. Skipping deploy."; exit 0 }
+          $installerName = $setup.Name
+          $tempPath = Join-Path $env:TEMP $installerName
+          Copy-Item -Path $setup.FullName -Destination $tempPath -Force
+          Write-Host "Saved installer to: $tempPath"
+
+          # Step 2: Switch to main branch
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
           git checkout main
-          Remove-Item -Path docs/MorpheX-Live-Setup-*.exe -Force -ErrorAction SilentlyContinue
-          $setup = Get-ChildItem -Path dist/*.exe | Select-Object -First 1
-          if ($setup) {
-            Copy-Item -Path $setup.FullName -Destination "docs/$($setup.Name)" -Force
-            git add docs/
-            git commit -m "release: update direct installer to $($setup.Name) for Microsoft Store" || exit 0
+
+          # Step 3: Remove old installers, copy in new one
+          Remove-Item -Path "docs/MorpheX-Live-Setup-*.exe" -Force -ErrorAction SilentlyContinue
+          Copy-Item -Path $tempPath -Destination "docs/$installerName" -Force
+
+          # Step 4: Commit and push
+          git add "docs/$installerName"
+          $staged = (git diff --cached --name-only).Trim()
+          if ($staged) {
+            git commit -m "release: deploy $installerName to GitHub Pages for Microsoft Store"
             git push origin main
+            Write-Host "Deployed $installerName to docs/"
+          } else {
+            Write-Host "No changes to commit — installer already up to date."
           }
