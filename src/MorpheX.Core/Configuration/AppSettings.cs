@@ -23,16 +23,19 @@ public sealed class AppSettings
 public sealed class WidgetSettings
 {
     public bool ClockEnabled { get; set; } = false;
+    public bool ClockIs24Hour { get; set; } = true;
     public bool SystemMonitorEnabled { get; set; } = false;
     public bool MediaEnabled { get; set; } = false;
 
-    // Saved positions per widget (desktop coordinates)
+    // Saved positions and sizes per widget (desktop coordinates)
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;
     public double SystemMonitorX { get; set; } = 20;
     public double SystemMonitorY { get; set; } = 120;
     public double MediaX { get; set; } = 20;
-    public double MediaY { get; set; } = 310;
+    public double MediaY { get; set; } = 260;
+    public double MediaWidth { get; set; } = 300;
+    public double MediaHeight { get; set; } = 125;
 }
 
 public sealed class GeneralSettings

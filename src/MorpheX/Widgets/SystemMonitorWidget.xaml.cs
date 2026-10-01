@@ -1,4 +1,6 @@
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Shapes;
 using MorpheX.Core.Configuration;
 using MorpheX.Core.Services;
 using Application = System.Windows.Application;
@@ -9,8 +11,6 @@ public partial class SystemMonitorWidget : Window
 {
     private readonly WidgetSettings _settings;
     private ISystemMetricsService? _metricsService;
-    // Track bar container width for proportional fill
-    private double _barContainerWidth = 0;
 
     public SystemMonitorWidget(WidgetSettings settings)
     {
@@ -26,38 +26,74 @@ public partial class SystemMonitorWidget : Window
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        // Reuse the already-running SystemMetricsService — zero extra polling
         var app = (App)Application.Current;
         _metricsService = app.SystemMetricsService;
         _metricsService.MetricsUpdated += OnMetricsUpdated;
 
-        // Ensure service is running (it starts with the main window, but may be stopped)
+        // Ensure service is running
         _metricsService.Start();
 
-        // Measure bar container after layout pass
-        Dispatcher.InvokeAsync(() =>
+        // Render current metrics immediately so it doesn't stay at 0%
+        if (_metricsService.CurrentMetrics != null)
         {
-            _barContainerWidth = CpuBar.ActualWidth + ((System.Windows.FrameworkElement)CpuBar.Parent).ActualWidth - CpuBar.ActualWidth;
-            // Get parent Border's actual width
-            if (CpuBar.Parent is System.Windows.FrameworkElement parent)
-                _barContainerWidth = parent.ActualWidth;
-        }, System.Windows.Threading.DispatcherPriority.Loaded);
+            ApplyMetrics(_metricsService.CurrentMetrics);
+        }
     }
 
     private void OnMetricsUpdated(object? sender, SystemMetrics m)
     {
-        Dispatcher.InvokeAsync(() =>
-        {
-            CpuText.Text = $"{m.CpuPercent:0}%";
-            GpuText.Text = $"{m.GpuPercent:0}%";
-            RamText.Text = $"{m.RamPercent:0}%";
-            RamDetailText.Text = $"{m.RamUsedGb:0.0} / {m.RamTotalGb:0.0} GB";
+        Dispatcher.InvokeAsync(() => ApplyMetrics(m));
+    }
 
-            double bw = _barContainerWidth > 0 ? _barContainerWidth : 130;
-            CpuBar.Width = bw * (m.CpuPercent / 100.0);
-            GpuBar.Width = bw * (m.GpuPercent / 100.0);
-            RamBar.Width = bw * (m.RamPercent / 100.0);
-        });
+    private void ApplyMetrics(SystemMetrics m)
+    {
+        CpuText.Text = $"{m.CpuPercent:0}%";
+        GpuText.Text = $"{m.GpuPercent:0}%";
+        RamText.Text = $"{m.RamPercent:0}%";
+        RamDetailText.Text = $"RAM: {m.RamUsedGb:0.0} / {m.RamTotalGb:0.0} GB";
+
+        UpdateArc(CpuArc, m.CpuPercent);
+        UpdateArc(GpuArc, m.GpuPercent);
+        UpdateArc(RamArc, m.RamPercent);
+    }
+
+    private static void UpdateArc(Path path, double percent, double radius = 23, double cx = 29, double cy = 29)
+    {
+        percent = Math.Clamp(percent, 0, 99.9);
+
+        if (percent < 0.5)
+        {
+            path.Data = Geometry.Empty;
+            return;
+        }
+
+        double angle = (percent / 100.0) * 360.0;
+        double angleRad = (angle - 90.0) * Math.PI / 180.0;
+
+        double startX = cx;
+        double startY = cy - radius;
+        double endX = cx + radius * Math.Cos(angleRad);
+        double endY = cy + radius * Math.Sin(angleRad);
+
+        bool isLargeArc = angle > 180.0;
+
+        var figure = new PathFigure
+        {
+            StartPoint = new System.Windows.Point(startX, startY),
+            IsClosed = false
+        };
+
+        figure.Segments.Add(new ArcSegment(
+            new System.Windows.Point(endX, endY),
+            new System.Windows.Size(radius, radius),
+            0,
+            isLargeArc,
+            SweepDirection.Clockwise,
+            true));
+
+        var geom = new PathGeometry();
+        geom.Figures.Add(figure);
+        path.Data = geom;
     }
 
     private void Widget_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)

@@ -37,6 +37,9 @@ public sealed class SystemMetricsService : ISystemMetricsService
     private bool _cpuInitialized;
 
     private readonly List<PerformanceCounter> _gpuCounters = new();
+    private float _cachedGpuPercent = 0f;
+    private bool _isGpuSampling;
+    private DateTime _lastGpuSample = DateTime.MinValue;
     private DateTime _lastGpuCountersRefresh = DateTime.MinValue;
 
     public void Start()
@@ -45,7 +48,7 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
         SampleCpu();
 
-        _timer = new Timer(async _ => await SampleAllMetricsAsync(), null, TimeSpan.Zero, TimeSpan.FromSeconds(2.5));
+        _timer = new Timer(async _ => await SampleAllMetricsAsync(), null, TimeSpan.Zero, TimeSpan.FromSeconds(1.0));
         Log.Debug("SystemMetricsService started");
     }
 
@@ -64,25 +67,37 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
         try
         {
-            await Task.Run(() =>
+            float cpu = SampleCpu();
+            (double ramUsed, double ramTotal, float ramPct) = SampleRam();
+            long appRam = SampleAppWorkingSet();
+
+            // Trigger non-blocking GPU sample every ~3s if not already sampling
+            if (!_isGpuSampling && (DateTime.UtcNow - _lastGpuSample).TotalSeconds >= 3.0)
             {
-                float cpu = SampleCpu();
-                (double ramUsed, double ramTotal, float ramPct) = SampleRam();
-                long appRam = SampleAppWorkingSet();
-                float gpu = SampleGpu();
-
-                CurrentMetrics = new SystemMetrics
+                _isGpuSampling = true;
+                _ = Task.Run(() =>
                 {
-                    CpuPercent = cpu,
-                    GpuPercent = gpu,
-                    RamUsedGb = ramUsed,
-                    RamTotalGb = ramTotal,
-                    RamPercent = ramPct,
-                    AppWorkingSetMb = appRam
-                };
+                    try
+                    {
+                        _cachedGpuPercent = SampleGpu();
+                        _lastGpuSample = DateTime.UtcNow;
+                    }
+                    catch { }
+                    finally { _isGpuSampling = false; }
+                });
+            }
 
-                MetricsUpdated?.Invoke(this, CurrentMetrics);
-            });
+            CurrentMetrics = new SystemMetrics
+            {
+                CpuPercent = cpu,
+                GpuPercent = _cachedGpuPercent,
+                RamUsedGb = ramUsed,
+                RamTotalGb = ramTotal,
+                RamPercent = ramPct,
+                AppWorkingSetMb = appRam
+            };
+
+            MetricsUpdated?.Invoke(this, CurrentMetrics);
         }
         catch (Exception ex)
         {
