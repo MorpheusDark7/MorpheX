@@ -27,6 +27,7 @@
 
     <!-- Minimal frosted card — dark, no hard border, soft shadow -->
     <Border
+        x:Name="CardBorder"
         Margin="6"
         CornerRadius="12"
         Background="#B8101013"

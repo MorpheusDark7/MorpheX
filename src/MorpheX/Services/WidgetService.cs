@@ -71,6 +71,20 @@ public sealed class WidgetService : IDisposable
         _sysmon?.Dispatcher.InvokeAsync(() => _sysmon.RefreshDisplay());
     }
 
+    public void RefreshLockState()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            _clock?.UpdateLockState();
+            _sysmon?.UpdateLockState();
+            _media?.UpdateLockState();
+            _day?.UpdateLockState();
+            _calendar?.UpdateLockState();
+            _notes?.UpdateLockState();
+            _quote?.UpdateLockState();
+        });
+    }
+
     // ── Core (must run on UI thread) ─────────────────────────────────────────
 
     private void ApplySettingsCore()

@@ -88,6 +88,7 @@ public partial class WidgetsPage : Page
         if (_isInitializing) return;
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
+        app.WidgetService.RefreshLockState();
         await app.SettingsService.SaveAsync();
     }
 

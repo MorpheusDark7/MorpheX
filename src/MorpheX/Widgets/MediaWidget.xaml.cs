@@ -45,6 +45,8 @@ public partial class MediaWidget : Window
         Width = Math.Max(240, settings.MediaWidth);
         Height = Math.Max(110, settings.MediaHeight);
 
+        UpdateLockState();
+
         // Precompute frequency weights across bars (slight curve emphasizing bass/mids)
         for (int i = 0; i < BarCount; i++)
         {
@@ -142,21 +144,8 @@ public partial class MediaWidget : Window
 
     private void ApplyAppearance()
     {
-        if (_settings.MediaShowBackground)
-        {
-            MainCardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x10));
-            MainCardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
-            MainCardBorder.BorderThickness = new Thickness(1);
-            MainCardBorder.Effect = (Effect)Resources["WidgetShadow"];
-            MainCardBorder.Margin = new Thickness(8);
-        }
-        else
-        {
-            MainCardBorder.Background = Brushes.Transparent;
-            MainCardBorder.BorderThickness = new Thickness(0);
-            MainCardBorder.Effect = null;
-            MainCardBorder.Margin = new Thickness(2);
-        }
+        WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14);
+        MainCardBorder.Margin = _settings.MediaShowBackground ? new Thickness(8) : new Thickness(2);
 
         if (_settings.MediaShowTrackDetails)
         {
@@ -406,9 +395,16 @@ public partial class MediaWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         var app = (App)Application.Current;
         _ = app.SettingsService.SaveAsync();
+        app.WidgetService.RefreshLockState();
+    }
+
+    public void UpdateLockState()
+    {
+        WidgetStyles.ApplyLockState(this, MainCardBorder, _settings.WidgetsLocked, hasResizeGrip: true);
+        UpdateLockMenuHeader();
     }
 
     private void ResetSize_Click(object sender, RoutedEventArgs e)

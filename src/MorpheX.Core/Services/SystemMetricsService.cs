@@ -37,7 +37,9 @@ public sealed class SystemMetricsService : ISystemMetricsService
     private ulong _prevUserTime;
     private bool _cpuInitialized;
 
-    private readonly List<PerformanceCounter> _gpuCounters = new();
+    private static readonly System.Text.RegularExpressions.Regex LuidRegex =
+        new(@"luid_(0x[0-9a-fA-F]+_0x[0-9a-fA-F]+)", System.Text.RegularExpressions.RegexOptions.Compiled);
+    private readonly List<(string adapter, PerformanceCounter counter)> _gpuCounters = new();
     private float _cachedGpuPercent = 0f;
     private bool _isGpuSampling;
     private DateTime _lastGpuSample = DateTime.MinValue;
@@ -108,8 +110,8 @@ public sealed class SystemMetricsService : ISystemMetricsService
             long appRam = SampleAppWorkingSet();
             float disk = SampleDisk();
 
-            // Trigger non-blocking GPU sample every ~3s if not already sampling
-            if (!_isGpuSampling && (DateTime.UtcNow - _lastGpuSample).TotalSeconds >= 3.0)
+            // Trigger non-blocking GPU sample every ~1.5s if not already sampling
+            if (!_isGpuSampling && (DateTime.UtcNow - _lastGpuSample).TotalSeconds >= 1.5)
             {
                 _isGpuSampling = true;
                 _ = Task.Run(() =>
@@ -212,28 +214,40 @@ public sealed class SystemMetricsService : ISystemMetricsService
     {
         try
         {
-            if ((DateTime.UtcNow - _lastGpuCountersRefresh).TotalSeconds > 45 || _gpuCounters.Count == 0)
+            if ((DateTime.UtcNow - _lastGpuCountersRefresh).TotalSeconds > 30 || _gpuCounters.Count == 0)
             {
                 RefreshGpuCounters();
             }
 
             if (_gpuCounters.Count == 0) return 0f;
 
-            // Sum per-node counters (each represents a different node/engine type, not per-process)
-            // Clamp to 100f in case multiple engines add up beyond
-            float totalGpu = 0f;
-            foreach (var counter in _gpuCounters)
+            // Group utilization per GPU adapter LUID so multi-GPU setups accurately report the active GPU
+            var adapterSums = new Dictionary<string, float>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = _gpuCounters.Count - 1; i >= 0; i--)
             {
+                var (adapter, counter) = _gpuCounters[i];
                 try
                 {
-                    totalGpu += counter.NextValue();
+                    float val = counter.NextValue();
+                    adapterSums[adapter] = adapterSums.GetValueOrDefault(adapter) + val;
                 }
                 catch
                 {
+                    try { counter.Dispose(); } catch { }
+                    _gpuCounters.RemoveAt(i);
                 }
             }
 
-            return Math.Clamp((float)Math.Round(totalGpu, 1), 0f, 100f);
+            // Return the highest utilization among the GPUs (matching Task Manager for multi-GPU)
+            float maxGpu = 0f;
+            foreach (var kvp in adapterSums)
+            {
+                if (kvp.Value > maxGpu)
+                    maxGpu = kvp.Value;
+            }
+
+            return Math.Clamp((float)Math.Round(maxGpu, 1), 0f, 100f);
         }
         catch
         {
@@ -248,40 +262,27 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
         try
         {
-            // "GPU Engine" category has per-process per-engine instances; summing all leads to > 100%.
-            // Instead, use "GPU Adapter Memory" or fall back to a single representative counter.
-            // Best match for Task Manager: use one counter per unique GPU node (engtype_3D only)
-            // and group by luid (adapter). We take one representative entry per luid.
             if (!PerformanceCounterCategory.Exists("GPU Engine")) return;
 
             var category = new PerformanceCounterCategory("GPU Engine");
             var instanceNames = category.GetInstanceNames();
 
-            // Collect unique luid_phys_eng adapter+node combinations
-            // Instance name format: pid_XXX_luid_0x000000000000XXXX_phys_X_eng_Y_engtype_3D
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
+            // Track 3D engine instances across all active processes and adapters
             foreach (var name in instanceNames)
             {
                 if (!name.Contains("engtype_3D", StringComparison.OrdinalIgnoreCase))
                     continue;
 
-                // Build a key that identifies the unique GPU node (luid + phys + eng), ignoring pid
-                // so we get one entry per physical engine, not per process
-                string nodeKey = name;
-                int pidEnd = name.IndexOf('_', 4); // skip "pid_"
-                if (pidEnd > 0)
-                    nodeKey = name[(pidEnd + 1)..]; // strip "pid_XXX_" prefix
-
-                // Only add one counter per unique GPU engine node
-                if (seen.Contains(nodeKey)) continue;
-                seen.Add(nodeKey);
+                string adapter = "default";
+                var match = LuidRegex.Match(name);
+                if (match.Success)
+                    adapter = match.Groups[1].Value;
 
                 try
                 {
                     var counter = new PerformanceCounter("GPU Engine", "Utilization Percentage", name, true);
                     counter.NextValue(); // prime
-                    _gpuCounters.Add(counter);
+                    _gpuCounters.Add((adapter, counter));
                 }
                 catch { }
             }
@@ -294,7 +295,7 @@ public sealed class SystemMetricsService : ISystemMetricsService
 
     private void DisposeGpuCounters()
     {
-        foreach (var counter in _gpuCounters)
+        foreach (var (_, counter) in _gpuCounters)
         {
             try { counter.Dispose(); } catch { }
         }

@@ -22,7 +22,8 @@ public partial class NotesWidget : Window
         Width  = Math.Max(140, settings.NotesWidth);
         Height = Math.Max(100, settings.NotesHeight);
 
-        UpdateLockMenuHeader();
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+        UpdateLockState();
 
         Loaded  += OnLoaded;
         Closing += OnClosing;
@@ -59,8 +60,15 @@ public partial class NotesWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void UpdateLockState()
+    {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked, hasResizeGrip: true);
+        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 
     private void ResetSize_Click(object sender, RoutedEventArgs e)
@@ -70,11 +78,6 @@ public partial class NotesWidget : Window
         _settings.NotesWidth  = Width;
         _settings.NotesHeight = Height;
         Save();
-    }
-
-    private void UpdateLockMenuHeader()
-    {
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

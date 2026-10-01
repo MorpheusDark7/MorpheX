@@ -29,7 +29,7 @@ public partial class SystemMonitorWidget : Window
         Top  = settings.SystemMonitorY;
 
         ApplyStylingAndLayout();
-        UpdateLockMenuHeader();
+        UpdateLockState();
 
         Loaded  += OnLoaded;
         Closing += OnClosing;
@@ -171,22 +171,8 @@ public partial class SystemMonitorWidget : Window
             label.Foreground = labelBrush;
         }
 
-        // 3. Background Card Styling
-        if (_settings.SysMonShowBackground)
-        {
-            CardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x12));
-            CardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
-            CardBorder.BorderThickness = new Thickness(1);
-            CardBorder.Effect = (Effect)Resources["CardShadow"];
-            CardBorder.Padding = new Thickness(10);
-        }
-        else
-        {
-            CardBorder.Background = Brushes.Transparent;
-            CardBorder.BorderThickness = new Thickness(0);
-            CardBorder.Effect = null;
-            CardBorder.Padding = new Thickness(4);
-        }
+        // 3. Background Card Styling (translucent frosted smoked acrylic)
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.SysMonShowBackground, 16, _settings.SysMonShowBackground ? new Thickness(10) : new Thickness(4));
 
         // Update menu checkmarks
         ToggleCardMenu.Header = _settings.SysMonShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
@@ -316,12 +302,14 @@ public partial class SystemMonitorWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
     }
 
-    private void UpdateLockMenuHeader()
+    public void UpdateLockState()
     {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 

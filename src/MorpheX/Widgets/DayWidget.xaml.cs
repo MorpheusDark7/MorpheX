@@ -26,7 +26,7 @@ public partial class DayWidget : Window
         Left = settings.DayX;
         Top  = settings.DayY;
 
-        UpdateLockMenuHeader();
+        UpdateLockState();
         UpdateDayDisplay();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
@@ -109,23 +109,8 @@ public partial class DayWidget : Window
             DayLettersPanel.Children.Add(tb);
         }
 
-        // Background card
-        if (_settings.DayShowBackground)
-        {
-            CardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x12));
-            CardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
-            CardBorder.BorderThickness = new Thickness(1);
-            CardBorder.Effect = (System.Windows.Media.Effects.Effect)Resources["CardShadow"];
-            CardBorder.Padding = new Thickness(16, 8, 16, 8);
-        }
-        else
-        {
-            CardBorder.Background = System.Windows.Media.Brushes.Transparent;
-            CardBorder.BorderThickness = new Thickness(0);
-            CardBorder.Effect = null;
-            CardBorder.Padding = new Thickness(6, 4, 6, 4);
-        }
-
+        // Background card (ultra-clean smoked frosted glass)
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.DayShowBackground, 16, new Thickness(14, 6, 14, 6));
         ToggleCardMenu.Header = _settings.DayShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
     }
 
@@ -153,7 +138,8 @@ public partial class DayWidget : Window
             1 => BahnschriftFont,
             2 => SegoeUiFont,
             3 => ConsolasFont,
-            _ => AnuratiFont
+            4 => WidgetStyles.GetAquaticoFont(),
+            _ => WidgetStyles.GetAnuratiFont()
         };
     }
 
@@ -223,12 +209,14 @@ public partial class DayWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
     }
 
-    private void UpdateLockMenuHeader()
+    public void UpdateLockState()
     {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 

@@ -29,7 +29,7 @@ public partial class ClockWidget : Window
         Top  = settings.ClockY;
 
         ApplyAppearance();
-        UpdateLockMenuHeader();
+        UpdateLockState();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => Tick();
@@ -79,8 +79,9 @@ public partial class ClockWidget : Window
         var fontFamily = _settings.ClockFontMode switch
         {
             1 => SegoeUiFont,
-            2 => AnuratiFont,
+            2 => WidgetStyles.GetAnuratiFont(),
             3 => ConsolasFont,
+            4 => WidgetStyles.GetQuicksandFont(),
             _ => BahnschriftFont
         };
         TimeText.FontFamily = fontFamily;
@@ -88,22 +89,8 @@ public partial class ClockWidget : Window
         // Date visibility
         DateText.Visibility = _settings.ClockShowDate ? Visibility.Visible : Visibility.Collapsed;
 
-        // Card background
-        if (_settings.ClockShowBackground)
-        {
-            CardBorder.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0xD9, 0x0E, 0x0E, 0x12));
-            CardBorder.BorderBrush = new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
-            CardBorder.BorderThickness = new Thickness(1);
-            CardBorder.Effect = (Effect)Resources["CardShadow"];
-            CardBorder.Padding = new Thickness(12, 8, 12, 8);
-        }
-        else
-        {
-            CardBorder.Background = Brushes.Transparent;
-            CardBorder.BorderThickness = new Thickness(0);
-            CardBorder.Effect = null;
-            CardBorder.Padding = new Thickness(4, 2, 4, 2);
-        }
+        // Card background (translucent smoked glass, not an opaque black box)
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8));
 
         // Context menu headers
         ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "⏰  Format: 24-Hour (Click for 12h)" : "⏰  Format: 12-Hour (Click for 24h)";
@@ -217,12 +204,14 @@ public partial class ClockWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
     }
 
-    private void UpdateLockMenuHeader()
+    public void UpdateLockState()
     {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 

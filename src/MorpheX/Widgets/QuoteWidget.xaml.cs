@@ -51,7 +51,8 @@ public partial class QuoteWidget : Window
         Left = settings.QuoteX;
         Top  = settings.QuoteY;
 
-        UpdateLockMenuHeader();
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+        UpdateLockState();
         ShowQuote(_settings.QuoteIndex);
 
         Closing += OnClosing;
@@ -81,12 +82,14 @@ public partial class QuoteWidget : Window
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
-        UpdateLockMenuHeader();
+        UpdateLockState();
         Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
     }
 
-    private void UpdateLockMenuHeader()
+    public void UpdateLockState()
     {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 

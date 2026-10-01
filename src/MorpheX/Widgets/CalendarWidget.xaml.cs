@@ -24,7 +24,8 @@ public partial class CalendarWidget : Window
         _settings = settings;
         Left = settings.CalendarX;
         Top  = settings.CalendarY;
-        UpdateLockMenuHeader();
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+        UpdateLockState();
         BuildDayHeaders();
         RenderMonth(DateTime.Now);
         var timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
@@ -89,10 +90,18 @@ public partial class CalendarWidget : Window
     { if (_settings.WidgetsLocked) return; DragMove(); }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
-    { _settings.WidgetsLocked = !_settings.WidgetsLocked; UpdateLockMenuHeader(); Save(); }
+    {
+        _settings.WidgetsLocked = !_settings.WidgetsLocked;
+        UpdateLockState();
+        Save();
+        (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
 
-    private void UpdateLockMenuHeader()
-    { LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position"; }
+    public void UpdateLockState()
+    {
+        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
+        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+    }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
     { _settings.CalendarEnabled = false; Save(); Close(); }
