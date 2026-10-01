@@ -18,9 +18,13 @@ public sealed class WidgetService : IDisposable
 {
     private readonly WidgetSettings _settings;
 
-    private ClockWidget? _clock;
+    private ClockWidget?         _clock;
     private SystemMonitorWidget? _sysmon;
-    private MediaWidget? _media;
+    private MediaWidget?         _media;
+    private DayWidget?           _day;
+    private CalendarWidget?      _calendar;
+    private NotesWidget?         _notes;
+    private QuoteWidget?         _quote;
 
     private bool _disposed;
 
@@ -39,9 +43,13 @@ public sealed class WidgetService : IDisposable
             Application.Current.Dispatcher.Invoke(ApplySettingsCore);
     }
 
-    public bool IsClockOpen  => _clock  != null && _clock.IsVisible;
-    public bool IsSysMonOpen => _sysmon != null && _sysmon.IsVisible;
-    public bool IsMediaOpen  => _media  != null && _media.IsVisible;
+    public bool IsClockOpen    => _clock    != null && _clock.IsVisible;
+    public bool IsSysMonOpen   => _sysmon   != null && _sysmon.IsVisible;
+    public bool IsMediaOpen    => _media    != null && _media.IsVisible;
+    public bool IsDayOpen      => _day      != null && _day.IsVisible;
+    public bool IsCalendarOpen => _calendar != null && _calendar.IsVisible;
+    public bool IsNotesOpen    => _notes    != null && _notes.IsVisible;
+    public bool IsQuoteOpen    => _quote    != null && _quote.IsVisible;
 
     public void RefreshClock()
     {
@@ -57,17 +65,13 @@ public sealed class WidgetService : IDisposable
 
     private void ApplySettingsCore()
     {
-        SetWidget(ref _clock,
-            _settings.ClockEnabled,
-            () => new ClockWidget(_settings));
-
-        SetWidget(ref _sysmon,
-            _settings.SystemMonitorEnabled,
-            () => new SystemMonitorWidget(_settings));
-
-        SetWidget(ref _media,
-            _settings.MediaEnabled,
-            () => new MediaWidget(_settings));
+        SetWidget(ref _clock,    _settings.ClockEnabled,          () => new ClockWidget(_settings));
+        SetWidget(ref _sysmon,   _settings.SystemMonitorEnabled,   () => new SystemMonitorWidget(_settings));
+        SetWidget(ref _media,    _settings.MediaEnabled,           () => new MediaWidget(_settings));
+        SetWidget(ref _day,      _settings.DayEnabled,             () => new DayWidget(_settings));
+        SetWidget(ref _calendar, _settings.CalendarEnabled,        () => new CalendarWidget(_settings));
+        SetWidget(ref _notes,    _settings.NotesEnabled,           () => new NotesWidget(_settings));
+        SetWidget(ref _quote,    _settings.QuoteEnabled,           () => new QuoteWidget(_settings));
     }
 
     private void SetWidget<T>(ref T? field, bool enabled, Func<T> factory)
@@ -111,6 +115,10 @@ public sealed class WidgetService : IDisposable
             CloseWidget(ref _clock);
             CloseWidget(ref _sysmon);
             CloseWidget(ref _media);
+            CloseWidget(ref _day);
+            CloseWidget(ref _calendar);
+            CloseWidget(ref _notes);
+            CloseWidget(ref _quote);
         });
     }
 
@@ -121,5 +129,3 @@ public sealed class WidgetService : IDisposable
         field = null;
     }
 }
-
-

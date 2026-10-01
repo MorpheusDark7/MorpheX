@@ -1,0 +1,61 @@
+<Window
+    x:Class="MorpheX.Widgets.CalendarWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="MorpheX Calendar"
+    SizeToContent="WidthAndHeight"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ShowInTaskbar="False"
+    Topmost="False"
+    ResizeMode="NoResize">
+
+    <Window.ContextMenu>
+        <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
+            <MenuItem Header="📅  Calendar" IsEnabled="False" Foreground="#88FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
+    <Window.Resources>
+        <DropShadowEffect x:Key="Glow" BlurRadius="18" ShadowDepth="0" Color="#000000" Opacity="0.55"/>
+    </Window.Resources>
+
+    <!-- Minimal frosted card — dark, no hard border, soft shadow -->
+    <Border
+        Margin="6"
+        CornerRadius="12"
+        Background="#B8101013"
+        Effect="{StaticResource Glow}"
+        MouseLeftButtonDown="Widget_MouseLeftButtonDown"
+        Cursor="SizeAll">
+
+        <StackPanel Margin="14,12,14,14">
+
+            <!-- Month + Year header -->
+            <TextBlock
+                x:Name="MonthYearText"
+                Text="OCTOBER 2026"
+                FontSize="10"
+                FontWeight="Bold"
+                FontFamily="Segoe UI"
+                Foreground="#88FFFFFF"
+                HorizontalAlignment="Center"
+                Margin="0,0,0,10"
+                LetterSpacing="1"/>
+
+            <!-- Day-of-week header row -->
+            <UniformGrid x:Name="DayHeaders" Rows="1" Columns="7" Margin="0,0,0,6">
+                <!-- Populated in code-behind -->
+            </UniformGrid>
+
+            <!-- Day number grid (6 rows × 7 cols max) -->
+            <UniformGrid x:Name="DaysGrid" Rows="6" Columns="7"/>
+
+        </StackPanel>
+    </Border>
+</Window>

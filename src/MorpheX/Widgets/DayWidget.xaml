@@ -1,8 +1,8 @@
 <Window
-    x:Class="MorpheX.Widgets.ClockWidget"
+    x:Class="MorpheX.Widgets.DayWidget"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="MorpheX Clock Widget"
+    Title="MorpheX Day Widget"
     SizeToContent="WidthAndHeight"
     WindowStyle="None"
     AllowsTransparency="True"
@@ -13,11 +13,13 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem Header="⏰  Toggle 12h / 24h" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
-            <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="🔡  Small" Click="SizeSmall_Click" Foreground="#AAFFFFFF"/>
             <MenuItem Header="🔡  Medium" Click="SizeMedium_Click" Foreground="#AAFFFFFF"/>
             <MenuItem Header="🔡  Large" Click="SizeLarge_Click" Foreground="#AAFFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="⚪  White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="🔘  Dim White (50%)" Click="ColorDim_Click" Foreground="#88FFFFFF"/>
+            <MenuItem Header="🔵  Cyan Glow" Click="ColorCyan_Click" Foreground="#38BDF8"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
@@ -25,34 +27,17 @@
         </ContextMenu>
     </Window.ContextMenu>
 
-    <!-- Pure floating text — no background box, Rainmeter style -->
-    <StackPanel
+    <!-- Pure floating text — no background, no border -->
+    <TextBlock
+        x:Name="DayText"
+        Text="SUNDAY"
+        FontSize="72"
+        FontWeight="Light"
+        FontFamily="Bahnschrift Light, Segoe UI Light, Segoe UI"
+        Foreground="#CCFFFFFF"
+        TextOptions.TextRenderingMode="ClearType"
+        TextOptions.TextFormattingMode="Display"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
         Cursor="SizeAll"
-        Margin="4,0">
-
-        <!-- Big time: 23:54 -->
-        <TextBlock
-            x:Name="TimeText"
-            Text="00:00"
-            FontSize="72"
-            FontWeight="Thin"
-            FontFamily="Bahnschrift Light, Segoe UI Light, Segoe UI"
-            Foreground="#EEFFFFFF"
-            TextOptions.TextRenderingMode="ClearType"
-            HorizontalAlignment="Left"
-            LineHeight="70"/>
-
-        <!-- Date + day below -->
-        <TextBlock
-            x:Name="DateText"
-            Text="Sunday, January 1"
-            FontSize="14"
-            FontWeight="Light"
-            FontFamily="Segoe UI Light, Segoe UI"
-            Foreground="#88FFFFFF"
-            HorizontalAlignment="Left"
-            Margin="4,-4,0,0"/>
-
-    </StackPanel>
+        Margin="4,0"/>
 </Window>

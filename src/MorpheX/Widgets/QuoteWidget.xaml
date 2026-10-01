@@ -1,0 +1,72 @@
+<Window
+    x:Class="MorpheX.Widgets.QuoteWidget"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="MorpheX Quote"
+    SizeToContent="WidthAndHeight"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ShowInTaskbar="False"
+    Topmost="False"
+    ResizeMode="NoResize">
+
+    <Window.ContextMenu>
+        <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
+            <MenuItem Header="🔄  Next Quote" Click="NextQuote_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
+    <Window.Resources>
+        <DropShadowEffect x:Key="Glow" BlurRadius="18" ShadowDepth="0" Color="#000000" Opacity="0.55"/>
+    </Window.Resources>
+
+    <Border
+        Margin="6"
+        CornerRadius="12"
+        Background="#B8101013"
+        MaxWidth="260"
+        Effect="{StaticResource Glow}"
+        MouseLeftButtonDown="Widget_MouseLeftButtonDown"
+        Cursor="SizeAll">
+
+        <StackPanel Margin="16,14,16,14">
+
+            <!-- Quote mark decorative -->
+            <TextBlock
+                Text="&#x201C;"
+                FontSize="28"
+                FontFamily="Georgia, Times New Roman"
+                Foreground="#33FFFFFF"
+                Margin="0,-8,0,-10"
+                HorizontalAlignment="Left"/>
+
+            <!-- Quote text -->
+            <TextBlock
+                x:Name="QuoteText"
+                Text=""
+                TextWrapping="Wrap"
+                FontSize="12"
+                FontWeight="Light"
+                FontFamily="Segoe UI Light, Segoe UI"
+                Foreground="#CCFFFFFF"
+                LineHeight="18"
+                Margin="0,0,0,8"/>
+
+            <!-- Author -->
+            <TextBlock
+                x:Name="AuthorText"
+                Text=""
+                FontSize="10"
+                FontStyle="Italic"
+                FontFamily="Segoe UI"
+                Foreground="#66FFFFFF"
+                HorizontalAlignment="Right"/>
+
+        </StackPanel>
+    </Border>
+</Window>

@@ -21,32 +21,35 @@ public partial class WidgetsPage : Page
         var app = (App)Application.Current;
         var w = app.SettingsService.Settings.Widgets;
 
-        ClockToggle.IsChecked = w.ClockEnabled;
-        ClockFormatToggle.IsChecked = w.ClockIs24Hour;
-        SysMonToggle.IsChecked = w.SystemMonitorEnabled;
-        MediaToggle.IsChecked = w.MediaEnabled;
-        LockWidgetsToggle.IsChecked = w.WidgetsLocked;
+        ClockToggle.IsChecked        = w.ClockEnabled;
+        ClockFormatToggle.IsChecked  = w.ClockIs24Hour;
+        SysMonToggle.IsChecked       = w.SystemMonitorEnabled;
+        MediaToggle.IsChecked        = w.MediaEnabled;
+        DayToggle.IsChecked          = w.DayEnabled;
+        CalendarToggle.IsChecked     = w.CalendarEnabled;
+        NotesToggle.IsChecked        = w.NotesEnabled;
+        QuoteToggle.IsChecked        = w.QuoteEnabled;
+        LockWidgetsToggle.IsChecked  = w.WidgetsLocked;
 
-        foreach (ComboBoxItem item in VisualizerStyleCombo.Items)
-        {
-            if (item.Tag is string s && int.TryParse(s, out int styleVal) && styleVal == w.VisualizerStyle)
-            {
-                VisualizerStyleCombo.SelectedItem = item;
-                break;
-            }
-        }
-
-        foreach (ComboBoxItem item in VisualizerColorCombo.Items)
-        {
-            if (item.Tag is string s && int.TryParse(s, out int colVal) && colVal == w.VisualizerColorMode)
-            {
-                VisualizerColorCombo.SelectedItem = item;
-                break;
-            }
-        }
+        SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
+        SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
 
         _isInitializing = false;
     }
+
+    private static void SelectComboItem(ComboBox combo, int value)
+    {
+        foreach (ComboBoxItem item in combo.Items)
+        {
+            if (item.Tag is string s && int.TryParse(s, out int v) && v == value)
+            {
+                combo.SelectedItem = item;
+                return;
+            }
+        }
+    }
+
+    // ── Toggle handlers ──────────────────────────────────────────────────────
 
     private async void ClockToggle_Changed(object sender, RoutedEventArgs e)
     {
@@ -54,14 +57,6 @@ public partial class WidgetsPage : Page
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.ClockEnabled = ClockToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
-        await app.SettingsService.SaveAsync();
-    }
-
-    private async void LockWidgetsToggle_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_isInitializing) return;
-        var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
         await app.SettingsService.SaveAsync();
     }
 
@@ -89,6 +84,50 @@ public partial class WidgetsPage : Page
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.MediaEnabled = MediaToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void DayToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.DayEnabled = DayToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void CalendarToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.CalendarEnabled = CalendarToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void NotesToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.NotesEnabled = NotesToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void QuoteToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void LockWidgetsToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
         await app.SettingsService.SaveAsync();
     }
 

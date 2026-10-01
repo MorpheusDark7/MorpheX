@@ -10,40 +10,49 @@ public partial class ClockWidget : Window
 {
     private readonly DispatcherTimer _timer;
     private readonly WidgetSettings _settings;
-    private DispatcherTimer? _saveDebounceTimer;
 
     public ClockWidget(WidgetSettings settings)
     {
         InitializeComponent();
         _settings = settings;
 
-        Left   = settings.ClockX;
-        Top    = settings.ClockY;
-        Width  = Math.Max(160, settings.ClockWidth);
-        Height = Math.Max(60,  settings.ClockHeight);
+        Left = settings.ClockX;
+        Top  = settings.ClockY;
+
+        ApplyFontSize();
+        UpdateLockMenuHeader();
 
         _timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _timer.Tick += (_, _) => Tick();
         _timer.Start();
         Tick();
 
-        Loaded   += (_, _) => UpdateLockMenuHeader();
-        Closing  += OnClosing;
-        SizeChanged += OnSizeChanged;
+        Closing += OnClosing;
     }
 
-    public void RefreshFormat()
-    {
-        Tick();
-    }
+    public void RefreshFormat() => Tick();
 
     private void Tick()
     {
         var now = DateTime.Now;
+        // No seconds — clean minimal time display
         TimeText.Text = _settings.ClockIs24Hour
-            ? now.ToString("HH:mm:ss")
-            : now.ToString("h:mm:ss tt");
+            ? now.ToString("HH:mm")
+            : now.ToString("h:mm tt");
         DateText.Text = now.ToString("dddd, MMMM d");
+    }
+
+    private void ApplyFontSize()
+    {
+        double size = _settings.ClockFontSize switch
+        {
+            0 => 48,
+            2 => 96,
+            _ => 72
+        };
+        TimeText.FontSize = size;
+        TimeText.LineHeight = size - 2;
+        DateText.FontSize = size switch { >= 96 => 16, <= 48 => 11, _ => 14 };
     }
 
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -54,8 +63,7 @@ public partial class ClockWidget : Window
         {
             _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
             Tick();
-            var app = (App)Application.Current;
-            _ = app.SettingsService.SaveAsync();
+            Save();
             return;
         }
 
@@ -66,59 +74,38 @@ public partial class ClockWidget : Window
     {
         _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
         Tick();
-        var app = (App)Application.Current;
-        _ = app.SettingsService.SaveAsync();
+        Save();
     }
+
+    private void SizeSmall_Click(object sender, RoutedEventArgs e)  { _settings.ClockFontSize = 0; ApplyFontSize(); Save(); }
+    private void SizeMedium_Click(object sender, RoutedEventArgs e) { _settings.ClockFontSize = 1; ApplyFontSize(); Save(); }
+    private void SizeLarge_Click(object sender, RoutedEventArgs e)  { _settings.ClockFontSize = 2; ApplyFontSize(); Save(); }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
         UpdateLockMenuHeader();
-        var app = (App)Application.Current;
-        _ = app.SettingsService.SaveAsync();
-    }
-
-    private void ResetSize_Click(object sender, RoutedEventArgs e)
-    {
-        Width  = 220;
-        Height = 85;
-        _settings.ClockWidth  = Width;
-        _settings.ClockHeight = Height;
-        var app = (App)Application.Current;
-        _ = app.SettingsService.SaveAsync();
+        Save();
     }
 
     private void UpdateLockMenuHeader()
     {
-        LockMenuItem.Header = _settings.WidgetsLocked
-            ? "\ud83d\udd13  Unlock Position"
-            : "\ud83d\udd12  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
     {
         _settings.ClockEnabled = false;
-        var app = (App)Application.Current;
-        _ = app.SettingsService.SaveAsync();
+        Save();
         Close();
-    }
-
-    private void OnSizeChanged(object sender, SizeChangedEventArgs e)
-    {
-        _settings.ClockWidth  = ActualWidth;
-        _settings.ClockHeight = ActualHeight;
-        ScheduleDebouncedSave();
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        _settings.ClockX      = Left;
-        _settings.ClockY      = Top;
-        _settings.ClockWidth  = ActualWidth;
-        _settings.ClockHeight = ActualHeight;
-        var app = (App)Application.Current;
-        _ = app.SettingsService.SaveAsync();
+        _settings.ClockX = Left;
+        _settings.ClockY = Top;
+        Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
@@ -128,16 +115,9 @@ public partial class ClockWidget : Window
         _settings.ClockY = Top;
     }
 
-    private void ScheduleDebouncedSave()
+    private void Save()
     {
-        _saveDebounceTimer?.Stop();
-        _saveDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        _saveDebounceTimer.Tick += (_, _) =>
-        {
-            _saveDebounceTimer.Stop();
-            var app = (App)Application.Current;
-            _ = app.SettingsService.SaveAsync();
-        };
-        _saveDebounceTimer.Start();
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
     }
 }

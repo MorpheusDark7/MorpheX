@@ -24,35 +24,58 @@ public sealed class WidgetSettings
 {
     public bool ClockEnabled { get; set; } = false;
     public bool ClockIs24Hour { get; set; } = true;
+    /// <summary>0=Small(48px) 1=Medium(72px) 2=Large(96px)</summary>
+    public int ClockFontSize { get; set; } = 1;
+
     public bool SystemMonitorEnabled { get; set; } = false;
+    /// <summary>0=Small 1=Medium 2=Large</summary>
+    public int SysMonSize { get; set; } = 1;
+
     public bool MediaEnabled { get; set; } = false;
+
+    public bool DayEnabled { get; set; } = false;
+    /// <summary>0=Small(48) 1=Medium(72) 2=Large(96)</summary>
+    public int DayFontSize { get; set; } = 1;
+    /// <summary>0=White(80%) 1=Dim White(55%) 2=Cyan</summary>
+    public int DayColorMode { get; set; } = 0;
+
+    public bool CalendarEnabled { get; set; } = false;
+    public bool NotesEnabled { get; set; } = false;
+    public bool QuoteEnabled { get; set; } = false;
 
     public bool WidgetsLocked { get; set; } = false;
 
-    // Saved positions and sizes per widget (desktop coordinates)
+    // ── Saved positions per widget ──────────────────────────────────
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;
-    public double ClockWidth { get; set; } = 220;
-    public double ClockHeight { get; set; } = 85;
 
     public double SystemMonitorX { get; set; } = 20;
-    public double SystemMonitorY { get; set; } = 120;
-    public double SystemMonitorWidth { get; set; } = 260;
-    public double SystemMonitorHeight { get; set; } = 150;
+    public double SystemMonitorY { get; set; } = 140;
 
     public double MediaX { get; set; } = 20;
-    public double MediaY { get; set; } = 260;
+    public double MediaY { get; set; } = 240;
     public double MediaWidth { get; set; } = 300;
-    public double MediaHeight { get; set; } = 125;
+    public double MediaHeight { get; set; } = 130;
 
-    /// <summary>
-    /// Visualizer style: 0 = Bars (classic), 1 = Mirrored (center), 2 = Waveform
-    /// </summary>
+    public double DayX { get; set; } = 30;
+    public double DayY { get; set; } = 30;
+
+    public double CalendarX { get; set; } = 30;
+    public double CalendarY { get; set; } = 160;
+
+    public double NotesX { get; set; } = 30;
+    public double NotesY { get; set; } = 420;
+    public double NotesWidth { get; set; } = 220;
+    public double NotesHeight { get; set; } = 160;
+    public string NotesText { get; set; } = string.Empty;
+
+    public double QuoteX { get; set; } = 30;
+    public double QuoteY { get; set; } = 600;
+    public int QuoteIndex { get; set; } = 0;
+
+    /// <summary>Visualizer style: 0=Bars 1=Mirrored 2=Waveform</summary>
     public int VisualizerStyle { get; set; } = 0;
-
-    /// <summary>
-    /// Visualizer color mode: 0 = White, 1 = Neon Cyan, 2 = Violet Glow
-    /// </summary>
+    /// <summary>Visualizer color: 0=White 1=Neon Cyan 2=Violet Glow</summary>
     public int VisualizerColorMode { get; set; } = 0;
 }
 
