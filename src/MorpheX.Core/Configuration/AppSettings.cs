@@ -36,6 +36,16 @@ public sealed class WidgetSettings
     public double MediaY { get; set; } = 260;
     public double MediaWidth { get; set; } = 300;
     public double MediaHeight { get; set; } = 125;
+
+    /// <summary>
+    /// Visualizer style: 0 = Bars (classic), 1 = Mirrored (center), 2 = Waveform
+    /// </summary>
+    public int VisualizerStyle { get; set; } = 0;
+
+    /// <summary>
+    /// Visualizer color mode: 0 = White, 1 = Neon Cyan, 2 = Violet Glow
+    /// </summary>
+    public int VisualizerColorMode { get; set; } = 0;
 }
 
 public sealed class GeneralSettings

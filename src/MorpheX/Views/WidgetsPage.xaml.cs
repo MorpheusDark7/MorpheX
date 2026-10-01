@@ -26,6 +26,24 @@ public partial class WidgetsPage : Page
         SysMonToggle.IsChecked = w.SystemMonitorEnabled;
         MediaToggle.IsChecked = w.MediaEnabled;
 
+        foreach (ComboBoxItem item in VisualizerStyleCombo.Items)
+        {
+            if (item.Tag is string s && int.TryParse(s, out int styleVal) && styleVal == w.VisualizerStyle)
+            {
+                VisualizerStyleCombo.SelectedItem = item;
+                break;
+            }
+        }
+
+        foreach (ComboBoxItem item in VisualizerColorCombo.Items)
+        {
+            if (item.Tag is string s && int.TryParse(s, out int colVal) && colVal == w.VisualizerColorMode)
+            {
+                VisualizerColorCombo.SelectedItem = item;
+                break;
+            }
+        }
+
         _isInitializing = false;
     }
 
@@ -63,5 +81,31 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.MediaEnabled = MediaToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
+    }
+
+    private async void VisualizerStyleCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (VisualizerStyleCombo.SelectedItem is ComboBoxItem item &&
+            item.Tag is string s && int.TryParse(s, out int styleVal))
+        {
+            var app = (App)Application.Current;
+            app.SettingsService.Settings.Widgets.VisualizerStyle = styleVal;
+            app.WidgetService.RefreshMedia();
+            await app.SettingsService.SaveAsync();
+        }
+    }
+
+    private async void VisualizerColorCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (VisualizerColorCombo.SelectedItem is ComboBoxItem item &&
+            item.Tag is string s && int.TryParse(s, out int colVal))
+        {
+            var app = (App)Application.Current;
+            app.SettingsService.Settings.Widgets.VisualizerColorMode = colVal;
+            app.WidgetService.RefreshMedia();
+            await app.SettingsService.SaveAsync();
+        }
     }
 }

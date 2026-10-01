@@ -11,6 +11,14 @@
     Topmost="False"
     ResizeMode="NoResize">
 
+    <Window.ContextMenu>
+        <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
+            <MenuItem Header="⏰  Toggle 12h / 24h" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
     <Window.Resources>
         <DropShadowEffect x:Key="WidgetShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6" />
     </Window.Resources>

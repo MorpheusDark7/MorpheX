@@ -101,6 +101,14 @@ public partial class SystemMonitorWidget : Window
         DragMove();
     }
 
+    private void CloseWidget_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SystemMonitorEnabled = false;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+        Close();
+    }
+
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         if (_metricsService != null)

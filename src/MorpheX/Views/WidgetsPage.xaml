@@ -90,22 +90,54 @@
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Audio Visualizer &amp; Now Playing" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Live equalizer bars, track info (Spotify, YouTube, etc.), and media controls. Drag to move, resize from the corner." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch
-                        x:Name="MediaToggle"
-                        Grid.Column="1"
-                        VerticalAlignment="Center"
-                        Checked="MediaToggle_Changed"
-                        Unchecked="MediaToggle_Changed"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Audio Visualizer &amp; Now Playing" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Live equalizer bars, track info (Spotify, YouTube, etc.), and media controls. Drag to move, resize from the corner." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch
+                            x:Name="MediaToggle"
+                            Grid.Column="1"
+                            VerticalAlignment="Center"
+                            Checked="MediaToggle_Changed"
+                            Unchecked="MediaToggle_Changed"/>
+                    </Grid>
+
+                    <!-- Visualizer Customization Options -->
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Style selector -->
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                <TextBlock Text="Visualizer Style" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="VisualizerStyleCombo" SelectionChanged="VisualizerStyleCombo_SelectionChanged">
+                                    <ComboBoxItem Content="📊  Equalizer Bars" Tag="0"/>
+                                    <ComboBoxItem Content="🪞  Mirrored Center" Tag="1"/>
+                                    <ComboBoxItem Content="🌊  Waveform Curve" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <!-- Color selector -->
+                            <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="VisualizerColorCombo" SelectionChanged="VisualizerColorCombo_SelectionChanged">
+                                    <ComboBoxItem Content="⚪  Minimalist White" Tag="0"/>
+                                    <ComboBoxItem Content="🔵  Cyber Neon Cyan" Tag="1"/>
+                                    <ComboBoxItem Content="🟣  Violet Glow" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- TIPS ─────────────────────────────────────────────── -->

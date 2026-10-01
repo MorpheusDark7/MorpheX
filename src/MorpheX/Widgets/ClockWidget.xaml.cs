@@ -56,6 +56,22 @@ public partial class ClockWidget : Window
         DragMove();
     }
 
+    private void ToggleFormat_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockIs24Hour = !_settings.ClockIs24Hour;
+        Tick();
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private void CloseWidget_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockEnabled = false;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+        Close();
+    }
+
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();

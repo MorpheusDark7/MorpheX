@@ -24,16 +24,6 @@ public sealed class WidgetService : IDisposable
 
     private bool _disposed;
 
-    // Win32 Z-order constants
-    private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
-    private const uint SWP_NOSIZE     = 0x0001;
-    private const uint SWP_NOMOVE     = 0x0002;
-    private const uint SWP_NOACTIVATE = 0x0010;
-
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter,
-        int x, int y, int cx, int cy, uint uFlags);
-
     public WidgetService(WidgetSettings settings)
     {
         _settings = settings;
@@ -56,6 +46,11 @@ public sealed class WidgetService : IDisposable
     public void RefreshClock()
     {
         _clock?.Dispatcher.InvokeAsync(() => _clock.RefreshFormat());
+    }
+
+    public void RefreshMedia()
+    {
+        _media?.Dispatcher.InvokeAsync(() => _media.RefreshVisualizerStyle());
     }
 
     // ── Core (must run on UI thread) ─────────────────────────────────────────
@@ -85,8 +80,8 @@ public sealed class WidgetService : IDisposable
                 try
                 {
                     field = factory();
+                    WidgetWindowHelper.SetupWidgetWindow(field);
                     field.Show();
-                    SendToDesktop(field);
                     Log.Debug("Widget opened: {Type}", typeof(T).Name);
                 }
                 catch (Exception ex)
@@ -103,27 +98,6 @@ public sealed class WidgetService : IDisposable
                 field = null;
                 Log.Debug("Widget closed: {Type}", typeof(T).Name);
             }
-        }
-    }
-
-    /// <summary>
-    /// Pins the widget to the bottom of the Z-order so it sits below all normal windows.
-    /// Uses SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE so only Z-order changes.
-    /// </summary>
-    private static void SendToDesktop(Window w)
-    {
-        try
-        {
-            var hwnd = new WindowInteropHelper(w).Handle;
-            if (hwnd != IntPtr.Zero)
-            {
-                SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-            }
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "SendToDesktop failed for widget");
         }
     }
 

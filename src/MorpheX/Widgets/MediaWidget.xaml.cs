@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using MorpheX.Core.Configuration;
 using MorpheX.Services;
@@ -46,7 +47,6 @@ public partial class MediaWidget : Window
         for (int i = 0; i < BarCount; i++)
         {
             double norm = (double)i / (BarCount - 1);
-            // Bell-like curve with slight bass bias
             _frequencyWeights[i] = 0.7 + 0.6 * Math.Sin(norm * Math.PI) + (1.0 - norm) * 0.2;
             _currentHeights[i] = MinBarHeight;
         }
@@ -74,13 +74,14 @@ public partial class MediaWidget : Window
     {
         // Build equalizer bar elements
         BarsGrid.Children.Clear();
+        var brush = GetVisualizerBrush();
         for (int i = 0; i < BarCount; i++)
         {
             var bar = new Border
             {
                 Margin = new Thickness(1, 0, 1, 0),
                 CornerRadius = new CornerRadius(1.5),
-                Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(220, 235, 235, 240)),
+                Background = brush,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Height = MinBarHeight
             };
@@ -88,11 +89,62 @@ public partial class MediaWidget : Window
             BarsGrid.Children.Add(bar);
         }
 
+        RefreshVisualizerStyle();
+
         _animTimer.Start();
         _mediaTimer.Start();
 
         await _mediaManager.InitializeAsync();
         await RefreshMediaInfoAsync();
+    }
+
+    public void RefreshVisualizerStyle()
+    {
+        var brush = GetVisualizerBrush();
+
+        if (_settings.VisualizerStyle == 2) // Waveform
+        {
+            BarsGrid.Visibility = Visibility.Collapsed;
+            WavePath.Visibility = Visibility.Visible;
+            WavePath.Stroke = brush;
+        }
+        else
+        {
+            BarsGrid.Visibility = Visibility.Visible;
+            WavePath.Visibility = Visibility.Collapsed;
+
+            var valignment = _settings.VisualizerStyle == 1
+                ? VerticalAlignment.Center // Mirrored
+                : VerticalAlignment.Bottom; // Classic
+
+            BarsGrid.VerticalAlignment = valignment;
+            for (int i = 0; i < BarCount; i++)
+            {
+                if (_bars[i] != null)
+                {
+                    _bars[i].VerticalAlignment = valignment;
+                    _bars[i].Background = brush;
+                }
+            }
+        }
+    }
+
+    private System.Windows.Media.Brush GetVisualizerBrush()
+    {
+        return _settings.VisualizerColorMode switch
+        {
+            1 => new LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(0, 242, 254),
+                System.Windows.Media.Color.FromRgb(79, 172, 254),
+                new System.Windows.Point(0, 1),
+                new System.Windows.Point(0, 0)),
+            2 => new LinearGradientBrush(
+                System.Windows.Media.Color.FromRgb(250, 112, 154),
+                System.Windows.Media.Color.FromRgb(155, 81, 224),
+                new System.Windows.Point(0, 1),
+                new System.Windows.Point(0, 0)),
+            _ => new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255))
+        };
     }
 
     private void OnAnimTick(object? sender, EventArgs e)
@@ -140,6 +192,35 @@ public partial class MediaWidget : Window
                 }
             }
         }
+
+        if (_settings.VisualizerStyle == 2)
+        {
+            UpdateWaveGeometry();
+        }
+    }
+
+    private void UpdateWaveGeometry()
+    {
+        double width = Math.Max(50, VisualizerContainer.ActualWidth);
+        double height = Math.Max(20, VisualizerContainer.ActualHeight);
+
+        var figure = new PathFigure
+        {
+            StartPoint = new System.Windows.Point(0, height - _currentHeights[0]),
+            IsClosed = false
+        };
+
+        double stepX = width / (BarCount - 1);
+        for (int i = 1; i < BarCount; i++)
+        {
+            double x = i * stepX;
+            double y = Math.Clamp(height - _currentHeights[i], 0, height - 2);
+            figure.Segments.Add(new LineSegment(new System.Windows.Point(x, y), true));
+        }
+
+        var geom = new PathGeometry();
+        geom.Figures.Add(figure);
+        WavePath.Data = geom;
     }
 
     private async Task RefreshMediaInfoAsync()
@@ -193,6 +274,56 @@ public partial class MediaWidget : Window
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         DragMove();
+    }
+
+    private void StyleBars_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerStyle = 0;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void StyleMirrored_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerStyle = 1;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void StyleWaveform_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerStyle = 2;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorWhite_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 0;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorCyan_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 1;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorViolet_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 2;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void CloseWidget_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.MediaEnabled = false;
+        var app = (App)Application.Current;
+        _ = app.SettingsService.SaveAsync();
+        Close();
     }
 
     private void OnSizeChanged(object sender, SizeChangedEventArgs e)

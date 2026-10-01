@@ -12,6 +12,20 @@
     Topmost="False"
     ResizeMode="CanResizeWithGrip">
 
+    <Window.ContextMenu>
+        <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
+            <MenuItem Header="📊  Equalizer Bars" Click="StyleBars_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="🪞  Mirrored Center" Click="StyleMirrored_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="🌊  Waveform Curve" Click="StyleWaveform_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="⚪  Minimalist White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="🔵  Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
+            <MenuItem Header="🟣  Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
     <Window.Resources>
         <DropShadowEffect x:Key="WidgetShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>
     </Window.Resources>
@@ -160,9 +174,10 @@
                 </Button>
             </StackPanel>
 
-            <!-- Row 3: Audio Visualizer Equalizer Bars -->
+            <!-- Row 3: Audio Visualizer Equalizer Bars & Waveform -->
             <Grid Grid.Row="3" x:Name="VisualizerContainer" VerticalAlignment="Bottom" Height="28" ClipToBounds="True">
                 <UniformGrid x:Name="BarsGrid" Rows="1" VerticalAlignment="Bottom" Height="28"/>
+                <Path x:Name="WavePath" StrokeThickness="2.5" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round" VerticalAlignment="Bottom" Height="28" Visibility="Collapsed"/>
             </Grid>
 
         </Grid>
