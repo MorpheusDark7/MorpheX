@@ -45,8 +45,7 @@
                 FontFamily="Segoe UI"
                 Foreground="#88FFFFFF"
                 HorizontalAlignment="Center"
-                Margin="0,0,0,10"
-                LetterSpacing="1"/>
+                Margin="0,0,0,10"/>
 
             <!-- Day-of-week header row -->
             <UniformGrid x:Name="DayHeaders" Rows="1" Columns="7" Margin="0,0,0,6">
