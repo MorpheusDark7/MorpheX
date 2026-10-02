@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Application = System.Windows.Application;
 using MorpheX.Core.Models;
+using MorpheX.Views;
 using Serilog;
 
 namespace MorpheX;
@@ -125,11 +126,10 @@ public partial class FavoritesPage : Page
         else
         {
             Log.Warning("Cannot open file location — file not found: {Path}", path);
-            System.Windows.MessageBox.Show(
-                $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
-                "File Not Found",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            ModernDialogWindow.Warning(
+                title:   "File Not Found",
+                heading: "Wallpaper file missing",
+                message: $"The wallpaper file could not be found on disk:\n{path}\n\nIt may have been moved, renamed, or deleted.");
         }
     }
 }

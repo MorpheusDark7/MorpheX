@@ -9,6 +9,7 @@ using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using FolderBrowserDialog = System.Windows.Forms.FolderBrowserDialog;
 using MorpheX.Core.Models;
 using MorpheX.Core.Services;
+using MorpheX.Views;
 using Serilog;
 
 namespace MorpheX;
@@ -169,16 +170,16 @@ public partial class LibraryPage : Page
                 if (isSceneFile && !shownSceneWarning)
                 {
                     shownSceneWarning = true;
-                    var warn = System.Windows.MessageBox.Show(
-                        "Wallpaper Engine Scene Wallpaper\n\n" +
-                        "This wallpaper will be imported with its animated preview and original scene audio.\n\n" +
-                        "Note: Proprietary 3D particle physics and shader scripts are replaced by the high-resolution animated preview to ensure low CPU usage and stability.\n\n" +
-                        "Audio is cached locally in your library (~1-5 MB).\n\n" +
-                        "Do you want to import this Scene wallpaper?",
-                        "Wallpaper Engine Scene",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Information);
-                    if (warn == MessageBoxResult.No) break;
+                    bool confirmed = ModernDialogWindow.Confirm(
+                        title:         "Wallpaper Engine Scene",
+                        heading:       "Scene Wallpaper Import",
+                        message:       "This wallpaper will be imported with its animated preview and original scene audio.\n\n" +
+                                       "Note: Proprietary 3D particle physics and shader scripts are replaced by the high-resolution animated preview to ensure low CPU usage and stability.\n\n" +
+                                       "Audio is cached locally in your library (~1–5 MB).",
+                        primaryText:   "Import",
+                        secondaryText: "Cancel",
+                        icon:          ModernDialogIcon.Info);
+                    if (!confirmed) break;
                 }
 
                 var added = await app.LibraryService.AddWallpaperAsync(file);
@@ -210,27 +211,24 @@ public partial class LibraryPage : Page
 
         if (failedFiles.Count > 0)
         {
-            System.Windows.MessageBox.Show(
-                "The following file(s) could not be added to the library:\n\n" +
-                string.Join("\n", failedFiles) +
-                "\n\nSupported formats:\n" +
-                "  • Wallpaper Engine Scenes (*.pkg, *.zip, project.json)\n" +
-                "  • Video: MP4, WEBM, MKV, MOV, AVI\n" +
-                "  • Images & GIF: PNG, JPG, JPEG, BMP, WEBP, TIFF, GIF\n" +
-                "  • Web: HTML, HTM",
-                "Add Wallpaper",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            ModernDialogWindow.Warning(
+                title:      "Import Failed",
+                heading:    $"{failedFiles.Count} file{(failedFiles.Count == 1 ? "" : "s")} could not be added",
+                message:    "The following file(s) could not be added to the library:\n" +
+                            string.Join("\n", failedFiles.Select(f => $"  • {f}")) +
+                            "\n\nSupported formats: Wallpaper Engine Scenes (*.pkg, *.zip, project.json), " +
+                            "Video (MP4, WEBM, MKV, MOV, AVI), Images & GIF (PNG, JPG, BMP, WEBP, TIFF, GIF), Web (HTML, HTM).");
         }
 
         if (importedCount > 1 || duplicateCount > 0)
         {
-            var summary = $"Added {importedCount} wallpaper{(importedCount == 1 ? string.Empty : "s")}.";
+            var summary = $"Added {importedCount} wallpaper{(importedCount == 1 ? string.Empty : "s")} to your library.";
             if (duplicateCount > 0)
-            {
-                summary += $"\n\nSkipped {duplicateCount} duplicate{(duplicateCount == 1 ? string.Empty : "s")} already in your library.";
-            }
-            System.Windows.MessageBox.Show(summary, "Import Complete", MessageBoxButton.OK, MessageBoxImage.Information);
+                summary += $" {duplicateCount} duplicate{(duplicateCount == 1 ? string.Empty : "s")} were skipped.";
+            ModernDialogWindow.Success(
+                title:   "Import Complete",
+                heading: "Wallpapers imported successfully",
+                message: summary);
         }
 
         RefreshWallpaperList();
@@ -392,11 +390,10 @@ public partial class LibraryPage : Page
         else
         {
             Log.Warning("Cannot open file location — file not found: {Path}", path);
-            System.Windows.MessageBox.Show(
-                $"The wallpaper file was not found on disk:\n\n{path}\n\nIt may have been moved, renamed, or deleted.",
-                "File Not Found",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            ModernDialogWindow.Warning(
+                title:   "File Not Found",
+                heading: "Wallpaper file missing",
+                message: $"The wallpaper file could not be found on disk:\n{path}\n\nIt may have been moved, renamed, or deleted.");
         }
     }
 
@@ -404,13 +401,15 @@ public partial class LibraryPage : Page
     {
         var wp = GetWallpaperFromMenuItem(sender);
         if (wp == null) return;
-        var result = System.Windows.MessageBox.Show(
-            $"Remove \"{wp.Name}\" from the library?\n\nThis will NOT delete the original file.",
-            "Remove Wallpaper",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
+        bool confirmed = ModernDialogWindow.Confirm(
+            title:         "Remove Wallpaper",
+            heading:       $"Remove \u201c{wp.Name}\u201d?",
+            message:       "This will remove the wallpaper from your library. The original file on disk will not be deleted.",
+            primaryText:   "Remove",
+            secondaryText: "Cancel",
+            icon:          ModernDialogIcon.Warning);
 
-        if (result == MessageBoxResult.Yes)
+        if (confirmed)
         {
             var app = (App)Application.Current;
             await app.LibraryService.RemoveWallpaperAsync(wp.Id);
@@ -424,11 +423,10 @@ public partial class LibraryPage : Page
         if (wallpaper.Type is not (WallpaperType.Image or WallpaperType.Video
                                    or WallpaperType.AnimatedImage or WallpaperType.Scene))
         {
-            System.Windows.MessageBox.Show(
-                $"{wallpaper.Type} wallpapers are not yet supported by the playback engine.",
-                "Wallpaper Type Not Supported",
-                MessageBoxButton.OK,
-                MessageBoxImage.Information);
+            ModernDialogWindow.Information(
+                title:   "Not Supported",
+                heading: $"{wallpaper.Type} type not supported",
+                message: $"{wallpaper.Type} wallpapers are not yet supported by the MorpheX playback engine.");
             return;
         }
         await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wallpaper, RefreshWallpaperList);

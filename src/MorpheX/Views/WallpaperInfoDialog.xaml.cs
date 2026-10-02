@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Input;
 using Application = System.Windows.Application;
 using MorpheX.Core.Models;
+using MorpheX.Views;
 using Serilog;
 
 namespace MorpheX;
@@ -74,8 +75,10 @@ public partial class WallpaperInfoDialog : Window
         var newName = NameTextBox.Text.Trim();
         if (string.IsNullOrWhiteSpace(newName))
         {
-            System.Windows.MessageBox.Show("Name cannot be empty.", "Rename",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+            ModernDialogWindow.Warning(
+                title:   "Rename",
+                heading: "Name cannot be empty",
+                message: "Please enter a valid name for this wallpaper.");
             return;
         }
 
@@ -105,13 +108,16 @@ public partial class WallpaperInfoDialog : Window
         {
             Process.Start("explorer.exe", $"/select,\"{path}\"");
         }
+        else if (Directory.Exists(path))
+        {
+            Process.Start("explorer.exe", $"\"{path}\"");
+        }
         else
         {
-            System.Windows.MessageBox.Show(
-                $"The wallpaper file was not found on disk:\n\n{path}",
-                "File Not Found",
-                MessageBoxButton.OK,
-                MessageBoxImage.Warning);
+            ModernDialogWindow.Warning(
+                title:   "File Not Found",
+                heading: "Wallpaper file missing",
+                message: $"The wallpaper file could not be found on disk:\n{path}\n\nIt may have been moved, renamed, or deleted.");
         }
     }
 
