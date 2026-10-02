@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MorpheX.Core.Configuration;
@@ -63,10 +64,79 @@ public sealed class LibraryService : ILibraryService
 
         [".html"] = WallpaperType.Web,
         [".htm"] = WallpaperType.Web,
+
+        // Wallpaper Engine Scene packages
+        [".pkg"] = WallpaperType.Scene,
+        [".zip"] = WallpaperType.Scene,  // WE workshop zip exports
     };
 
     public static bool IsSupportedExtension(string extension) =>
         !string.IsNullOrEmpty(extension) && ExtensionMap.ContainsKey(extension);
+
+    // -------------------------------------------------------------------------
+    // Scene (Wallpaper Engine .pkg) detection helpers
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Returns true when the path is a folder that looks like a WE wallpaper
+    /// (contains project.json with "type":"Scene" and a preview.gif or scene.pkg).
+    /// </summary>
+    public static bool IsSceneFolder(string folderPath)
+    {
+        if (!Directory.Exists(folderPath)) return false;
+        var projectJson = Path.Combine(folderPath, "project.json");
+        return File.Exists(projectJson) &&
+               (File.Exists(Path.Combine(folderPath, "preview.gif")) ||
+                File.Exists(Path.Combine(folderPath, "preview.png")) ||
+                File.Exists(Path.Combine(folderPath, "preview.jpg")) ||
+                File.Exists(Path.Combine(folderPath, "preview.jpeg")) ||
+                Directory.EnumerateFiles(folderPath, "*.pkg").Any());
+    }
+
+    /// <summary>
+    /// Searches for a directory containing project.json (up to 4 levels deep).
+    /// Handles unzipped archives with wrapper folders.
+    /// </summary>
+    public static string? FindSceneRoot(string rootDir)
+    {
+        if (!Directory.Exists(rootDir)) return null;
+        if (IsSceneFolder(rootDir)) return rootDir;
+
+        var queue = new Queue<string>();
+        queue.Enqueue(rootDir);
+        int maxDepth = 4;
+        while (queue.Count > 0 && maxDepth-- > 0)
+        {
+            var dir = queue.Dequeue();
+            if (IsSceneFolder(dir)) return dir;
+            try
+            {
+                foreach (var sub in Directory.EnumerateDirectories(dir))
+                {
+                    if (IsSceneFolder(sub)) return sub;
+                    queue.Enqueue(sub);
+                }
+            }
+            catch { /* ignore inaccessible */ }
+        }
+        return null;
+    }
+
+    /// <summary>
+    /// Returns true when the path is a .zip whose root or subfolder contains project.json.
+    /// </summary>
+    public static bool IsSceneZip(string zipPath)
+    {
+        if (!File.Exists(zipPath)) return false;
+        if (!zipPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) return false;
+        try
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+            return archive.Entries.Any(e =>
+                e.FullName.EndsWith("project.json", StringComparison.OrdinalIgnoreCase));
+        }
+        catch { return false; }
+    }
 
     private readonly string _libraryDir;
     private readonly string _manifestPath;
@@ -181,6 +251,27 @@ public sealed class LibraryService : ILibraryService
     public async Task<WallpaperInfo?> AddWallpaperAsync(string filePath, bool copyToLibrary = false,
                                                          CancellationToken ct = default)
     {
+        // 1. Handle directory input (scene folder directly or unzipped parent folder)
+        if (Directory.Exists(filePath))
+        {
+            var sceneDir = FindSceneRoot(filePath);
+            if (sceneDir != null)
+                return await AddSceneFromFolderAsync(sceneDir, ct);
+
+            Log.Warning("Folder does not contain a supported Wallpaper Engine scene: {Path}", filePath);
+            return null;
+        }
+
+        // 2. Handle WE workshop .zip exports
+        if (filePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+        {
+            if (IsSceneZip(filePath))
+                return await AddSceneFromZipAsync(filePath, ct);
+
+            Log.Warning("Zip archive is not a Wallpaper Engine package (no project.json found): {Path}", filePath);
+            return null;
+        }
+
         if (!File.Exists(filePath))
         {
             Log.Error("Cannot add wallpaper: file not found: {Path}", filePath);
@@ -188,6 +279,28 @@ public sealed class LibraryService : ILibraryService
         }
 
         var extension = Path.GetExtension(filePath);
+
+        // 3. If user picked project.json or scene.pkg or preview image from a scene folder
+        var parentDir = Path.GetDirectoryName(filePath);
+        if (parentDir != null && IsSceneFolder(parentDir))
+        {
+            if (string.Equals(Path.GetFileName(filePath), "project.json", StringComparison.OrdinalIgnoreCase) ||
+                extension.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Path.GetFileName(filePath), "preview.gif", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Path.GetFileName(filePath), "preview.png", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Path.GetFileName(filePath), "preview.jpg", StringComparison.OrdinalIgnoreCase))
+            {
+                return await AddSceneFromFolderAsync(parentDir, ct);
+            }
+        }
+
+        // 4. Standalone .pkg without a scene folder cannot be played
+        if (extension.Equals(".pkg", StringComparison.OrdinalIgnoreCase))
+        {
+            Log.Warning("Standalone .pkg without project.json is not supported: {Path}", filePath);
+            return null;
+        }
+
         if (!ExtensionMap.TryGetValue(extension, out var type))
         {
             Log.Warning("Unsupported file format: {Extension}", extension);
@@ -471,12 +584,175 @@ public sealed class LibraryService : ILibraryService
 
     public static string GetFileFilter()
     {
-        var allExts = string.Join(";", ExtensionMap.Keys.Select(e => $"*{e}"));
-        return $"All Supported|{allExts}|" +
-               "Images|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif|" +
+        return "All Supported|*.mp4;*.webm;*.mkv;*.mov;*.avi;*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif;*.gif;*.html;*.htm;*.pkg;*.zip;project.json|" +
+               "Wallpaper Engine (*.pkg;*.zip;project.json)|*.pkg;*.zip;project.json|" +
                "Videos|*.mp4;*.webm;*.mkv;*.mov;*.avi|" +
-               "Animated|*.gif|" +
+               "Images|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif|" +
+               "Animated GIFs|*.gif|" +
                "Web|*.html;*.htm";
+    }
+
+    // -------------------------------------------------------------------------
+    // Scene import helpers
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Adds a WE wallpaper scene from an already-unzipped folder
+    /// (the folder that directly contains project.json).
+    /// </summary>
+    public async Task<WallpaperInfo?> AddSceneFromFolderAsync(string folderPath,
+                                                               CancellationToken ct = default)
+    {
+        var projectJsonPath = Path.Combine(folderPath, "project.json");
+
+        if (!File.Exists(projectJsonPath))
+        {
+            Log.Warning("Scene import: no project.json in {Folder}", folderPath);
+            return null;
+        }
+
+        // Parse project.json for metadata
+        string wallpaperName = Path.GetFileName(folderPath);
+        string? customPreview = null;
+        string? projectType = null;
+        string? targetFile = null;
+        try
+        {
+            using var doc = JsonDocument.Parse(await File.ReadAllTextAsync(projectJsonPath, ct));
+            if (doc.RootElement.TryGetProperty("title", out var titleEl))
+                wallpaperName = titleEl.GetString() ?? wallpaperName;
+            if (doc.RootElement.TryGetProperty("preview", out var prevEl))
+                customPreview = prevEl.GetString();
+            if (doc.RootElement.TryGetProperty("type", out var typeEl))
+                projectType = typeEl.GetString();
+            if (doc.RootElement.TryGetProperty("file", out var fileEl))
+                targetFile = fileEl.GetString();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Scene import: could not parse project.json");
+        }
+
+        // Check if this WE item is actually a Video wallpaper
+        if (string.Equals(projectType, "Video", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrEmpty(targetFile))
+        {
+            var videoPath = Path.Combine(folderPath, targetFile);
+            if (File.Exists(videoPath))
+            {
+                var videoWallpaper = await AddWallpaperAsync(videoPath, copyToLibrary: false, ct);
+                if (videoWallpaper != null)
+                {
+                    videoWallpaper.Name = wallpaperName;
+                    await SaveInternalAsync(ct);
+                }
+                return videoWallpaper;
+            }
+        }
+
+        await _lock.WaitAsync(ct);
+        try
+        {
+            var normalizedFolder = Path.GetFullPath(folderPath);
+
+            // De-duplicate: check if already in library by folder path
+            var existing = _manifest.Wallpapers.FirstOrDefault(w =>
+                w.Type == WallpaperType.Scene &&
+                PathsMatch(w.SourcePath, normalizedFolder));
+            if (existing != null)
+            {
+                Log.Information("Scene wallpaper already in library: {Folder}", normalizedFolder);
+                return existing;
+            }
+
+            // Resolve preview image or gif
+            string? previewPath = null;
+            if (!string.IsNullOrEmpty(customPreview))
+            {
+                var custom = Path.Combine(folderPath, customPreview);
+                if (File.Exists(custom)) previewPath = custom;
+            }
+
+            if (previewPath == null)
+            {
+                string[] candidates = { "preview.gif", "preview.png", "preview.jpg", "preview.jpeg" };
+                foreach (var c in candidates)
+                {
+                    var p = Path.Combine(folderPath, c);
+                    if (File.Exists(p)) { previewPath = p; break; }
+                }
+            }
+
+            long totalSize = 0;
+            try
+            {
+                var dirInfo = new DirectoryInfo(folderPath);
+                totalSize = dirInfo.EnumerateFiles("*", SearchOption.TopDirectoryOnly).Sum(f => f.Length);
+            }
+            catch { /* best effort */ }
+
+            var wallpaper = new WallpaperInfo
+            {
+                Name       = wallpaperName,
+                Type       = WallpaperType.Scene,
+                SourcePath = normalizedFolder,
+                FileSize   = totalSize > 0 ? totalSize : (previewPath != null && File.Exists(previewPath) ? new FileInfo(previewPath).Length : 0),
+                DateAdded  = DateTimeOffset.UtcNow
+            };
+
+            if (previewPath != null && File.Exists(previewPath))
+                wallpaper.ThumbnailPath = previewPath;
+
+            _manifest.Wallpapers.Add(wallpaper);
+            await SaveInternalAsync(ct);
+
+            Log.Information("Added Scene wallpaper '{Name}' from {Folder}", wallpaper.Name, normalizedFolder);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+            return wallpaper;
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    /// <summary>
+    /// Adds a WE wallpaper from a .zip archive by extracting it to a directory under AppData\MorpheX\scenes\.
+    /// </summary>
+    public async Task<WallpaperInfo?> AddSceneFromZipAsync(string zipPath,
+                                                            CancellationToken ct = default)
+    {
+        var scenesDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "MorpheX", "scenes");
+        Directory.CreateDirectory(scenesDir);
+
+        var extractName = Path.GetFileNameWithoutExtension(zipPath);
+        var extractRoot = Path.Combine(scenesDir, extractName);
+
+        Log.Information("Scene import: extracting zip {Zip} -> {Dest}", zipPath, extractRoot);
+        try
+        {
+            await Task.Run(() =>
+            {
+                if (Directory.Exists(extractRoot))
+                    Directory.Delete(extractRoot, recursive: true);
+                ZipFile.ExtractToDirectory(zipPath, extractRoot, overwriteFiles: true);
+            }, ct);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Scene import: failed to extract zip {Zip}", zipPath);
+            return null;
+        }
+
+        var sceneFolder = FindSceneRoot(extractRoot);
+        if (sceneFolder == null)
+        {
+            Log.Warning("Scene import: no project.json found after extracting {Zip}", zipPath);
+            return null;
+        }
+
+        return await AddSceneFromFolderAsync(sceneFolder, ct);
     }
 
     private async Task SaveInternalAsync(CancellationToken ct)

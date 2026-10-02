@@ -72,7 +72,7 @@ public partial class LibraryPage : Page
         var filter = (FilterCombo?.SelectedItem as ComboBoxItem)?.Tag as string ?? "All";
         filtered = filter switch
         {
-            "Image" or "Video" or "AnimatedImage" when Enum.TryParse<WallpaperType>(filter, out var type) =>
+            "Image" or "Video" or "AnimatedImage" or "Scene" when Enum.TryParse<WallpaperType>(filter, out var type) =>
                 filtered.Where(w => w.Type == type),
             _ => filtered
         };
@@ -154,16 +154,43 @@ public partial class LibraryPage : Page
         var knownIds = app.LibraryService.Wallpapers.Select(w => w.Id).ToHashSet();
         int importedCount = 0;
         int duplicateCount = 0;
+        bool shownSceneWarning = false;
 
         foreach (var file in ExpandImportFiles(files, failedFiles))
         {
             try
             {
+                // Show a one-time resource warning for Scene wallpapers before importing
+                var ext = Path.GetExtension(file);
+                bool isSceneFile = (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) && LibraryService.IsSceneZip(file)) ||
+                                   ext.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(Path.GetFileName(file), "project.json", StringComparison.OrdinalIgnoreCase) ||
+                                   LibraryService.IsSceneFolder(file);
+                if (isSceneFile && !shownSceneWarning)
+                {
+                    shownSceneWarning = true;
+                    var warn = System.Windows.MessageBox.Show(
+                        "Wallpaper Engine Scene Wallpaper\n\n" +
+                        "This wallpaper will be imported with its animated preview and original scene audio.\n\n" +
+                        "Note: Proprietary 3D particle physics and shader scripts are replaced by the high-resolution animated preview to ensure low CPU usage and stability.\n\n" +
+                        "Audio is cached locally in your library (~1-5 MB).\n\n" +
+                        "Do you want to import this Scene wallpaper?",
+                        "Wallpaper Engine Scene",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Information);
+                    if (warn == MessageBoxResult.No) break;
+                }
+
                 var added = await app.LibraryService.AddWallpaperAsync(file);
                 if (added == null)
                 {
-                    var ext = Path.GetExtension(file);
-                    failedFiles.Add($"{Path.GetFileName(file)} (unsupported format '{ext}')");
+                    var ext2 = Path.GetExtension(file);
+                    if (!ext2.Equals(".zip", StringComparison.OrdinalIgnoreCase) &&
+                        !ext2.Equals(".pkg", StringComparison.OrdinalIgnoreCase) &&
+                        !string.Equals(Path.GetFileName(file), "project.json", StringComparison.OrdinalIgnoreCase))
+                    {
+                        failedFiles.Add($"{Path.GetFileName(file)} (unsupported format '{ext2}')");
+                    }
                 }
                 else if (knownIds.Add(added.Id))
                 {
@@ -186,7 +213,11 @@ public partial class LibraryPage : Page
             System.Windows.MessageBox.Show(
                 "The following file(s) could not be added to the library:\n\n" +
                 string.Join("\n", failedFiles) +
-                "\n\nSupported video formats: MP4, WEBM, MKV, MOV, AVI\nSupported image formats: PNG, JPG, JPEG, BMP, WEBP, TIFF, GIF",
+                "\n\nSupported formats:\n" +
+                "  • Wallpaper Engine Scenes (*.pkg, *.zip, project.json)\n" +
+                "  • Video: MP4, WEBM, MKV, MOV, AVI\n" +
+                "  • Images & GIF: PNG, JPG, JPEG, BMP, WEBP, TIFF, GIF\n" +
+                "  • Web: HTML, HTM",
                 "Add Wallpaper",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -209,35 +240,67 @@ public partial class LibraryPage : Page
     {
         foreach (var entry in entries)
         {
-            if (!Directory.Exists(entry))
+            if (Directory.Exists(entry))
             {
-                yield return entry;
-                continue;
-            }
-
-            IEnumerable<string> files;
-            try
-            {
-                files = Directory.EnumerateFiles(entry, "*", new EnumerationOptions
+                // 1. If entry itself is a WE scene folder, yield it directly
+                if (LibraryService.IsSceneFolder(entry))
                 {
-                    RecurseSubdirectories = true,
-                    IgnoreInaccessible = true,
-                    ReturnSpecialDirectories = false
-                });
-            }
-            catch (Exception ex)
-            {
-                failedFiles.Add($"{Path.GetFileName(entry)} ({ex.Message})");
-                continue;
-            }
-
-            foreach (var file in files)
-            {
-                if (LibraryService.IsSupportedExtension(Path.GetExtension(file)))
-                {
-                    yield return file;
+                    yield return entry;
+                    continue;
                 }
+
+                // 2. Scan directory recursively
+                IEnumerable<string> files;
+                try
+                {
+                    files = Directory.EnumerateFiles(entry, "*", new EnumerationOptions
+                    {
+                        RecurseSubdirectories = true,
+                        IgnoreInaccessible = true,
+                        ReturnSpecialDirectories = false
+                    });
+                }
+                catch (Exception ex)
+                {
+                    failedFiles.Add($"{Path.GetFileName(entry)} ({ex.Message})");
+                    continue;
+                }
+
+                var seenSceneDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (var file in files)
+                {
+                    var dir = Path.GetDirectoryName(file);
+                    if (dir != null)
+                    {
+                        // If file is inside an already recognized scene directory, ignore internal files
+                        if (seenSceneDirs.Any(s => dir.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
+                            continue;
+
+                        // Check if dir or an ancestor under entry is a scene folder
+                        if (LibraryService.IsSceneFolder(dir))
+                        {
+                            seenSceneDirs.Add(dir);
+                            yield return dir;
+                            continue;
+                        }
+                    }
+
+                    var ext = Path.GetExtension(file);
+                    if (ext.Equals(".pkg", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) && !LibraryService.IsSceneZip(file))
+                        continue;
+
+                    if (LibraryService.IsSupportedExtension(ext))
+                    {
+                        yield return file;
+                    }
+                }
+                continue;
             }
+
+            // Regular file
+            yield return entry;
         }
     }
 
@@ -278,10 +341,6 @@ public partial class LibraryPage : Page
         }
     }
 
-    /// <summary>
-    /// Gets WallpaperInfo from a context menu item via PlacementTarget.Tag.
-    /// ContextMenus live outside the visual tree so DataContext doesn't inherit from the card.
-    /// </summary>
     private static WallpaperInfo? GetWallpaperFromMenuItem(object sender)
     {
         if (sender is not MenuItem mi) return null;
@@ -326,6 +385,10 @@ public partial class LibraryPage : Page
         {
             Process.Start("explorer.exe", $"/select,\"{path}\"");
         }
+        else if (Directory.Exists(path))
+        {
+            Process.Start("explorer.exe", $"\"{path}\"");
+        }
         else
         {
             Log.Warning("Cannot open file location — file not found: {Path}", path);
@@ -358,7 +421,8 @@ public partial class LibraryPage : Page
 
     private async Task ApplyWallpaperAsync(WallpaperInfo wallpaper)
     {
-        if (wallpaper.Type is not (WallpaperType.Image or WallpaperType.Video or WallpaperType.AnimatedImage))
+        if (wallpaper.Type is not (WallpaperType.Image or WallpaperType.Video
+                                   or WallpaperType.AnimatedImage or WallpaperType.Scene))
         {
             System.Windows.MessageBox.Show(
                 $"{wallpaper.Type} wallpapers are not yet supported by the playback engine.",

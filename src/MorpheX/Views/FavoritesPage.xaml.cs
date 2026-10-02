@@ -118,6 +118,10 @@ public partial class FavoritesPage : Page
         {
             Process.Start("explorer.exe", $"/select,\"{path}\"");
         }
+        else if (Directory.Exists(path))
+        {
+            Process.Start("explorer.exe", $"\"{path}\"");
+        }
         else
         {
             Log.Warning("Cannot open file location — file not found: {Path}", path);

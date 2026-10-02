@@ -302,6 +302,12 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
         return Task.CompletedTask;
     }
 
+    internal static LibVLC GetSharedLibVLC()
+    {
+        EnsureLibVLCInitialized();
+        return _sharedLibVLC!;
+    }
+
     private static void EnsureLibVLCInitialized()
     {
         if (_sharedLibVLC != null) return;

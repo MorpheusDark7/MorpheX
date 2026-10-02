@@ -44,6 +44,7 @@
                     <ComboBoxItem Content="Images" Tag="Image" />
                     <ComboBoxItem Content="Videos" Tag="Video" />
                     <ComboBoxItem Content="Animated" Tag="AnimatedImage" />
+                    <ComboBoxItem Content="Scenes" Tag="Scene" />
                 </ComboBox>
                 <ComboBox
                     x:Name="SortCombo"

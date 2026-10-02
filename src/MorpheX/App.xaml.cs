@@ -119,6 +119,9 @@ public partial class App : Application
         _providerFactory.Register(WallpaperType.AnimatedImage,
             () => new GifWallpaperProvider(),
             new[] { ".gif" });
+        _providerFactory.Register(WallpaperType.Scene,
+            () => new SceneWallpaperProvider(),
+            new[] { ".pkg", ".zip" });
 
         WallpaperService = new WallpaperService(MonitorService, SettingsService, _providerFactory, LibraryService);
 

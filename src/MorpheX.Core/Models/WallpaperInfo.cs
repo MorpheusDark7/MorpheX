@@ -50,9 +50,26 @@ public sealed class WallpaperInfo
     public string TagsText => Tags is { Count: > 0 } ? string.Join(" • ", Tags) : string.Empty;
 
     [JsonIgnore]
-    public string? PreviewImagePath =>
-        !string.IsNullOrEmpty(ThumbnailPath) && File.Exists(ThumbnailPath) ? ThumbnailPath :
-        Type == WallpaperType.Image ? EffectivePath : null;
+    public string? PreviewImagePath
+    {
+        get
+        {
+            if (!string.IsNullOrEmpty(ThumbnailPath) && File.Exists(ThumbnailPath))
+                return ThumbnailPath;
+            if (Type is WallpaperType.Image or WallpaperType.AnimatedImage && File.Exists(EffectivePath))
+                return EffectivePath;
+            if (Type == WallpaperType.Scene && Directory.Exists(SourcePath))
+            {
+                var gif = Path.Combine(SourcePath, "preview.gif");
+                if (File.Exists(gif)) return gif;
+                var png = Path.Combine(SourcePath, "preview.png");
+                if (File.Exists(png)) return png;
+                var jpg = Path.Combine(SourcePath, "preview.jpg");
+                if (File.Exists(jpg)) return jpg;
+            }
+            return null;
+        }
+    }
 
     [JsonIgnore]
     public bool HasPreviewImage => !string.IsNullOrEmpty(PreviewImagePath) && File.Exists(PreviewImagePath);

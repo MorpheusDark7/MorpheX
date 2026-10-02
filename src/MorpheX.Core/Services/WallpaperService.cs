@@ -122,7 +122,7 @@ public sealed class WallpaperService : IWallpaperService
 
         var host = new WallpaperHostWindow();
 
-        bool isLayered = wallpaper.Type is WallpaperType.Image or WallpaperType.AnimatedImage;
+        bool isLayered = wallpaper.Type is WallpaperType.Image or WallpaperType.AnimatedImage or WallpaperType.Scene;
         if (!host.Create(_workerW.WorkerWHandle,
             monitor.Bounds.X, monitor.Bounds.Y,
             monitor.Bounds.Width, monitor.Bounds.Height,
@@ -539,7 +539,7 @@ public sealed class WallpaperService : IWallpaperService
                 // Image/GIF providers render via WM_PAINT. After Windows refreshes the
                 // desktop layer on DisplaySettingsChanged, the painted content is lost.
                 // Force a repaint so the wallpaper reappears immediately.
-                if (state.Provider is ImageWallpaperProvider or GifWallpaperProvider)
+                if (state.Provider is ImageWallpaperProvider or GifWallpaperProvider or SceneWallpaperProvider)
                 {
                     state.Host?.Repaint();
                 }

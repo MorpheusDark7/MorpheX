@@ -33,6 +33,11 @@ public static class WallpaperEffectsService
                                                   effects.Saturation, effects.ColorTemperature));
                 break;
 
+            case SceneWallpaperProvider scene:
+                scene.SetColorMatrix(BuildGdiMatrix(brightness, effects.Contrast,
+                                                    effects.Saturation, effects.ColorTemperature));
+                break;
+
             case VideoWallpaperProvider vid:
                 ApplyVlcAdjust(vid, brightness, effects.Contrast,
                                effects.Saturation, effects.ColorTemperature);

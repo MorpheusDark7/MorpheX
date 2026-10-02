@@ -61,7 +61,7 @@ public partial class DisplaysPage : Page
         foreach (var m in monitors)
         {
             var active = app.WallpaperService.GetActiveWallpaper(m.DeviceId);
-            bool hasAudio = active != null && active.Type == WallpaperType.Video;
+            bool hasAudio = active != null && active.Type is WallpaperType.Video or WallpaperType.Scene;
             bool isMuted = app.WallpaperService.IsMonitorMuted(m.DeviceId);
             int volume = app.WallpaperService.GetMonitorVolume(m.DeviceId);
 
