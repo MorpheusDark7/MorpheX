@@ -171,20 +171,20 @@
 
                         <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,0">
                             <TextBlock Text="RESOLUTION" Style="{StaticResource InfoLabel}" />
-                            <TextBlock x:Name="ResolutionText" Style="{StaticResource InfoValue}" Text="—" />
+                            <TextBlock x:Name="ResolutionText" Style="{StaticResource InfoValue}" Text="-" />
                         </StackPanel>
                         <StackPanel Grid.Row="0" Grid.Column="1">
                             <TextBlock Text="DURATION" Style="{StaticResource InfoLabel}" />
-                            <TextBlock x:Name="DurationText" Style="{StaticResource InfoValue}" Text="—" />
+                            <TextBlock x:Name="DurationText" Style="{StaticResource InfoValue}" Text="-" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0">
                             <TextBlock Text="FILE SIZE" Style="{StaticResource InfoLabel}" />
-                            <TextBlock x:Name="FileSizeText" Style="{StaticResource InfoValue}" Text="—" />
+                            <TextBlock x:Name="FileSizeText" Style="{StaticResource InfoValue}" Text="-" />
                         </StackPanel>
                         <StackPanel Grid.Row="1" Grid.Column="1">
                             <TextBlock Text="DATE ADDED" Style="{StaticResource InfoLabel}" />
-                            <TextBlock x:Name="DateAddedText" Style="{StaticResource InfoValue}" Text="—" />
+                            <TextBlock x:Name="DateAddedText" Style="{StaticResource InfoValue}" Text="-" />
                         </StackPanel>
 
                         <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">

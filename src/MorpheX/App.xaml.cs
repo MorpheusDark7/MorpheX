@@ -31,7 +31,6 @@ public partial class App : Application
     public SystemMetricsService SystemMetricsService { get; } = new();
     public UpdateService UpdateService { get; } = new();
     public WidgetService WidgetService { get; private set; } = null!;
-    public TaskbarStyleService TaskbarStyleService { get; } = new();
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -103,11 +102,6 @@ public partial class App : Application
         _splash?.SetStatus("Loading settings...");
         _splash?.SetProgress(0.10);
         await SettingsService.LoadAsync();
-
-        // Apply saved taskbar style immediately after settings load
-        var savedStyle = (TaskbarStyleService.TaskbarStyle)SettingsService.Settings.Taskbar.Style;
-        if (savedStyle != TaskbarStyleService.TaskbarStyle.Default)
-            TaskbarStyleService.Apply(savedStyle);
 
         _splash?.SetStatus("Loading wallpaper library...");
         _splash?.SetProgress(0.30);
@@ -568,7 +562,7 @@ public partial class App : Application
 
             // Also update tray icon tooltip (max 63 chars for WinForms)
             string tooltip = activeWallpapers.Count > 0
-                ? "MorpheX — " + activeWallpapers[0].Name
+                ? "MorpheX - " + activeWallpapers[0].Name
                 : "MorpheX Live";
             if (_trayIcon != null)
                 _trayIcon.Text = tooltip.Length > 63 ? tooltip[..63] : tooltip;
@@ -661,7 +655,6 @@ public partial class App : Application
         PlaybackService?.Dispose();
         _ambientDimService?.Dispose();
         WidgetService?.Dispose();
-        TaskbarStyleService?.Dispose();  // Reset taskbar to system default before exit
         WallpaperService?.Dispose();
         MonitorService?.Dispose();
 

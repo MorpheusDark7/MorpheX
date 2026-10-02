@@ -41,11 +41,17 @@
         <DropShadowEffect x:Key="WidgetShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>
         <DropShadowEffect x:Key="BarGlow" BlurRadius="10" ShadowDepth="0" Color="#FFFFFF" Opacity="0.55"/>
 
-        <!-- Gradient brush for bars: teal bottom → white top -->
+        <!-- Gradient brush for bars: teal bottom -> white top (dark mode) -->
         <LinearGradientBrush x:Key="BarBrushWhite" StartPoint="0.5,1" EndPoint="0.5,0">
             <GradientStop Color="#4038BDF8" Offset="0"/>
             <GradientStop Color="#BBFFFFFF" Offset="0.55"/>
             <GradientStop Color="#FFFFFFFF" Offset="1"/>
+        </LinearGradientBrush>
+        <!-- Dark charcoal gradient for light mode default -->
+        <LinearGradientBrush x:Key="BarBrushDark" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#40221E18" Offset="0"/>
+            <GradientStop Color="#BB221E18" Offset="0.55"/>
+            <GradientStop Color="#FF181410" Offset="1"/>
         </LinearGradientBrush>
         <LinearGradientBrush x:Key="BarBrushCyan" StartPoint="0.5,1" EndPoint="0.5,0">
             <GradientStop Color="#400EA5E8" Offset="0"/>
@@ -94,6 +100,7 @@
             <!-- Row 0: Header + Live Indicator -->
             <DockPanel x:Name="HeaderRow" Grid.Row="0" Margin="0,0,0,4">
                 <TextBlock
+                    x:Name="HeaderTitleText"
                     Text="NOW PLAYING"
                     FontSize="9"
                     FontWeight="Bold"
@@ -217,7 +224,7 @@
                 </Button>
             </StackPanel>
 
-            <!-- Row 3: Audio Visualizer — stretches to fill all remaining space -->
+            <!-- Row 3: Audio Visualizer - stretches to fill all remaining space -->
             <Grid Grid.Row="3" x:Name="VisualizerContainer"
                   VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
                   ClipToBounds="True" MinHeight="20">

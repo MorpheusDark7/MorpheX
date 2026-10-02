@@ -70,13 +70,6 @@ public partial class WidgetsPage : Page
         NotesToggle.IsChecked    = w.NotesEnabled;
         QuoteToggle.IsChecked    = w.QuoteEnabled;
 
-        // Taskbar
-        SelectComboItem(TaskbarStyleCombo, app.SettingsService.Settings.Taskbar.Style);
-
-        // Show Windows 11 22H2+ compatibility notice when SWCA doesn't work on XAML taskbar
-        if (TaskbarStyleService.IsModernWindows11)
-            Win11TaskbarNotice.Visibility = Visibility.Visible;
-
         _isInitializing = false;
     }
 
@@ -313,43 +306,5 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
-    }
-
-    // ── Taskbar ─────────────────────────────────────────────────────────────────────────
-
-    private async void TaskbarStyleCombo_Changed(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isInitializing) return;
-        var app = (App)Application.Current;
-
-        if (TaskbarStyleCombo.SelectedItem is ComboBoxItem item &&
-            int.TryParse(item.Tag?.ToString(), out int style))
-        {
-            app.SettingsService.Settings.Taskbar.Style = style;
-            app.TaskbarStyleService.Apply((TaskbarStyleService.TaskbarStyle)style);
-            await app.SettingsService.SaveAsync();
-        }
-    }
-
-    private void GetTranslucentTbBtn_Click(object sender, RoutedEventArgs e)
-    {
-        // Open TranslucentTB in the Microsoft Store
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName   = "ms-windows-store://pdp/?ProductId=9PF4KZ2VN4W9",
-                UseShellExecute = true
-            });
-        }
-        catch
-        {
-            // Fallback to web if Store URI fails
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "https://apps.microsoft.com/detail/9pf4kz2vn4w9",
-                UseShellExecute = true
-            });
-        }
     }
 }

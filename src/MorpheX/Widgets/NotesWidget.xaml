@@ -53,11 +53,13 @@
                     Foreground="#66FFFFFF"
                     VerticalAlignment="Center"/>
                 <TextBlock
-                    Text="✏️"
+                    x:Name="PencilIcon"
+                    Text="✏"
                     FontSize="10"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
-                    Opacity="0.5"/>
+                    Foreground="#66FFFFFF"
+                    Opacity="0.7"/>
             </DockPanel>
 
             <!-- Editable text area -->

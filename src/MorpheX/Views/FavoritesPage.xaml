@@ -174,7 +174,7 @@
                                                    Foreground="{DynamicResource TextFillColorSecondaryBrush}">
                                             <Run Text="{Binding Type, Mode=OneWay}" />
                                             <Run Text=" · " />
-                                            <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='—'}" />
+                                            <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='-'}" />
                                         </TextBlock>
                                     </Grid>
                                 </Border>

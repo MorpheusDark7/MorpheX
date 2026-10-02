@@ -36,6 +36,8 @@ public partial class NotesWidget : Window
         WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
 
         HeaderTitleText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
+        if (PencilIcon != null)
+            PencilIcon.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
         NoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
         NoteText.CaretBrush = isLight
             ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0x28, 0x20))

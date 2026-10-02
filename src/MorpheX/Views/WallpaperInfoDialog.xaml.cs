@@ -59,11 +59,11 @@ public partial class WallpaperInfoDialog : Window
         TagsTextBox.Text = w.Tags is { Count: > 0 } ? string.Join(", ", w.Tags) : string.Empty;
 
         // Metadata
-        ResolutionText.Text = w.ResolutionText ?? "—";
+        ResolutionText.Text = w.ResolutionText ?? "-";
         DurationText.Text = w.Duration.HasValue
             ? FormatDuration(w.Duration.Value)
-            : "—";
-        FileSizeText.Text = w.FileSize > 0 ? FormatBytes(w.FileSize) : "—";
+            : "-";
+        FileSizeText.Text = w.FileSize > 0 ? FormatBytes(w.FileSize) : "-";
         DateAddedText.Text = w.DateAdded.ToLocalTime().ToString("MMM d, yyyy");
         FilePathText.Text = w.EffectivePath;
         IdText.Text = w.Id;

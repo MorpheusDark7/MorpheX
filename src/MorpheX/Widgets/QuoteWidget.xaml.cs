@@ -89,7 +89,7 @@ public partial class QuoteWidget : Window
         index = ((index % Quotes.Length) + Quotes.Length) % Quotes.Length;
         _settings.QuoteIndex = index;
         QuoteText.Text  = Quotes[index].text;
-        AuthorText.Text = "— " + Quotes[index].author;
+        AuthorText.Text = "- " + Quotes[index].author;
     }
 
     private void NextQuote_Click(object sender, RoutedEventArgs e)

@@ -142,12 +142,42 @@ public partial class MediaWidget : Window
         }
     }
 
-    public void ApplyTheme() => ApplyAppearance();
+    public void ApplyTheme() => RefreshVisualizerStyle();
 
     private void ApplyAppearance()
     {
-        WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14, isLightTheme: _settings.WidgetTheme == 1);
+        bool isLight = _settings.WidgetTheme == 1;
+        WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14, isLightTheme: isLight);
         MainCardBorder.Margin = _settings.MediaShowBackground ? new Thickness(8) : new Thickness(2);
+
+        // Header and track info styling based on theme
+        HeaderTitleText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
+        TrackTitleText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
+        TrackArtistText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
+
+        // Media controls buttons background and foreground
+        var btnBg = isLight
+            ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x18, 0x22, 0x1E, 0x18))
+            : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x1E, 0xFF, 0xFF, 0xFF));
+        var playBtnBg = isLight
+            ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x28, 0x22, 0x1E, 0x18))
+            : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x2A, 0xFF, 0xFF, 0xFF));
+        var btnBorder = isLight
+            ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x20, 0x22, 0x1E, 0x18))
+            : new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x25, 0xFF, 0xFF, 0xFF));
+        var btnFg = WidgetStyles.GetWidgetForeground(isLight);
+
+        PrevBtn.Background = btnBg;
+        PrevBtn.BorderBrush = btnBorder;
+        PrevBtn.Foreground = btnFg;
+
+        PlayPauseBtn.Background = playBtnBg;
+        PlayPauseBtn.BorderBrush = btnBorder;
+        PlayPauseBtn.Foreground = btnFg;
+
+        NextBtn.Background = btnBg;
+        NextBtn.BorderBrush = btnBorder;
+        NextBtn.Foreground = btnFg;
 
         if (_settings.MediaShowTrackDetails)
         {
@@ -177,7 +207,9 @@ public partial class MediaWidget : Window
             2 => (System.Windows.Media.Brush)Resources["BarBrushViolet"],
             3 => (System.Windows.Media.Brush)Resources["BarBrushMint"],
             4 => (System.Windows.Media.Brush)Resources["BarBrushAmber"],
-            _ => (System.Windows.Media.Brush)Resources["BarBrushWhite"]
+            _ => _settings.WidgetTheme == 1
+                ? (System.Windows.Media.Brush)Resources["BarBrushDark"]
+                : (System.Windows.Media.Brush)Resources["BarBrushWhite"]
         };
     }
 
@@ -191,7 +223,9 @@ public partial class MediaWidget : Window
             2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.75),  // violet glow
             3 => (System.Windows.Media.Color.FromRgb(74, 222, 128),  0.75),  // emerald mint glow
             4 => (System.Windows.Media.Color.FromRgb(251, 146, 60),  0.75),  // sunset amber glow
-            _ => (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
+            _ => _settings.WidgetTheme == 1
+                ? (System.Windows.Media.Color.FromRgb(34, 30, 24),   0.30)
+                : (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
         };
         return new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = col, Opacity = op };
     }
