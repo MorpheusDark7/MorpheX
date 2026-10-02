@@ -11,6 +11,7 @@ using System.Windows.Input;
 using MorpheX.Core.Configuration;
 using MorpheX.Core.Models;
 using MorpheX.Core.Services;
+using MorpheX.Views;
 using Serilog;
 
 namespace MorpheX;
@@ -510,7 +511,10 @@ public partial class SettingsPage : Page
             .AppendLine($"Manual pause: {app.PlaybackService.IsManuallyPaused}")
             .AppendLine($"Active wallpapers: {app.WallpaperService.GetAllActiveWallpapers().Count}");
         Clipboard.SetText(builder.ToString());
-        MessageBox.Show("Diagnostics copied to the clipboard.", "Diagnostics", MessageBoxButton.OK, MessageBoxImage.Information);
+        ModernDialogWindow.Success(
+            title:   "Diagnostics",
+            heading: "Copied to clipboard",
+            message: "Diagnostics information has been copied to the clipboard.");
     }
     #endregion
 

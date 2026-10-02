@@ -1,0 +1,142 @@
+<Window
+    x:Class="MorpheX.Views.ModernDialogWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="MorpheX"
+    Width="460"
+    SizeToContent="Height"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="Transparent"
+    ShowInTaskbar="False">
+
+    <Border
+        Margin="16"
+        Background="#1C1C28"
+        CornerRadius="14"
+        BorderBrush="#32324C"
+        BorderThickness="1">
+        <Border.Effect>
+            <DropShadowEffect Color="#000000" BlurRadius="32" Opacity="0.75" ShadowDepth="8" />
+        </Border.Effect>
+
+        <Grid MouseLeftButtonDown="Header_MouseLeftButtonDown">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Top Header Bar with Title and Close 'X' -->
+            <Grid Grid.Row="0" Margin="20,16,16,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    x:Name="WindowTitleText"
+                    Grid.Column="0"
+                    Text="Wallpaper Engine Scene"
+                    FontSize="12"
+                    FontWeight="SemiBold"
+                    Foreground="#8A92A6"
+                    VerticalAlignment="Center" />
+
+                <ui:Button
+                    Grid.Column="1"
+                    x:Name="CloseIconButton"
+                    Icon="{ui:SymbolIcon Dismiss16}"
+                    Appearance="Secondary"
+                    Width="28"
+                    Height="28"
+                    Padding="0"
+                    VerticalAlignment="Center"
+                    Click="CloseButton_Click"
+                    ToolTip="Close" />
+            </Grid>
+
+            <!-- Body Content -->
+            <Grid Grid.Row="1" Margin="20,8,20,18">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Icon Badge with Glow -->
+                <Border
+                    Grid.Column="0"
+                    x:Name="IconContainer"
+                    Width="44"
+                    Height="44"
+                    CornerRadius="12"
+                    Background="#242044"
+                    BorderBrush="#3E3470"
+                    BorderThickness="1"
+                    VerticalAlignment="Top"
+                    Margin="0,2,16,0">
+                    <ui:SymbolIcon
+                        x:Name="DialogSymbolIcon"
+                        Symbol="QuestionCircle24"
+                        FontSize="22"
+                        Foreground="#A78BFA"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center" />
+                </Border>
+
+                <!-- Message Text Container -->
+                <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                    <TextBlock
+                        x:Name="HeadingText"
+                        Text="Wallpaper Engine Scene Wallpaper"
+                        FontSize="15"
+                        FontWeight="SemiBold"
+                        Foreground="#FFFFFF"
+                        TextWrapping="Wrap"
+                        Margin="0,0,0,8" />
+
+                    <TextBlock
+                        x:Name="MessageText"
+                        Text="Description and warning body message goes here."
+                        FontSize="13"
+                        Foreground="#CBD0E0"
+                        TextWrapping="Wrap"
+                        LineHeight="20" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer Action Buttons -->
+            <Border
+                Grid.Row="2"
+                Background="#161622"
+                CornerRadius="0,0,13,13"
+                BorderBrush="#252538"
+                BorderThickness="0,1,0,0"
+                Padding="20,14">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <ui:Button
+                        x:Name="SecondaryButton"
+                        Content="No"
+                        Appearance="Secondary"
+                        MinWidth="84"
+                        Height="34"
+                        Margin="0,0,10,0"
+                        IsCancel="True"
+                        Click="SecondaryButton_Click" />
+
+                    <ui:Button
+                        x:Name="PrimaryButton"
+                        Content="Yes"
+                        Appearance="Primary"
+                        MinWidth="84"
+                        Height="34"
+                        IsDefault="True"
+                        Click="PrimaryButton_Click" />
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</Window>

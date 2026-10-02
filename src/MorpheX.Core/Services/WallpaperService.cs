@@ -105,7 +105,10 @@ public sealed class WallpaperService : IWallpaperService
             return;
         }        
         var filePath = wallpaper.EffectivePath;
-        if (!File.Exists(filePath))
+        bool exists = wallpaper.Type == WallpaperType.Scene
+            ? (Directory.Exists(filePath) || File.Exists(filePath))
+            : File.Exists(filePath);
+        if (!exists)
         {
             var msg = $"Wallpaper file not found on disk:\n{filePath}\n\nIt may have been moved, renamed, or deleted.";
             Log.Error("Wallpaper file not found: {Path}", filePath);
