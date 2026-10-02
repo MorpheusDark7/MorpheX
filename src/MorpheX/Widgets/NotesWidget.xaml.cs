@@ -22,12 +22,37 @@ public partial class NotesWidget : Window
         Width  = Math.Max(140, settings.NotesWidth);
         Height = Math.Max(100, settings.NotesHeight);
 
-        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+        ApplyTheme();
         UpdateLockState();
 
         Loaded  += OnLoaded;
         Closing += OnClosing;
         SizeChanged += OnSizeChanged;
+    }
+
+    public void ApplyTheme()
+    {
+        bool isLight = _settings.WidgetTheme == 1;
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
+
+        HeaderTitleText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
+        NoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
+        NoteText.CaretBrush = isLight
+            ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0x28, 0x20))
+            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0xAA, 0xFF, 0xFF, 0xFF));
+
+        if (ThemeMenuItem != null)
+        {
+            ThemeMenuItem.Header = isLight ? "🌙  Dark Theme" : "☀️  Light Theme";
+        }
+    }
+
+    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
+        ApplyTheme();
+        Save();
+        (Application.Current as App)?.WidgetService.RefreshTheme();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)

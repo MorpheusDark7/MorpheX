@@ -34,6 +34,10 @@ public sealed class TaskbarSettings
 
 public sealed class WidgetSettings
 {
+    // ── Global widget appearance ───────────────────────────────────────
+    /// <summary>0 = Dark (default frosted dark glass), 1 = Light (frosted white/cream glass)</summary>
+    public int WidgetTheme { get; set; } = 0;
+
     // ── Clock ──────────────────────────────────────────────────────────
     public bool ClockEnabled { get; set; } = false;
     public bool ClockIs24Hour { get; set; } = true;

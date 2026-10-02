@@ -85,6 +85,20 @@ public sealed class WidgetService : IDisposable
         });
     }
 
+    public void RefreshTheme()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            _notes?.ApplyTheme();
+            _quote?.ApplyTheme();
+            _calendar?.ApplyTheme();
+            _clock?.ApplyTheme();
+            _day?.ApplyTheme();
+            _sysmon?.ApplyTheme();
+            _media?.ApplyTheme();
+        });
+    }
+
     // ── Core (must run on UI thread) ─────────────────────────────────────────
 
     private void ApplySettingsCore()

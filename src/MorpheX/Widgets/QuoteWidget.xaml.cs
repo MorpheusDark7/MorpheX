@@ -51,11 +51,37 @@ public partial class QuoteWidget : Window
         Left = settings.QuoteX;
         Top  = settings.QuoteY;
 
-        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+        ApplyTheme();
         UpdateLockState();
         ShowQuote(_settings.QuoteIndex);
 
         Closing += OnClosing;
+    }
+
+    public void ApplyTheme()
+    {
+        bool isLight = _settings.WidgetTheme == 1;
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
+
+        QuoteMarkText.Foreground = isLight
+            ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x35, 0x22, 0x1E, 0x18))
+            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF));
+
+        QuoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
+        AuthorText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
+
+        if (ThemeMenuItem != null)
+        {
+            ThemeMenuItem.Header = isLight ? "🌙  Dark Theme" : "☀️  Light Theme";
+        }
+    }
+
+    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
+        ApplyTheme();
+        Save();
+        (Application.Current as App)?.WidgetService.RefreshTheme();
     }
 
     private void ShowQuote(int index)

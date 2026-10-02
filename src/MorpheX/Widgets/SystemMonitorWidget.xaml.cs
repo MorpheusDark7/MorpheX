@@ -171,8 +171,8 @@ public partial class SystemMonitorWidget : Window
             label.Foreground = labelBrush;
         }
 
-        // 3. Background Card Styling (translucent frosted smoked acrylic)
-        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.SysMonShowBackground, 16, _settings.SysMonShowBackground ? new Thickness(10) : new Thickness(4));
+        // 3. Background Card Styling (translucent frosted smoked or cream acrylic)
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.SysMonShowBackground, 16, _settings.SysMonShowBackground ? new Thickness(10) : new Thickness(4), _settings.WidgetTheme == 1);
 
         // Update menu checkmarks
         ToggleCardMenu.Header = _settings.SysMonShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
@@ -185,6 +185,8 @@ public partial class SystemMonitorWidget : Window
         if (_metricsService?.CurrentMetrics != null)
             ApplyMetrics(_metricsService.CurrentMetrics);
     }
+
+    public void ApplyTheme() => RefreshDisplay();
 
     private (System.Windows.Media.Brush arc, System.Windows.Media.Brush track, System.Windows.Media.Brush text, System.Windows.Media.Brush label, DropShadowEffect? glow) GetColorScheme()
     {
@@ -218,13 +220,21 @@ public partial class SystemMonitorWidget : Window
                 new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 251, 146, 60)),
                 new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(251, 146, 60), Opacity = 0.6 }
             ),
-            _ => (
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255)),
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x22, 255, 255, 255)),
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255)),
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 255, 255, 255)),
-                new DropShadowEffect { BlurRadius = 8, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(255, 255, 255), Opacity = 0.35 }
-            )
+            _ => _settings.WidgetTheme == 1
+                ? (
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 30, 24)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x30, 34, 30, 24)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromRgb(24, 20, 16)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x99, 34, 30, 24)),
+                    null
+                )
+                : (
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x22, 255, 255, 255)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 255, 255, 255)),
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(0x88, 255, 255, 255)),
+                    new DropShadowEffect { BlurRadius = 8, ShadowDepth = 0, Color = System.Windows.Media.Color.FromRgb(255, 255, 255), Opacity = 0.35 }
+                )
         };
     }
 

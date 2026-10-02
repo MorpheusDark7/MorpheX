@@ -24,26 +24,56 @@ public partial class CalendarWidget : Window
         _settings = settings;
         Left = settings.CalendarX;
         Top  = settings.CalendarY;
-        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12);
+
+        ApplyTheme();
         UpdateLockState();
-        BuildDayHeaders();
-        RenderMonth(DateTime.Now);
+
         var timer = new DispatcherTimer { Interval = TimeSpan.FromMinutes(1) };
         timer.Tick += (_, _) => { var n = DateTime.Now; if (n.Month != _lastRenderedMonth) RenderMonth(n); };
         timer.Start();
         Closing += OnClosing;
     }
 
+    public void ApplyTheme()
+    {
+        bool isLight = _settings.WidgetTheme == 1;
+        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
+        MonthYearText.Foreground = isLight
+            ? new SolidColorBrush(Color.FromArgb(200, 34, 30, 24))
+            : new SolidColorBrush(Color.FromArgb(140, 255, 255, 255));
+
+        if (ThemeMenuItem != null)
+        {
+            ThemeMenuItem.Header = isLight ? "🌙  Dark Theme" : "☀️  Light Theme";
+        }
+
+        BuildDayHeaders();
+        RenderMonth(DateTime.Now);
+    }
+
+    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
+        ApplyTheme();
+        Save();
+        (Application.Current as App)?.WidgetService.RefreshTheme();
+    }
+
     private void BuildDayHeaders()
     {
+        bool isLight = _settings.WidgetTheme == 1;
         DayHeaders.Children.Clear();
+        var headerBrush = isLight
+            ? new SolidColorBrush(Color.FromArgb(140, 60, 50, 40))
+            : new SolidColorBrush(Color.FromArgb(120, 255, 255, 255));
+
         foreach (var d in new[] { "Su","Mo","Tu","We","Th","Fr","Sa" })
         {
             DayHeaders.Children.Add(new TextBlock
             {
                 Text = d, FontSize = 9, FontWeight = FontWeights.SemiBold,
                 FontFamily = new FontFamily("Segoe UI"),
-                Foreground = new SolidColorBrush(Color.FromArgb(120,255,255,255)),
+                Foreground = headerBrush,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextAlignment = TextAlignment.Center, Width = 26
             });
@@ -52,6 +82,7 @@ public partial class CalendarWidget : Window
 
     private void RenderMonth(DateTime now)
     {
+        bool isLight = _settings.WidgetTheme == 1;
         _lastRenderedMonth = now.Month;
         MonthYearText.Text = now.ToString("MMMM yyyy").ToUpperInvariant();
         DaysGrid.Children.Clear();
@@ -59,17 +90,32 @@ public partial class CalendarWidget : Window
         int startDow = (int)firstDay.DayOfWeek;
         int daysInMonth = DateTime.DaysInMonth(now.Year, now.Month);
         for (int i = 0; i < startDow; i++) DaysGrid.Children.Add(new TextBlock());
+
+        var todayBg = isLight
+            ? new SolidColorBrush(Color.FromRgb(30, 34, 42))     // Dark slate pill for light mode
+            : new SolidColorBrush(Colors.White);                 // Pure white pill for dark mode
+        var todayFg = isLight
+            ? new SolidColorBrush(Colors.White)
+            : new SolidColorBrush(Color.FromRgb(14, 14, 18));
+
+        var regularFg = isLight
+            ? new SolidColorBrush(Color.FromArgb(215, 34, 30, 24))
+            : new SolidColorBrush(Color.FromArgb(200, 255, 255, 255));
+        var weekendFg = isLight
+            ? new SolidColorBrush(Color.FromArgb(130, 80, 70, 60))
+            : new SolidColorBrush(Color.FromArgb(140, 255, 255, 255));
+
         for (int day = 1; day <= daysInMonth; day++)
         {
             if (day == now.Day)
             {
                 var b = new Border { Width=22, Height=22, CornerRadius=new CornerRadius(11),
-                    Background=new SolidColorBrush(Colors.White),
+                    Background=todayBg,
                     HorizontalAlignment=HorizontalAlignment.Center, VerticalAlignment=VerticalAlignment.Center,
                     Margin=new Thickness(2) };
                 b.Child = new TextBlock { Text=day.ToString(), FontSize=10, FontWeight=FontWeights.Bold,
                     FontFamily=new FontFamily("Segoe UI"),
-                    Foreground=new SolidColorBrush(Color.FromRgb(14,14,18)),
+                    Foreground=todayFg,
                     HorizontalAlignment=HorizontalAlignment.Center, VerticalAlignment=VerticalAlignment.Center,
                     TextAlignment=TextAlignment.Center };
                 DaysGrid.Children.Add(b);
@@ -79,7 +125,7 @@ public partial class CalendarWidget : Window
                 bool wend = ((startDow+day-1)%7==0)||((startDow+day-1)%7==6);
                 DaysGrid.Children.Add(new TextBlock { Text=day.ToString(), FontSize=10,
                     FontFamily=new FontFamily("Segoe UI"),
-                    Foreground=new SolidColorBrush(Color.FromArgb(wend?(byte)140:(byte)200,255,255,255)),
+                    Foreground=wend ? weekendFg : regularFg,
                     HorizontalAlignment=HorizontalAlignment.Center, VerticalAlignment=VerticalAlignment.Center,
                     TextAlignment=TextAlignment.Center, Width=26, Margin=new Thickness(2,3,2,3) });
             }

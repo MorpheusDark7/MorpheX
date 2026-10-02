@@ -16,6 +16,7 @@
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem Header="📝  Notes" IsEnabled="False" Foreground="#88FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="ThemeMenuItem" Header="☀️  Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
@@ -45,6 +46,7 @@
             <!-- Header row -->
             <DockPanel Grid.Row="0" Margin="0,0,0,8">
                 <TextBlock
+                    x:Name="HeaderTitleText"
                     Text="NOTES"
                     FontSize="9" FontWeight="Bold"
                     FontFamily="Segoe UI"

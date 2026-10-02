@@ -25,6 +25,7 @@ public partial class WidgetsPage : Page
         var w = app.SettingsService.Settings.Widgets;
 
         LockWidgetsToggle.IsChecked = w.WidgetsLocked;
+        SelectComboItem(WidgetThemeCombo, w.WidgetTheme);
 
         // Clock
         ClockToggle.IsChecked       = w.ClockEnabled;
@@ -95,6 +96,19 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.WidgetsLocked = LockWidgetsToggle.IsChecked == true;
         app.WidgetService.RefreshLockState();
         await app.SettingsService.SaveAsync();
+    }
+
+    private async void WidgetThemeCombo_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        if (WidgetThemeCombo.SelectedItem is ComboBoxItem item &&
+            int.TryParse(item.Tag?.ToString(), out int theme))
+        {
+            app.SettingsService.Settings.Widgets.WidgetTheme = theme;
+            app.WidgetService.RefreshTheme();
+            await app.SettingsService.SaveAsync();
+        }
     }
 
     // ── Clock ────────────────────────────────────────────────────────────────

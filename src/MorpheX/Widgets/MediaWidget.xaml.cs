@@ -142,9 +142,11 @@ public partial class MediaWidget : Window
         }
     }
 
+    public void ApplyTheme() => ApplyAppearance();
+
     private void ApplyAppearance()
     {
-        WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14);
+        WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14, isLightTheme: _settings.WidgetTheme == 1);
         MainCardBorder.Margin = _settings.MediaShowBackground ? new Thickness(8) : new Thickness(2);
 
         if (_settings.MediaShowTrackDetails)

@@ -159,58 +159,119 @@ public static class WidgetStyles
     }
 
     /// <summary>
-    /// Applies an ultra-clean, elegant frosted acrylic glass styling to a widget container border.
-    /// Unlike opaque black boxes, this lets the user's wallpaper shine through with gentle contrast,
-    /// soft specular highlight borders, and ambient depth.
+    /// Applies an ultra-clean frosted glass style to a widget border,
+    /// automatically switching between dark and light themes.
     /// </summary>
-    public static void ApplyFrostedGlass(Border border, bool showBackground, double cornerRadius = 14, Thickness? padding = null)
+    public static void ApplyFrostedGlass(Border border, bool showBackground, double cornerRadius = 14,
+        Thickness? padding = null, bool isLightTheme = false)
     {
         if (showBackground)
         {
-            // Translucent smoked glass gradient (lets wallpaper radiate through, not an opaque box)
-            var bgBrush = new LinearGradientBrush
-            {
-                StartPoint = new System.Windows.Point(0, 0),
-                EndPoint = new System.Windows.Point(0, 1)
-            };
-            bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x2E, 0x10, 0x14, 0x1E), 0.0)); // ~18% slate glass
-            bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x18, 0x08, 0x0A, 0x12), 1.0)); // ~10% light acrylic
+            LinearGradientBrush bgBrush;
+            LinearGradientBrush borderBrush;
+            DropShadowEffect shadow;
 
-            // Specular refraction border (subtle light on top rim, soft fade below)
-            var borderBrush = new LinearGradientBrush
+            if (isLightTheme)
             {
-                StartPoint = new System.Windows.Point(0, 0),
-                EndPoint = new System.Windows.Point(0, 1)
-            };
-            borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF), 0.0)); // subtle hairline top
-            borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x0E, 0xFF, 0xFF, 0xFF), 1.0)); // soft fade bottom
+                // ── Light theme — frosted cream/white glass ──────────────────
+                bgBrush = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 0),
+                    EndPoint   = new System.Windows.Point(0, 1)
+                };
+                // High-alpha white so it reads on bright wallpapers too
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xCC, 0xFF, 0xFD, 0xF7), 0.0)); // warm cream top
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xBB, 0xF5, 0xF3, 0xEE), 1.0)); // soft ivory bottom
 
-            border.Background = bgBrush;
-            border.BorderBrush = borderBrush;
-            border.BorderThickness = new Thickness(1);
-            border.CornerRadius = new CornerRadius(cornerRadius);
-            border.Effect = new DropShadowEffect
+                borderBrush = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 0),
+                    EndPoint   = new System.Windows.Point(0, 1)
+                };
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF), 0.0)); // bright specular top
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x20, 0xA0, 0x90, 0x70), 1.0)); // warm tinted bottom
+
+                shadow = new DropShadowEffect
+                {
+                    Color       = Color.FromRgb(0xA0, 0x90, 0x70),
+                    BlurRadius  = 18,
+                    ShadowDepth = 2,
+                    Opacity     = 0.18
+                };
+            }
+            else
             {
-                Color = Color.FromRgb(0, 0, 0),
-                BlurRadius = 24,
-                ShadowDepth = 2,
-                Opacity = 0.28
-            };
+                // ── Dark theme — smoked dark glass (original) ────────────────
+                bgBrush = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 0),
+                    EndPoint   = new System.Windows.Point(0, 1)
+                };
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x2E, 0x10, 0x14, 0x1E), 0.0));
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x18, 0x08, 0x0A, 0x12), 1.0));
+
+                borderBrush = new LinearGradientBrush
+                {
+                    StartPoint = new System.Windows.Point(0, 0),
+                    EndPoint   = new System.Windows.Point(0, 1)
+                };
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF), 0.0));
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x0E, 0xFF, 0xFF, 0xFF), 1.0));
+
+                shadow = new DropShadowEffect
+                {
+                    Color       = Color.FromRgb(0, 0, 0),
+                    BlurRadius  = 24,
+                    ShadowDepth = 2,
+                    Opacity     = 0.28
+                };
+            }
+
+            border.Background        = bgBrush;
+            border.BorderBrush       = borderBrush;
+            border.BorderThickness   = new Thickness(1);
+            border.CornerRadius      = new CornerRadius(cornerRadius);
+            border.Effect            = shadow;
 
             if (padding.HasValue)
                 border.Padding = padding.Value;
         }
         else
         {
-            border.Background = Brushes.Transparent;
-            border.BorderBrush = Brushes.Transparent;
+            border.Background      = Brushes.Transparent;
+            border.BorderBrush     = Brushes.Transparent;
             border.BorderThickness = new Thickness(0);
-            border.Effect = null;
+            border.Effect          = null;
 
             if (padding.HasValue)
                 border.Padding = new Thickness(4, 2, 4, 2);
         }
     }
+
+    /// <summary>
+    /// Applies the appropriate text foreground color for a widget based on the current theme.
+    /// Dark theme → semi-transparent white; Light theme → dark charcoal.
+    /// </summary>
+    public static System.Windows.Media.Brush GetWidgetForeground(bool isLightTheme, double opacity = 1.0)
+    {
+        if (isLightTheme)
+        {
+            // Dark warm charcoal — readable on the cream background
+            return new SolidColorBrush(Color.FromArgb(
+                (byte)(0xD8 * opacity), 0x22, 0x1E, 0x18));
+        }
+        return new SolidColorBrush(Color.FromArgb(
+            (byte)(0xCC * opacity), 0xFF, 0xFF, 0xFF));
+    }
+
+    /// <summary>Returns a muted/secondary foreground color (labels, subtitles).</summary>
+    public static System.Windows.Media.Brush GetWidgetSubtleForeground(bool isLightTheme)
+    {
+        if (isLightTheme)
+            return new SolidColorBrush(Color.FromArgb(0x80, 0x44, 0x38, 0x28));
+        return new SolidColorBrush(Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF));
+    }
+
 
     /// <summary>
     /// Updates widget locking state: removes resize grips and switches cursors when locked.

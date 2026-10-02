@@ -90,12 +90,18 @@ public partial class ClockWidget : Window
         DateText.Visibility = _settings.ClockShowDate ? Visibility.Visible : Visibility.Collapsed;
 
         // Card background (translucent smoked glass, not an opaque black box)
-        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8));
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8), _settings.WidgetTheme == 1);
 
         // Context menu headers
         ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "⏰  Format: 24-Hour (Click for 12h)" : "⏰  Format: 12-Hour (Click for 24h)";
         ToggleDateMenu.Header = _settings.ClockShowDate ? "📅  Hide Date Line" : "📅  Show Date Line";
         ToggleCardMenu.Header = _settings.ClockShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+    }
+
+    public void ApplyTheme()
+    {
+        ApplyAppearance();
+        Tick();
     }
 
     private (System.Windows.Media.Brush time, System.Windows.Media.Brush date) GetColorBrushes()
@@ -126,10 +132,15 @@ public partial class ClockWidget : Window
                 new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 191, 36)),        // Amber Gold
                 new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 191, 36))
             ),
-            _ => (
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(240, 255, 255, 255)), // Pure White
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(140, 255, 255, 255))
-            )
+            _ => _settings.WidgetTheme == 1
+                ? (
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 34, 30, 24)),  // Crisp dark charcoal for light mode
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 68, 56, 40))
+                )
+                : (
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(240, 255, 255, 255)), // Pure White
+                    new SolidColorBrush(System.Windows.Media.Color.FromArgb(140, 255, 255, 255))
+                )
         };
     }
 

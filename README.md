@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.30-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.31-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -116,6 +116,11 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.31
+- **Windows 11 Taskbar Fix** — Implemented an automatic 900ms DWM composition refresher loop, corrected unmanaged memory layout, and set `AccentFlags = 2` to keep Clear, Blur, and Acrylic taskbar effects persistently active against Windows 11 shell repaints.
+- **Light Theme for Widgets** — Added a dedicated Light Mode option for widgets (Notes, Daily Quotes, Calendar, Clock, System Monitor, and Media). Renders frosted ivory/cream glass with high-contrast typography optimized for bright wallpapers.
+- **Widget Context Menu Theme Switcher** — Quickly toggle between Dark and Light mode directly from widget right-click menus or from the Widgets settings page.
 
 ### v0.1.30
 - **Taskbar Styling** — Built-in Clear, Blur, and Acrylic taskbar effects (primary + all secondary monitors). Resets to default when MorpheX closes.
