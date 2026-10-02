@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -71,6 +72,10 @@ public partial class WidgetsPage : Page
 
         // Taskbar
         SelectComboItem(TaskbarStyleCombo, app.SettingsService.Settings.Taskbar.Style);
+
+        // Show Windows 11 22H2+ compatibility notice when SWCA doesn't work on XAML taskbar
+        if (TaskbarStyleService.IsModernWindows11)
+            Win11TaskbarNotice.Visibility = Visibility.Visible;
 
         _isInitializing = false;
     }
@@ -323,6 +328,28 @@ public partial class WidgetsPage : Page
             app.SettingsService.Settings.Taskbar.Style = style;
             app.TaskbarStyleService.Apply((TaskbarStyleService.TaskbarStyle)style);
             await app.SettingsService.SaveAsync();
+        }
+    }
+
+    private void GetTranslucentTbBtn_Click(object sender, RoutedEventArgs e)
+    {
+        // Open TranslucentTB in the Microsoft Store
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName   = "ms-windows-store://pdp/?ProductId=9PF4KZ2VN4W9",
+                UseShellExecute = true
+            });
+        }
+        catch
+        {
+            // Fallback to web if Store URI fails
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://apps.microsoft.com/detail/9pf4kz2vn4w9",
+                UseShellExecute = true
+            });
         }
     }
 }
