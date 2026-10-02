@@ -18,7 +18,19 @@ public sealed class AppSettings
 
     public Dictionary<string, MonitorAssignment> MonitorAssignments { get; set; } = new();
     public WidgetSettings Widgets { get; set; } = new();
+    public TaskbarSettings Taskbar { get; set; } = new();
 }
+
+/// <summary>
+/// Controls the visual style applied to the Windows taskbar.
+/// 0 = Default (no modification), 1 = Clear, 2 = Blur, 3 = Acrylic.
+/// </summary>
+public sealed class TaskbarSettings
+{
+    /// <summary>0 = Default, 1 = Clear, 2 = Blur, 3 = Acrylic</summary>
+    public int Style { get; set; } = 0;
+}
+
 
 public sealed class WidgetSettings
 {

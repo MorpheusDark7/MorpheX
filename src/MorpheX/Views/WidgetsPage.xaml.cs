@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using ComboBox = System.Windows.Controls.ComboBox;
 using ComboBoxItem = System.Windows.Controls.ComboBoxItem;
 using Application = System.Windows.Application;
+using MorpheX.Services;
 
 namespace MorpheX;
 
@@ -66,6 +67,9 @@ public partial class WidgetsPage : Page
         CalendarToggle.IsChecked = w.CalendarEnabled;
         NotesToggle.IsChecked    = w.NotesEnabled;
         QuoteToggle.IsChecked    = w.QuoteEnabled;
+
+        // Taskbar
+        SelectComboItem(TaskbarStyleCombo, app.SettingsService.Settings.Taskbar.Style);
 
         _isInitializing = false;
     }
@@ -290,5 +294,21 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
+    }
+
+    // ── Taskbar ─────────────────────────────────────────────────────────────────────────
+
+    private async void TaskbarStyleCombo_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+
+        if (TaskbarStyleCombo.SelectedItem is ComboBoxItem item &&
+            int.TryParse(item.Tag?.ToString(), out int style))
+        {
+            app.SettingsService.Settings.Taskbar.Style = style;
+            app.TaskbarStyleService.Apply((TaskbarStyleService.TaskbarStyle)style);
+            await app.SettingsService.SaveAsync();
+        }
     }
 }

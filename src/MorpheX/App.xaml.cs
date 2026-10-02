@@ -31,6 +31,7 @@ public partial class App : Application
     public SystemMetricsService SystemMetricsService { get; } = new();
     public UpdateService UpdateService { get; } = new();
     public WidgetService WidgetService { get; private set; } = null!;
+    public TaskbarStyleService TaskbarStyleService { get; } = new();
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -102,6 +103,11 @@ public partial class App : Application
         _splash?.SetStatus("Loading settings...");
         _splash?.SetProgress(0.10);
         await SettingsService.LoadAsync();
+
+        // Apply saved taskbar style immediately after settings load
+        var savedStyle = (TaskbarStyleService.TaskbarStyle)SettingsService.Settings.Taskbar.Style;
+        if (savedStyle != TaskbarStyleService.TaskbarStyle.Default)
+            TaskbarStyleService.Apply(savedStyle);
 
         _splash?.SetStatus("Loading wallpaper library...");
         _splash?.SetProgress(0.30);
@@ -655,6 +661,7 @@ public partial class App : Application
         PlaybackService?.Dispose();
         _ambientDimService?.Dispose();
         WidgetService?.Dispose();
+        TaskbarStyleService?.Dispose();  // Reset taskbar to system default before exit
         WallpaperService?.Dispose();
         MonitorService?.Dispose();
 

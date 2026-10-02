@@ -21,6 +21,8 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -41,6 +43,9 @@ jobs:
           Remove-Item -Path ./publish/*.pdb, ./publish/*.xml, ./publish/libvlc/win-x64/*.lib, ./publish/libvlc/win-x64/vlc-cache-gen.exe -Force -ErrorAction SilentlyContinue
           Remove-Item -Path ./publish/libvlc/win-x64/lua, ./publish/libvlc/win-x64/hrtfs, ./publish/runtimes -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -Path ./publish/libvlc/win-arm64, ./publish/libvlc/win-x86 -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access_output, ./publish/libvlc/win-x64/plugins/stream_out, ./publish/libvlc/win-x64/plugins/mux, ./publish/libvlc/win-x64/plugins/services_discovery, ./publish/libvlc/win-x64/plugins/keystore, ./publish/libvlc/win-x64/plugins/visualization, ./publish/libvlc/win-x64/plugins/video_splitter -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access/libdcp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libaccess_srt_plugin.dll, ./publish/libvlc/win-x64/plugins/access/librist_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblibbluray_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libcdda_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libdtv_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsftp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/*.jar, ./publish/libvlc/win-x64/plugins/access/librtp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblive555_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libnfs_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvcd_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvdr_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsatip_plugin.dll -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/codec/libzvbi_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libgme_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libx26410b_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libaom_plugin.dll, ./publish/libvlc/win-x64/plugins/audio_filter/libspatialaudio_plugin.dll, ./publish/libvlc/win-x64/plugins/video_output/libcaca_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpuzzle_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libball_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpsychedelic_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libanaglyph_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libripple_plugin.dll -Force -ErrorAction SilentlyContinue
           Get-ChildItem -Path ./publish -Directory | Where-Object { (Get-ChildItem $_.FullName -Recurse -File).Count -eq 0 } | Remove-Item -Recurse -Force
 
       - name: Compile Inno Setup Installer
@@ -81,7 +86,7 @@ jobs:
           # Step 2: Switch to main branch
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
+          git fetch origin main:main
           git checkout main
 
           # Step 3: Remove old installers, copy in new one
@@ -92,7 +97,7 @@ jobs:
           git add "docs/$installerName"
           $staged = (git diff --cached --name-only).Trim()
           if ($staged) {
-            git commit -m "release: deploy $installerName to GitHub Pages for Microsoft Store"
+            git commit -m "release: deploy $installerName to GitHub Pages for Microsoft Store [skip ci]"
             git push origin main
             Write-Host "Deployed $installerName to docs/"
           } else {

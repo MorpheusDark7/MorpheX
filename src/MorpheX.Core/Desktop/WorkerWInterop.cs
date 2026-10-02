@@ -23,25 +23,18 @@ public sealed class WorkerWInterop
         }
         Log.Debug("Found Progman: 0x{Handle:X}", _progmanHandle);
 
+        // Single message is enough to spawn WorkerW on first run;
+        // the second identical call was redundant and added 1s of timeout overhead.
         NativeMethods.SendMessageTimeout(
             _progmanHandle,
             0x052C,
             new IntPtr(0x0000000D),
             new IntPtr(1),
             NativeMethods.SMTO_NORMAL,
-            1000,
+            500,
             out _);
 
-        NativeMethods.SendMessageTimeout(
-            _progmanHandle,
-            0x052C,
-            IntPtr.Zero,
-            IntPtr.Zero,
-            NativeMethods.SMTO_NORMAL,
-            1000,
-            out _);
-
-        Thread.Sleep(150);
+        Thread.Sleep(50); // Brief yield so Explorer processes the message
 
         Log.Debug("Sent WorkerW spawn message to Progman");
 
@@ -67,17 +60,17 @@ public sealed class WorkerWInterop
 
     private IntPtr FindDesktopWorkerW()
     {
-        for (int attempt = 0; attempt < 5; attempt++)
+        for (int attempt = 0; attempt < 3; attempt++)  // 3 attempts (was 5) — WorkerW is almost always immediate
         {
             if (attempt > 0)
             {
-                Log.Debug("WorkerW search attempt {Attempt}/5...", attempt + 1);
-                Thread.Sleep(200);
+                Log.Debug("WorkerW search attempt {Attempt}/3...", attempt + 1);
+                Thread.Sleep(100);  // 100ms (was 200ms) between retries
 
                 NativeMethods.SendMessageTimeout(
                     _progmanHandle, 0x052C,
                     new IntPtr(0xD), new IntPtr(1),
-                    NativeMethods.SMTO_NORMAL, 1000, out _);
+                    NativeMethods.SMTO_NORMAL, 500, out _);
             }
 
             var childWorkerW = NativeMethods.FindWindowEx(_progmanHandle, IntPtr.Zero, "WorkerW", null);
@@ -122,7 +115,7 @@ public sealed class WorkerWInterop
             }
         }
 
-        Log.Warning("Could not locate desktop WorkerW after 5 attempts, falling back to Progman 0x{Handle:X}", _progmanHandle);
+        Log.Warning("Could not locate desktop WorkerW after 3 attempts, falling back to Progman 0x{Handle:X}", _progmanHandle);
         return _progmanHandle;
     }
 }

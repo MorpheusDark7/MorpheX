@@ -12,6 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
+  <img src="https://img.shields.io/badge/version-0.1.30-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -32,19 +33,16 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 
 - **Direct3D 11 Hardware Acceleration**: Powered by LibVLC with native GPU decoding (`.mp4`, `.webm`, `.mov`, `.mkv`, `.gif`).
 - **Smart Pause Detection**: Automatically freezes video playback when running fullscreen games or applications so your frame rates never take a hit.
-- **Multi-Monitor Setup**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
-- **Wallpaper Playlist & Auto-Rotation**:
-  - Shuffle or cycle through your library on a customizable timer (from 1 minute up to 24 hours).
-  - Filter by favorites so only your top wallpapers play.
-  - Postpones rotation while you are in a game or when paused.
-- **Minimal System Stats Widget**:
-  - A sleek status bar at the bottom showing CPU load, GPU 3D/video usage, system RAM, and MorpheX's exact memory footprint.
-  - Automatically suspends polling when the window is minimized or closed to the tray to save CPU cycles.
-- **Custom Global Hotkeys**:
-  - Set your own keyboard shortcuts to quickly pause/resume, mute/unmute, or skip to the next wallpaper from anywhere in Windows.
-  - Left completely unassigned by default so nothing clashes with your existing game keybinds.
-- **Native Windows Shell Integration**: Embeds cleanly behind your desktop icons using the Windows `WorkerW` layer without interfering with desktop clicks or shortcuts.
-- **1-Click Built-in Updates**: Check for and install updates directly inside the app with a single click.
+- **Multi-Monitor Support**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
+- **Wallpaper Playlist & Auto-Rotation**: Shuffle or cycle through your library on a customizable timer. Filter by favorites. Postpones rotation while in a game.
+- **Desktop Widgets**: Transparent, drag-and-drop overlays — Clock, Day Name, System Monitor (CPU/GPU/RAM/Disk), Audio Visualizer, Calendar, Notes, and Motivational Quotes.
+- **Taskbar Styling**: Apply Clear, Blur (Aero Glass), or Acrylic (Frosted Glass) effects to your taskbar — including secondary monitor taskbars. Resets automatically when MorpheX exits.
+- **System Monitor Widget**: Simplicity Circles showing real-time CPU, GPU, RAM, and Disk usage. Supports multi-GPU setups with discrete GPU tracking.
+- **Audio Visualizer**: Reactive bar, mirrored, or waveform visualizer synced to your system audio, with an optional neon glow toggle.
+- **Custom Global Hotkeys**: Set keyboard shortcuts to pause/resume, mute/unmute, or skip wallpapers from anywhere in Windows.
+- **Native Windows Shell Integration**: Embeds cleanly behind your desktop icons using the `WorkerW` layer without interfering with desktop clicks.
+- **1-Click Built-in Updates**: Check for and install updates directly inside the app.
+- **Fast Startup**: Optimized desktop integration initialization — typically under 1 second on most systems.
 
 ---
 
@@ -56,7 +54,7 @@ Grab the latest setup from the [**Releases**](https://github.com/MorpheusDark7/M
 2. Run the installer and click Next.
 3. Launch MorpheX from your Start Menu or Desktop.
 
-*(Future updates can be installed with a single click right inside the app settings—you won't need to reinstall or re-configure your wallpapers).*
+*(Future updates can be installed with a single click right inside the app settings.)*
 
 ---
 
@@ -71,8 +69,6 @@ Grab the latest setup from the [**Releases**](https://github.com/MorpheusDark7/M
 ---
 
 ## Building from Source
-
-If you want to build MorpheX yourself:
 
 ### Requirements
 - Windows 10 (1809+) or Windows 11 (64-bit)
@@ -104,18 +100,43 @@ To compile the setup installer, open `installer.iss` in [Inno Setup 6](https://j
 ```
 MorpheX/
 ├── src/
-│   ├── MorpheX/             # WPF Front-end UI (MVVM, Fluent Design, Views, Hotkeys)
+│   ├── MorpheX/             # WPF Front-end UI (MVVM, Fluent Design, Views, Widgets)
 │   └── MorpheX.Core/        # Core Engine
-│       ├── Configuration/   # App settings & Library manifests
-│       ├── Desktop/         # Win32 WorkerW shell injection & host windows
+│       ├── Configuration/   # App settings & library manifests
+│       ├── Desktop/         # Win32 WorkerW shell integration & host windows
 │       ├── Detection/       # Fullscreen, battery, and Explorer restart watchers
 │       ├── Models/          # Monitor, wallpaper, and performance data models
 │       ├── Providers/       # Video (LibVLC) and image wallpaper providers
-│       ├── Services/        # Playback, playlist, audio, and auto-update services
+│       ├── Services/        # Playback, playlist, audio, metrics, and update services
 │       └── Utilities/       # Win32 memory trimming & shell thumbnail helpers
 ├── installer.iss            # Inno Setup packaging script
 └── .github/workflows/       # GitHub Actions CI/CD pipeline
 ```
+
+---
+
+## Changelog
+
+### v0.1.30
+- **Taskbar Styling** — Built-in Clear, Blur, and Acrylic taskbar effects (primary + all secondary monitors). Resets to default when MorpheX closes.
+- **Faster Startup** — Reduced WorkerW initialization overhead: single spawn message, shorter sleep intervals, and fewer retry attempts.
+- **Widget Tips** — Cleaned up the Desktop Tips card in the Widgets page.
+- **CI Fix** — Fixed GitHub Actions deploy step that was dropping the installer before copying to `docs/`.
+
+### v0.1.29
+- Fixed CI deploy step (copy installer to TEMP before branch switch).
+
+### v0.1.28
+- Toggleable neon glow for the audio visualizer.
+- Frosted glass acrylic background option for the Media widget.
+- Optimized installer size by stripping unused VLC architecture runtimes.
+- Auto-deploy installer to GitHub Pages for direct download.
+
+### v0.1.27
+- Acrylic frosted glass widget backgrounds.
+- Multi-GPU engine tracking (dGPU load for discrete GPUs).
+- Hide resize grips when widgets are locked.
+- Mond / Anurati font support for Day widget.
 
 ---
 

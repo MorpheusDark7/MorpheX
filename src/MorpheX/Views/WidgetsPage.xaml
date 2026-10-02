@@ -382,20 +382,39 @@
                 </Grid>
             </Border>
 
+            <!-- ─── TASKBAR ─────────────────────────────────────────── -->
+            <TextBlock Text="TASKBAR" Style="{StaticResource SectionHeaderStyle}"/>
+
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Text="Taskbar Style" Style="{StaticResource SettingLabelStyle}"/>
+                    <TextBlock Text="Change the taskbar look. Clear and Blur work best with a wallpaper behind them."
+                               Style="{StaticResource SettingDescriptionStyle}" Margin="0,2,0,10"/>
+                    <ComboBox x:Name="TaskbarStyleCombo" SelectionChanged="TaskbarStyleCombo_Changed">
+                        <ComboBoxItem Content="Default (Windows)" Tag="0"/>
+                        <ComboBoxItem Content="Clear (Fully Transparent)" Tag="1"/>
+                        <ComboBoxItem Content="Blur (Aero Glass)" Tag="2"/>
+                        <ComboBoxItem Content="Acrylic (Frosted Glass)" Tag="3"/>
+                    </ComboBox>
+                </StackPanel>
+            </Border>
+
             <Border Background="#0A38BDF8" BorderBrush="#1A38BDF8" BorderThickness="1"
                     CornerRadius="8" Padding="14,10" Margin="0,20,0,0">
                 <StackPanel>
-                    <TextBlock Text="💡  Desktop Customization Tips" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8" Margin="0,0,0,4"/>
+                    <TextBlock Text="💡  Desktop Tips" FontSize="12" FontWeight="SemiBold" Foreground="#38BDF8" Margin="0,0,0,4"/>
                     <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#AAFFFFFF" LineHeight="18">
-                        <Run>• Drag any widget to reposition — coordinates save automatically on release.</Run>
+                        <Run>• Drag any widget to move it. Position saves automatically.</Run>
                         <LineBreak/>
-                        <Run>• Right-click any widget to Lock, customize sizes, choose colors, or switch layouts on the fly.</Run>
+                        <Run>• Right-click a widget to lock it, change colors, or resize.</Run>
                         <LineBreak/>
-                        <Run>• Double-click Clock to flip between 12h and 24h format.</Run>
+                        <Run>• Double-click the Clock widget to toggle 12h/24h.</Run>
                         <LineBreak/>
-                        <Run>• Audio Visualizer &amp; Notes are resizable from the bottom-right corner.</Run>
+                        <Run>• Audio Visualizer and Notes resize from the bottom-right corner.</Run>
                         <LineBreak/>
-                        <Run>• Widgets stay pinned behind your apps (HWND_BOTTOM) and consume negligible resources.</Run>
+                        <Run>• Widgets may use extra system resources. Test and pick what works for your setup.</Run>
                     </TextBlock>
                 </StackPanel>
             </Border>
