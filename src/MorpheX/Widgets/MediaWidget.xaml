@@ -14,26 +14,26 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Show Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
-            <MenuItem x:Name="ToggleDetailsMenu" Header="🎵  Show Track Details" Click="ToggleDetails_Click" Foreground="#FFFFFF"/>
-            <MenuItem x:Name="ToggleGlowMenu" Header="✨  Toggle Glow Effect" Click="ToggleGlow_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleCardMenu" Header="Show Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleDetailsMenu" Header="Show Track Details" Click="ToggleDetails_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleGlowMenu" Header="Toggle Glow Effect" Click="ToggleGlow_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="📊  Equalizer Bars" Click="StyleBars_Click" Foreground="#FFFFFF"/>
-            <MenuItem Header="🪞  Mirrored Center" Click="StyleMirrored_Click" Foreground="#FFFFFF"/>
-            <MenuItem Header="🌊  Waveform Curve" Click="StyleWaveform_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Equalizer Bars" Click="StyleBars_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Mirrored Center" Click="StyleMirrored_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Waveform Curve" Click="StyleWaveform_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="🎨  Color Theme">
-                <MenuItem Header="⚪  Minimalist White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
-                <MenuItem Header="🔵  Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
-                <MenuItem Header="🟣  Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
-                <MenuItem Header="🟢  Emerald Mint" Click="ColorMint_Click" Foreground="#4ADE80"/>
-                <MenuItem Header="🟠  Sunset Amber" Click="ColorAmber_Click" Foreground="#FB923C"/>
+            <MenuItem Header="Color Theme">
+                <MenuItem Header="Minimalist White" Click="ColorWhite_Click" Foreground="#FFFFFF"/>
+                <MenuItem Header="Cyber Neon Cyan" Click="ColorCyan_Click" Foreground="#38BDF8"/>
+                <MenuItem Header="Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
+                <MenuItem Header="Emerald Mint" Click="ColorMint_Click" Foreground="#4ADE80"/>
+                <MenuItem Header="Sunset Amber" Click="ColorAmber_Click" Foreground="#FB923C"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
-            <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
+            <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem Header="Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+            <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
     </Window.ContextMenu>
 

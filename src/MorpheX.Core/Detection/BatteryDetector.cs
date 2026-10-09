@@ -6,8 +6,10 @@ public sealed class BatteryDetector
     {
         if (Desktop.NativeMethods.GetSystemPowerStatus(out var status))
         {
-            return !status.IsOnAcPower;
+            // ACLineStatus: 0=offline (battery), 1=online (AC), 255=unknown/no battery (desktop)
+            // Treat unknown (255) as AC-powered — desktops have no battery.
+            return status.ACLineStatus == 0;
         }
-        return false;
+        return false; // If API fails, assume AC power (safe default)
     }
 }

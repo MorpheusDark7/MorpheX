@@ -58,6 +58,7 @@
                 <ui:TextBox
                     x:Name="SearchBox"
                     Width="180"
+                    MaxLength="100"
                     PlaceholderText="Search..."
                     Icon="{ui:SymbolIcon Search24}"
                     TextChanged="SearchBox_TextChanged"

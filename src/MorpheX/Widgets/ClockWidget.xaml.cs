@@ -25,8 +25,9 @@ public partial class ClockWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.ClockX;
-        Top  = settings.ClockY;
+        // Position by stored centre so switching 12h/24h or font size never shifts the clock
+        Loaded      += (_, _) => RecenterFromAnchor();
+        SizeChanged += (_, _) => RecenterFromAnchor();
 
         ApplyAppearance();
         UpdateLockState();
@@ -37,6 +38,12 @@ public partial class ClockWidget : Window
         Tick();
 
         Closing += OnClosing;
+    }
+
+    private void RecenterFromAnchor()
+    {
+        if (ActualWidth  > 0) Left = _settings.ClockX - ActualWidth  / 2;
+        if (ActualHeight > 0) Top  = _settings.ClockY - ActualHeight / 2;
     }
 
     public void RefreshFormat()
@@ -92,10 +99,10 @@ public partial class ClockWidget : Window
         // Card background (translucent smoked glass, not an opaque black box)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8), _settings.WidgetTheme == 1);
 
-        // Context menu headers
-        ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "⏰  Format: 24-Hour (Click for 12h)" : "⏰  Format: 12-Hour (Click for 24h)";
-        ToggleDateMenu.Header = _settings.ClockShowDate ? "📅  Hide Date Line" : "📅  Show Date Line";
-        ToggleCardMenu.Header = _settings.ClockShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+        // Context menu headers (no emoji)
+        ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "Format: 24-Hour (click for 12h)" : "Format: 12-Hour (click for 24h)";
+        ToggleDateMenu.Header   = _settings.ClockShowDate ? "Hide Date Line" : "Show Date Line";
+        ToggleCardMenu.Header   = _settings.ClockShowBackground ? "Hide Background Card" : "Show Background Card";
     }
 
     public void ApplyTheme()
@@ -223,7 +230,7 @@ public partial class ClockWidget : Window
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
@@ -236,16 +243,18 @@ public partial class ClockWidget : Window
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        _settings.ClockX = Left;
-        _settings.ClockY = Top;
+        // Save centre coordinates
+        _settings.ClockX = Left + ActualWidth  / 2;
+        _settings.ClockY = Top  + ActualHeight / 2;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        _settings.ClockX = Left;
-        _settings.ClockY = Top;
+        // Save centre, not top-left
+        _settings.ClockX = Left + ActualWidth  / 2;
+        _settings.ClockY = Top  + ActualHeight / 2;
     }
 
     private void Save()

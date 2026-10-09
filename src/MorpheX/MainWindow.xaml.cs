@@ -171,11 +171,10 @@ public partial class MainWindow : FluentWindow
         catch (Exception ex)
         {
             Serilog.Log.Error(ex, "Failed to navigate to {PageType}", pageType.Name);
-            System.Windows.MessageBox.Show(
-                $"Failed to load {pageType.Name}:\n\n{ex.Message}",
-                "Navigation Error",
-                System.Windows.MessageBoxButton.OK,
-                System.Windows.MessageBoxImage.Error);
+            MorpheX.Views.ModernDialogWindow.Error(
+                title:   "Navigation Error",
+                heading: $"Could not load {pageType.Name}",
+                message: ex.Message);
         }
     }
 

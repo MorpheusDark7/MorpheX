@@ -320,7 +320,7 @@ public partial class SystemMonitorWidget : Window
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

@@ -14,13 +14,13 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem Header="📝  Notes" IsEnabled="False" Foreground="#88FFFFFF"/>
+            <MenuItem Header="Notes" IsEnabled="False" Foreground="#88FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="ThemeMenuItem" Header="☀️  Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
-            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
-            <MenuItem Header="📐  Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
+            <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem Header="Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+            <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
     </Window.ContextMenu>
 
@@ -66,6 +66,7 @@
             <TextBox
                 x:Name="NoteText"
                 Grid.Row="1"
+                MaxLength="2000"
                 TextWrapping="Wrap"
                 AcceptsReturn="True"
                 VerticalScrollBarVisibility="Auto"

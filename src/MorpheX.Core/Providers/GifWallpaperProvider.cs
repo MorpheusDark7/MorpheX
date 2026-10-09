@@ -1,6 +1,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 using MorpheX.Core.Desktop;
 using MorpheX.Core.Models;
 using Serilog;
@@ -210,17 +211,29 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
             _gifImage.SelectActiveFrame(_gifDimension, _currentFrame);
 
             using var g = Graphics.FromImage(_frameBuffer);
-            g.CompositingMode = CompositingMode.SourceCopy;
-            g.CompositingQuality = CompositingQuality.HighSpeed;
-
-            // Use NearestNeighbor for GIF frames — avoids blurring the palette-based pixels
-            // and is dramatically faster. Bicubic on 256-colour GIFs causes colour bleeding.
-            g.InterpolationMode = InterpolationMode.NearestNeighbor;
-            g.SmoothingMode    = SmoothingMode.None;
-            g.PixelOffsetMode  = PixelOffsetMode.Half;   // needed for NearestNeighbor accuracy
+            g.CompositingMode    = CompositingMode.SourceCopy;
+            g.CompositingQuality = CompositingQuality.HighQuality;
             g.Clear(Color.Black);
 
             var (destRect, srcRect) = CalculateDestRect(_gifImage.Width, _gifImage.Height, _width, _height, _scaling);
+
+            // Choose interpolation based on whether we are upscaling or downscaling/1:1.
+            // Upscaling a photographic GIF to fill 4K: HighQualityBicubic gives a smooth result.
+            // Downscaling or 1:1: NearestNeighbor is pixel-exact and much faster.
+            bool isUpscaling = destRect.Width > srcRect.Width || destRect.Height > srcRect.Height;
+            if (isUpscaling)
+            {
+                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode     = SmoothingMode.HighQuality;
+                g.PixelOffsetMode   = PixelOffsetMode.HighQuality;
+            }
+            else
+            {
+                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                g.SmoothingMode     = SmoothingMode.None;
+                g.PixelOffsetMode   = PixelOffsetMode.Half;
+            }
+
             g.DrawImage(_gifImage, destRect, srcRect, GraphicsUnit.Pixel);
         }
         catch (Exception ex)
@@ -237,23 +250,37 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
         {
             lock (_renderLock)
             {
-                using var graphics = Graphics.FromHdc(hdc);
-                // NearestNeighbor + None = pixel-exact blit; no interpolation smearing
-                graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
-                graphics.PixelOffsetMode   = PixelOffsetMode.Half;
-                graphics.CompositingMode   = CompositingMode.SourceCopy;
-
-                var destRect = new System.Drawing.Rectangle(0, 0, _width, _height);
-
                 if (_colorMatrix != null)
                 {
+                    // Color matrix path: must go through GDI+ DrawImage
+                    using var graphics = Graphics.FromHdc(hdc);
+                    graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                    graphics.PixelOffsetMode   = PixelOffsetMode.Half;
+                    graphics.CompositingMode   = CompositingMode.SourceCopy;
                     using var ia = new ImageAttributes();
                     ia.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                    var destRect = new System.Drawing.Rectangle(0, 0, _width, _height);
                     graphics.DrawImage(_frameBuffer, destRect, 0, 0, _width, _height, GraphicsUnit.Pixel, ia);
                 }
                 else
                 {
-                    graphics.DrawImage(_frameBuffer, destRect, 0, 0, _width, _height, GraphicsUnit.Pixel);
+                    // Fast path: use native BitBlt for a perfect pixel-for-pixel copy.
+                    // This avoids the GDI+ scaling/compositing pipeline entirely,
+                    // eliminating all blur regardless of DPI settings.
+                    IntPtr srcDc = GdiNative.CreateCompatibleDC(hdc);
+                    if (srcDc == IntPtr.Zero) return;
+                    try
+                    {
+                        IntPtr hBitmap = _frameBuffer.GetHbitmap();
+                        IntPtr oldBmp  = GdiNative.SelectObject(srcDc, hBitmap);
+                        GdiNative.BitBlt(hdc, 0, 0, _width, _height, srcDc, 0, 0, GdiNative.SRCCOPY);
+                        GdiNative.SelectObject(srcDc, oldBmp);
+                        GdiNative.DeleteObject(hBitmap);
+                    }
+                    finally
+                    {
+                        GdiNative.DeleteDC(srcDc);
+                    }
                 }
             }
         }
@@ -261,6 +288,20 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
         {
             Log.Debug(ex, "Failed to paint GIF buffer to HDC");
         }
+    }
+
+    /// <summary>Minimal GDI P/Invoke surface for the BitBlt fast path.</summary>
+    private static class GdiNative
+    {
+        internal const uint SRCCOPY = 0x00CC0020;
+
+        [DllImport("gdi32.dll")] internal static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+        [DllImport("gdi32.dll")] internal static extern bool   DeleteDC(IntPtr hdc);
+        [DllImport("gdi32.dll")] internal static extern IntPtr SelectObject(IntPtr hdc, IntPtr h);
+        [DllImport("gdi32.dll")] internal static extern bool   DeleteObject(IntPtr h);
+        [DllImport("gdi32.dll")]
+        internal static extern bool BitBlt(IntPtr hdcDest, int x, int y, int w, int h,
+                                           IntPtr hdcSrc,  int xSrc, int ySrc, uint rop);
     }
 
     private static (RectangleF destRect, RectangleF srcRect) CalculateDestRect(

@@ -48,14 +48,22 @@ public partial class QuoteWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.QuoteX;
-        Top  = settings.QuoteY;
+        // Centre-anchor: QuoteX/QuoteY store the widget's centre.
+        // When cycling quotes the card width changes — keep visual centre fixed.
+        Loaded      += (_, _) => RecenterFromAnchor();
+        SizeChanged += (_, _) => RecenterFromAnchor();
 
         ApplyTheme();
         UpdateLockState();
         ShowQuote(_settings.QuoteIndex);
 
         Closing += OnClosing;
+    }
+
+    private void RecenterFromAnchor()
+    {
+        if (ActualWidth  > 0) Left = _settings.QuoteX - ActualWidth  / 2;
+        if (ActualHeight > 0) Top  = _settings.QuoteY - ActualHeight / 2;
     }
 
     public void ApplyTheme()
@@ -72,7 +80,7 @@ public partial class QuoteWidget : Window
 
         if (ThemeMenuItem != null)
         {
-            ThemeMenuItem.Header = isLight ? "🌙  Dark Theme" : "☀️  Light Theme";
+            ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
         }
     }
 
@@ -116,7 +124,7 @@ public partial class QuoteWidget : Window
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
@@ -128,16 +136,17 @@ public partial class QuoteWidget : Window
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        _settings.QuoteX = Left;
-        _settings.QuoteY = Top;
+        // Save centre, not top-left
+        _settings.QuoteX = Left + ActualWidth  / 2;
+        _settings.QuoteY = Top  + ActualHeight / 2;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        _settings.QuoteX = Left;
-        _settings.QuoteY = Top;
+        _settings.QuoteX = Left + ActualWidth  / 2;
+        _settings.QuoteY = Top  + ActualHeight / 2;
     }
 
     private void Save()

@@ -17,36 +17,36 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem Header="📏  Size">
+            <MenuItem Header="Size">
                 <MenuItem Header="Small (44px)" Click="SizePreset_Click" Tag="0"/>
                 <MenuItem Header="Medium (56px)" Click="SizePreset_Click" Tag="1"/>
                 <MenuItem Header="Large (72px)" Click="SizePreset_Click" Tag="2"/>
                 <MenuItem Header="Extra Large (90px)" Click="SizePreset_Click" Tag="3"/>
             </MenuItem>
-            <MenuItem Header="🎨  Color Theme">
-                <MenuItem Header="⚪  Pure White" Click="ColorPreset_Click" Tag="0"/>
-                <MenuItem Header="🔵  Cyan Neon" Click="ColorPreset_Click" Tag="1"/>
-                <MenuItem Header="🟢  Emerald Mint" Click="ColorPreset_Click" Tag="2"/>
-                <MenuItem Header="🟣  Cyber Violet" Click="ColorPreset_Click" Tag="3"/>
-                <MenuItem Header="🟠  Sunset Amber" Click="ColorPreset_Click" Tag="4"/>
+            <MenuItem Header="Color Theme">
+                <MenuItem Header="Pure White" Click="ColorPreset_Click" Tag="0"/>
+                <MenuItem Header="Cyan Neon" Click="ColorPreset_Click" Tag="1"/>
+                <MenuItem Header="Emerald Mint" Click="ColorPreset_Click" Tag="2"/>
+                <MenuItem Header="Cyber Violet" Click="ColorPreset_Click" Tag="3"/>
+                <MenuItem Header="Sunset Amber" Click="ColorPreset_Click" Tag="4"/>
             </MenuItem>
-            <MenuItem Header="📐  Layout">
-                <MenuItem Header="➡️  Horizontal Row" Click="LayoutPreset_Click" Tag="0"/>
-                <MenuItem Header="⬇️  Vertical Column" Click="LayoutPreset_Click" Tag="1"/>
-                <MenuItem Header="⊞  2x2 Grid" Click="LayoutPreset_Click" Tag="2"/>
+            <MenuItem Header="Layout">
+                <MenuItem Header="Horizontal Row" Click="LayoutPreset_Click" Tag="0"/>
+                <MenuItem Header="Vertical Column" Click="LayoutPreset_Click" Tag="1"/>
+                <MenuItem Header="2x2 Grid" Click="LayoutPreset_Click" Tag="2"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Show Background Card" Click="ToggleCard_Click"/>
-            <MenuItem Header="⚙️  Active Circles">
+            <MenuItem x:Name="ToggleCardMenu" Header="Show Background Card" Click="ToggleCard_Click"/>
+            <MenuItem Header="Active Circles">
                 <MenuItem x:Name="ToggleCpuMenu" Header="CPU" Click="ToggleCpu_Click"/>
                 <MenuItem x:Name="ToggleRamMenu" Header="RAM" Click="ToggleRam_Click"/>
                 <MenuItem x:Name="ToggleGpuMenu" Header="GPU" Click="ToggleGpu_Click"/>
                 <MenuItem x:Name="ToggleDiskMenu" Header="DISK" Click="ToggleDisk_Click"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+            <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
     </Window.ContextMenu>
 

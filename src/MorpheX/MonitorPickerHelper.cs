@@ -55,11 +55,10 @@ public static class MonitorPickerHelper
         {
             Log.Error(ex, "Failed to apply wallpaper '{Name}' on monitor {DeviceId}",
                 wallpaper.Name, monitorDeviceId);
-            System.Windows.MessageBox.Show(
-                $"Could not apply wallpaper \"{wallpaper.Name}\":\n\n{ex.Message}",
-                "Wallpaper Error",
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
+            MorpheX.Views.ModernDialogWindow.Error(
+                title:   "Wallpaper Error",
+                heading: $"Could not apply \u201c{wallpaper.Name}\u201d",
+                message: ex.Message);
         }
     }
 
