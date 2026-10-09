@@ -45,6 +45,10 @@ public partial class WidgetsPage : Page
         SelectComboItem(DayFontCombo,    w.DayFontMode);
         SelectComboItem(DayCaseCombo,    w.DayCaseMode);
         SelectComboItem(DaySpacingCombo, w.DaySpacingMode);
+        DayCustomTextCheck.IsChecked = w.DayUseCustomText;
+        DayCustomTextBox.Text        = w.DayCustomText ?? string.Empty;
+        DayCustomTextPanel.Visibility = w.DayUseCustomText ? Visibility.Visible : Visibility.Collapsed;
+        UpdateDayCustomCounter(w.DayCustomText?.Length ?? 0);
 
         // System Monitor (Simplicity Circles)
         SysMonToggle.IsChecked    = w.SystemMonitorEnabled;
@@ -193,6 +197,44 @@ public partial class WidgetsPage : Page
 
         app.WidgetService.RefreshDay();
         await app.SettingsService.SaveAsync();
+    }
+
+    private async void DayCustomText_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        bool on = DayCustomTextCheck.IsChecked == true;
+        w.DayUseCustomText = on;
+        DayCustomTextPanel.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
+
+        app.WidgetService.RefreshDay();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void DayCustomTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        string txt = DayCustomTextBox.Text;
+        // Enforce 20-char safe limit in code too
+        if (txt.Length > 20) { txt = txt[..20]; DayCustomTextBox.Text = txt; DayCustomTextBox.SelectionStart = 20; }
+        w.DayCustomText = txt;
+        UpdateDayCustomCounter(txt.Length);
+
+        app.WidgetService.RefreshDay();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private void UpdateDayCustomCounter(int length)
+    {
+        DayCustomTextCounter.Text = $"{length}/20";
+        DayCustomTextCounter.Foreground = length >= 18
+            ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 146, 60))
+            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(96, 96, 128));
     }
 
     // ── System Monitor (Simplicity Circles) ───────────────────────────────────

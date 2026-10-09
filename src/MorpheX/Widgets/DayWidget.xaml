@@ -17,9 +17,12 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem x:Name="ToggleCardMenu" Header="🔲  Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleCardMenu" Header="Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="📏  Size">
+            <MenuItem x:Name="CustomTextMenu" Header="Set Custom Text..." Click="CustomText_Click" Foreground="#A0C4FF"/>
+            <MenuItem x:Name="AutoDayMenu" Header="Use Weekday Name" Click="AutoDay_Click" Foreground="#AAFFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Size">
                 <MenuItem Header="Small (42px)" Click="SizePreset_Click" Tag="0"/>
                 <MenuItem Header="Medium (64px)" Click="SizePreset_Click" Tag="1"/>
                 <MenuItem Header="Large (86px)" Click="SizePreset_Click" Tag="2"/>
@@ -27,37 +30,37 @@
                 <MenuItem Header="Giant (140px)" Click="SizePreset_Click" Tag="4"/>
                 <MenuItem Header="Massive (180px)" Click="SizePreset_Click" Tag="5"/>
             </MenuItem>
-            <MenuItem Header="🎨  Color Theme">
-                <MenuItem Header="⚪  Pure White" Click="ColorPreset_Click" Tag="0"/>
-                <MenuItem Header="🔘  Dim Slate" Click="ColorPreset_Click" Tag="1"/>
-                <MenuItem Header="🔵  Electric Cyan" Click="ColorPreset_Click" Tag="2"/>
-                <MenuItem Header="🟢  Neon Mint" Click="ColorPreset_Click" Tag="3"/>
-                <MenuItem Header="🟣  Cyber Violet" Click="ColorPreset_Click" Tag="4"/>
-                <MenuItem Header="🟠  Sunset Orange" Click="ColorPreset_Click" Tag="5"/>
-                <MenuItem Header="🟡  Amber Gold" Click="ColorPreset_Click" Tag="6"/>
-                <MenuItem Header="🔴  Rose Pink" Click="ColorPreset_Click" Tag="7"/>
-                <MenuItem Header="🌹  Crimson Red" Click="ColorPreset_Click" Tag="8"/>
+            <MenuItem Header="Color">
+                <MenuItem Header="Pure White" Click="ColorPreset_Click" Tag="0"/>
+                <MenuItem Header="Dim Slate" Click="ColorPreset_Click" Tag="1"/>
+                <MenuItem Header="Electric Cyan" Click="ColorPreset_Click" Tag="2"/>
+                <MenuItem Header="Neon Mint" Click="ColorPreset_Click" Tag="3"/>
+                <MenuItem Header="Cyber Violet" Click="ColorPreset_Click" Tag="4"/>
+                <MenuItem Header="Sunset Orange" Click="ColorPreset_Click" Tag="5"/>
+                <MenuItem Header="Amber Gold" Click="ColorPreset_Click" Tag="6"/>
+                <MenuItem Header="Rose Pink" Click="ColorPreset_Click" Tag="7"/>
+                <MenuItem Header="Crimson Red" Click="ColorPreset_Click" Tag="8"/>
             </MenuItem>
-            <MenuItem Header="🔤  Font Style">
-                <MenuItem Header="🚀  Anurati (Mond Sci-Fi)" Click="FontPreset_Click" Tag="0"/>
-                <MenuItem Header="📐  Bahnschrift Light" Click="FontPreset_Click" Tag="1"/>
-                <MenuItem Header="✍️  Segoe UI Light" Click="FontPreset_Click" Tag="2"/>
-                <MenuItem Header="💻  Consolas Monospace" Click="FontPreset_Click" Tag="3"/>
+            <MenuItem Header="Font Style">
+                <MenuItem Header="Anurati (Mond Sci-Fi)" Click="FontPreset_Click" Tag="0"/>
+                <MenuItem Header="Bahnschrift Light" Click="FontPreset_Click" Tag="1"/>
+                <MenuItem Header="Segoe UI Light" Click="FontPreset_Click" Tag="2"/>
+                <MenuItem Header="Consolas Monospace" Click="FontPreset_Click" Tag="3"/>
             </MenuItem>
-            <MenuItem Header="↔️  Letter Spacing">
+            <MenuItem Header="Letter Spacing">
                 <MenuItem Header="Compact" Click="SpacingPreset_Click" Tag="0"/>
                 <MenuItem Header="Wide (Mond Tracking)" Click="SpacingPreset_Click" Tag="1"/>
                 <MenuItem Header="Ultra Wide (Cinematic)" Click="SpacingPreset_Click" Tag="2"/>
             </MenuItem>
-            <MenuItem Header="🔡  Letter Casing">
+            <MenuItem Header="Letter Casing">
                 <MenuItem Header="UPPERCASE (Mond Default)" Click="CasePreset_Click" Tag="0"/>
                 <MenuItem Header="Title Case" Click="CasePreset_Click" Tag="1"/>
                 <MenuItem Header="lowercase" Click="CasePreset_Click" Tag="2"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="LockMenuItem" Header="🔒  Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="❌  Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
+            <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
     </Window.ContextMenu>
 

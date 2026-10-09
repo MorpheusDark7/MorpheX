@@ -87,6 +87,10 @@ public sealed class WidgetSettings
     /// <summary>0=Compact 1=Wide (Mond style) 2=Ultra Wide</summary>
     public int DaySpacingMode { get; set; } = 1;
     public bool DayShowBackground { get; set; } = false;
+    /// <summary>When true, displays DayCustomText instead of the auto weekday name.</summary>
+    public bool DayUseCustomText { get; set; } = false;
+    /// <summary>User-defined text shown when DayUseCustomText is true. Max 20 chars.</summary>
+    public string DayCustomText { get; set; } = string.Empty;
 
     // ── Other widgets ──────────────────────────────────────────────────
     public bool CalendarEnabled { get; set; } = false;

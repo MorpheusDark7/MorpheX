@@ -23,8 +23,9 @@ public partial class DayWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.DayX;
-        Top  = settings.DayY;
+        // Position by stored centre — so changing day-name length never shifts the visual position
+        Loaded += (_, _) => RecenterFromAnchor();
+        SizeChanged += (_, _) => RecenterFromAnchor();
 
         UpdateLockState();
         UpdateDayDisplay();
@@ -36,19 +37,39 @@ public partial class DayWidget : Window
         Closing += OnClosing;
     }
 
+    // ── Centre-anchor helpers ────────────────────────────────────────────
+    // DayX/DayY store the CENTRE of the widget. On each render we move Left/Top
+    // so the centre stays pinned even when the text width changes day to day.
+
+    private void RecenterFromAnchor()
+    {
+        if (ActualWidth > 0)
+            Left = _settings.DayX - ActualWidth  / 2;
+        if (ActualHeight > 0)
+            Top  = _settings.DayY - ActualHeight / 2;
+    }
+
     public void RefreshDisplay() => UpdateDayDisplay();
 
-    private void UpdateDayDisplay()
+    private string ResolveDisplayText()
     {
-        DayLettersPanel.Children.Clear();
+        if (_settings.DayUseCustomText && !string.IsNullOrWhiteSpace(_settings.DayCustomText))
+            return _settings.DayCustomText;
 
         string day = DateTime.Now.ToString("dddd");
-        day = _settings.DayCaseMode switch
+        return _settings.DayCaseMode switch
         {
             1 => System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(day.ToLowerInvariant()),
             2 => day.ToLowerInvariant(),
             _ => day.ToUpperInvariant()
         };
+    }
+
+    private void UpdateDayDisplay()
+    {
+        DayLettersPanel.Children.Clear();
+
+        string day = ResolveDisplayText();
 
         double fontSize = _settings.DayFontSize switch
         {
@@ -162,6 +183,29 @@ public partial class DayWidget : Window
         Save();
     }
 
+    private void CustomText_Click(object sender, RoutedEventArgs e)
+    {
+        // Simple inline input via an InputBox-style dialog
+        var dlg = new CustomTextInputDialog(_settings.DayCustomText ?? string.Empty)
+        {
+            Owner = this
+        };
+        if (dlg.ShowDialog() == true)
+        {
+            _settings.DayCustomText   = dlg.EnteredText;
+            _settings.DayUseCustomText = true;
+            UpdateDayDisplay();
+            Save();
+        }
+    }
+
+    private void AutoDay_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.DayUseCustomText = false;
+        UpdateDayDisplay();
+        Save();
+    }
+
     private void SpacingPreset_Click(object sender, RoutedEventArgs e)
     {
         if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int val))
@@ -223,7 +267,7 @@ public partial class DayWidget : Window
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
@@ -236,16 +280,20 @@ public partial class DayWidget : Window
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        _settings.DayX = Left;
-        _settings.DayY = Top;
+        // Save the centre point so repositioning next session is stable
+        _settings.DayX = Left + ActualWidth  / 2;
+        _settings.DayY = Top  + ActualHeight / 2;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        _settings.DayX = Left;
-        _settings.DayY = Top;
+        if (ActualWidth > 0)
+        {
+            _settings.DayX = Left + ActualWidth  / 2;
+            _settings.DayY = Top  + ActualHeight / 2;
+        }
     }
 
     private void Save()
