@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
-using Wpf.Ui.Controls;
 using WpfColor = System.Windows.Media.Color;
 using WpfColorConverter = System.Windows.Media.ColorConverter;
 using WpfApplication = System.Windows.Application;
@@ -47,19 +46,17 @@ public partial class ModernDialogWindow : Window
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
-        WindowTitleText.Text = title;
-        HeadingText.Text = heading;
-        MessageText.Text = message;
+        WindowTitleText.Text  = title;
+        HeadingText.Text      = heading;
+        MessageText.Text      = message;
         PrimaryButton.Content = primaryText;
 
         if (string.IsNullOrWhiteSpace(secondaryText))
-        {
             SecondaryButton.Visibility = Visibility.Collapsed;
-        }
         else
         {
             SecondaryButton.Visibility = Visibility.Visible;
-            SecondaryButton.Content = secondaryText;
+            SecondaryButton.Content    = secondaryText;
         }
 
         ApplyIconStyle(icon);
@@ -70,51 +67,39 @@ public partial class ModernDialogWindow : Window
 
     private void ApplyIconStyle(ModernDialogIcon icon)
     {
+        // Colour the heading and primary button to match the severity — no AI badge/icon needed
         switch (icon)
         {
             case ModernDialogIcon.Info:
-                DialogSymbolIcon.Symbol = SymbolRegular.Info24;
-                DialogSymbolIcon.Foreground = Brush("#60A5FA");
-                IconContainer.Background = Brush("#172554");
-                IconContainer.BorderBrush = Brush("#1E3A8A");
+                HeadingText.Foreground   = Brush("#C0CCFF");
+                PrimaryButton.Background = Brush("#2952CC");
                 break;
 
             case ModernDialogIcon.Warning:
-                DialogSymbolIcon.Symbol = SymbolRegular.Warning24;
-                DialogSymbolIcon.Foreground = Brush("#FBBF24");
-                IconContainer.Background = Brush("#35260C");
-                IconContainer.BorderBrush = Brush("#5C4113");
+                HeadingText.Foreground   = Brush("#FBBF24");
+                PrimaryButton.Background = Brush("#7C4B00");
                 break;
 
             case ModernDialogIcon.Error:
-                DialogSymbolIcon.Symbol = SymbolRegular.DismissCircle24;
-                DialogSymbolIcon.Foreground = Brush("#F87171");
-                IconContainer.Background = Brush("#3B1318");
-                IconContainer.BorderBrush = Brush("#641D26");
+                HeadingText.Foreground   = Brush("#F87171");
+                PrimaryButton.Background = Brush("#8B1A1A");
                 break;
 
             case ModernDialogIcon.Question:
-                DialogSymbolIcon.Symbol = SymbolRegular.QuestionCircle24;
-                DialogSymbolIcon.Foreground = Brush("#A78BFA");
-                IconContainer.Background = Brush("#261C4C");
-                IconContainer.BorderBrush = Brush("#433285");
+                HeadingText.Foreground   = Brush("#C4B5FD");
+                PrimaryButton.Background = Brush("#3B3BCC");
                 break;
 
             case ModernDialogIcon.Success:
-                DialogSymbolIcon.Symbol = SymbolRegular.CheckmarkCircle24;
-                DialogSymbolIcon.Foreground = Brush("#34D399");
-                IconContainer.Background = Brush("#0C2B1D");
-                IconContainer.BorderBrush = Brush("#165337");
+                HeadingText.Foreground   = Brush("#34D399");
+                PrimaryButton.Background = Brush("#065F46");
                 break;
         }
     }
 
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        if (e.LeftButton == MouseButtonState.Pressed)
-        {
-            DragMove();
-        }
+        if (e.LeftButton == MouseButtonState.Pressed) DragMove();
     }
 
     private void PrimaryButton_Click(object sender, RoutedEventArgs e)

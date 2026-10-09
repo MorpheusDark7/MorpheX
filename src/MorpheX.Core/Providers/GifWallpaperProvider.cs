@@ -211,9 +211,13 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
 
             using var g = Graphics.FromImage(_frameBuffer);
             g.CompositingMode = CompositingMode.SourceCopy;
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            g.SmoothingMode = SmoothingMode.HighQuality;
-            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+            g.CompositingQuality = CompositingQuality.HighSpeed;
+
+            // Use NearestNeighbor for GIF frames — avoids blurring the palette-based pixels
+            // and is dramatically faster. Bicubic on 256-colour GIFs causes colour bleeding.
+            g.InterpolationMode = InterpolationMode.NearestNeighbor;
+            g.SmoothingMode    = SmoothingMode.None;
+            g.PixelOffsetMode  = PixelOffsetMode.Half;   // needed for NearestNeighbor accuracy
             g.Clear(Color.Black);
 
             var (destRect, srcRect) = CalculateDestRect(_gifImage.Width, _gifImage.Height, _width, _height, _scaling);
@@ -234,19 +238,22 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
             lock (_renderLock)
             {
                 using var graphics = Graphics.FromHdc(hdc);
-                graphics.CompositingMode = CompositingMode.SourceCopy;
-                graphics.InterpolationMode = InterpolationMode.Default;
+                // NearestNeighbor + None = pixel-exact blit; no interpolation smearing
+                graphics.InterpolationMode = InterpolationMode.NearestNeighbor;
+                graphics.PixelOffsetMode   = PixelOffsetMode.Half;
+                graphics.CompositingMode   = CompositingMode.SourceCopy;
+
+                var destRect = new System.Drawing.Rectangle(0, 0, _width, _height);
 
                 if (_colorMatrix != null)
                 {
                     using var ia = new ImageAttributes();
                     ia.SetColorMatrix(_colorMatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
-                    var rect = new System.Drawing.Rectangle(0, 0, _width, _height);
-                    graphics.DrawImage(_frameBuffer, rect, 0, 0, _width, _height, GraphicsUnit.Pixel, ia);
+                    graphics.DrawImage(_frameBuffer, destRect, 0, 0, _width, _height, GraphicsUnit.Pixel, ia);
                 }
                 else
                 {
-                    graphics.DrawImage(_frameBuffer, 0, 0);
+                    graphics.DrawImage(_frameBuffer, destRect, 0, 0, _width, _height, GraphicsUnit.Pixel);
                 }
             }
         }

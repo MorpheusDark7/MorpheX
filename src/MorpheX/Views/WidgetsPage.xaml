@@ -219,8 +219,50 @@
                             </StackPanel>
                         </Grid>
                     </Border>
+
+                    <!-- Custom Text row -->
+                    <Border BorderBrush="#15FFFFFF" BorderThickness="0,1,0,0" Margin="0,8,0,0" Padding="0,10,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                    <TextBlock Text="Custom Text" FontSize="12" Foreground="#DDFFFFFF" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                                    <TextBlock Text="Show your own text instead of the auto weekday name. Max 20 chars." FontSize="11" Foreground="#80FFFFFF" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <CheckBox x:Name="DayCustomTextCheck" Grid.Column="1" VerticalAlignment="Top"
+                                          Checked="DayCustomText_Changed" Unchecked="DayCustomText_Changed"/>
+                            </Grid>
+                            <!-- Input box — shown only when custom text is on -->
+                            <Grid x:Name="DayCustomTextPanel" Visibility="Collapsed" Margin="0,8,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="36"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox
+                                    x:Name="DayCustomTextBox"
+                                    Grid.Column="0"
+                                    MaxLength="20"
+                                    FontSize="13"
+                                    Padding="8,6"
+                                    Margin="0,0,8,0"
+                                    TextChanged="DayCustomTextBox_TextChanged"/>
+                                <TextBlock
+                                    x:Name="DayCustomTextCounter"
+                                    Grid.Column="1"
+                                    Text="0/20"
+                                    FontSize="10"
+                                    Foreground="#606080"
+                                    VerticalAlignment="Center"
+                                    TextAlignment="Right"/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
+
 
             <!-- ─── SYSTEM MONITOR (SIMPLICITY CIRCLES) ────────────── -->
             <TextBlock Text="SYSTEM MONITOR (SIMPLICITY CIRCLES)" Style="{StaticResource SectionHeaderStyle}"/>
