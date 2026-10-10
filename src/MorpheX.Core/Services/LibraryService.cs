@@ -19,6 +19,7 @@ public interface ILibraryService
                                             CancellationToken ct = default);
     Task RemoveWallpaperAsync(string wallpaperId, bool deleteFile = false,
                                CancellationToken ct = default);
+    Task ClearAllWallpapersAsync(bool deleteFiles = false, CancellationToken ct = default);
     WallpaperInfo? GetById(string wallpaperId);
     void SetFavorite(string wallpaperId, bool isFavorite);
     Task SetTagsAsync(string wallpaperId, IEnumerable<string> tags, CancellationToken ct = default);
@@ -60,14 +61,8 @@ public sealed class LibraryService : ILibraryService
         [".mov"] = WallpaperType.Video,
         [".avi"] = WallpaperType.Video,
 
-        [".gif"] = WallpaperType.AnimatedImage,
-
         [".html"] = WallpaperType.Web,
         [".htm"] = WallpaperType.Web,
-
-        // Wallpaper Engine Scene packages
-        [".pkg"] = WallpaperType.Scene,
-        [".zip"] = WallpaperType.Scene,  // WE workshop zip exports
     };
 
     public static bool IsSupportedExtension(string extension) =>
@@ -251,24 +246,17 @@ public sealed class LibraryService : ILibraryService
     public async Task<WallpaperInfo?> AddWallpaperAsync(string filePath, bool copyToLibrary = false,
                                                          CancellationToken ct = default)
     {
-        // 1. Handle directory input (scene folder directly or unzipped parent folder)
+        // 1. Scene folders and directories are not supported
         if (Directory.Exists(filePath))
         {
-            var sceneDir = FindSceneRoot(filePath);
-            if (sceneDir != null)
-                return await AddSceneFromFolderAsync(sceneDir, ct);
-
-            Log.Warning("Folder does not contain a supported Wallpaper Engine scene: {Path}", filePath);
+            Log.Warning("Folder / Scene import is not supported: {Path}", filePath);
             return null;
         }
 
-        // 2. Handle WE workshop .zip exports
+        // 2. WE workshop .zip exports are not supported
         if (filePath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
         {
-            if (IsSceneZip(filePath))
-                return await AddSceneFromZipAsync(filePath, ct);
-
-            Log.Warning("Zip archive is not a Wallpaper Engine package (no project.json found): {Path}", filePath);
+            Log.Warning("Wallpaper Engine zip packages are not supported: {Path}", filePath);
             return null;
         }
 
@@ -280,24 +268,18 @@ public sealed class LibraryService : ILibraryService
 
         var extension = Path.GetExtension(filePath);
 
-        // 3. If user picked project.json or scene.pkg or preview image from a scene folder
-        var parentDir = Path.GetDirectoryName(filePath);
-        if (parentDir != null && IsSceneFolder(parentDir))
+        // 3. GIF files are not supported (low quality)
+        if (extension.Equals(".gif", StringComparison.OrdinalIgnoreCase))
         {
-            if (string.Equals(Path.GetFileName(filePath), "project.json", StringComparison.OrdinalIgnoreCase) ||
-                extension.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(Path.GetFileName(filePath), "preview.gif", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(Path.GetFileName(filePath), "preview.png", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(Path.GetFileName(filePath), "preview.jpg", StringComparison.OrdinalIgnoreCase))
-            {
-                return await AddSceneFromFolderAsync(parentDir, ct);
-            }
+            Log.Warning("GIF wallpapers are not supported: {Path}", filePath);
+            return null;
         }
 
-        // 4. Standalone .pkg without a scene folder cannot be played
-        if (extension.Equals(".pkg", StringComparison.OrdinalIgnoreCase))
+        // 4. Standalone .pkg or project.json are not supported
+        if (extension.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(Path.GetFileName(filePath), "project.json", StringComparison.OrdinalIgnoreCase))
         {
-            Log.Warning("Standalone .pkg without project.json is not supported: {Path}", filePath);
+            Log.Warning("Wallpaper Engine files are not supported: {Path}", filePath);
             return null;
         }
 
@@ -403,6 +385,39 @@ public sealed class LibraryService : ILibraryService
 
             await SaveInternalAsync(ct);
             Log.Information("Removed wallpaper '{Name}' from library", wallpaper.Name);
+            LibraryChanged?.Invoke(this, EventArgs.Empty);
+        }
+        finally
+        {
+            _lock.Release();
+        }
+    }
+
+    public async Task ClearAllWallpapersAsync(bool deleteFiles = false, CancellationToken ct = default)
+    {
+        await _lock.WaitAsync(ct);
+        try
+        {
+            if (deleteFiles)
+            {
+                foreach (var wallpaper in _manifest.Wallpapers)
+                {
+                    if (!string.IsNullOrEmpty(wallpaper.ImportedPath) && File.Exists(wallpaper.ImportedPath))
+                    {
+                        try { File.Delete(wallpaper.ImportedPath); } catch { }
+                    }
+                }
+            }
+
+            _manifest.Wallpapers.Clear();
+
+            foreach (var collection in _manifest.Collections)
+            {
+                collection.WallpaperIds.Clear();
+            }
+
+            await SaveInternalAsync(ct);
+            Log.Information("Cleared all wallpapers from library");
             LibraryChanged?.Invoke(this, EventArgs.Empty);
         }
         finally
@@ -584,12 +599,11 @@ public sealed class LibraryService : ILibraryService
 
     public static string GetFileFilter()
     {
-        return "All Supported|*.mp4;*.webm;*.mkv;*.mov;*.avi;*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif;*.gif;*.html;*.htm;*.pkg;*.zip;project.json|" +
-               "Wallpaper Engine (*.pkg;*.zip;project.json)|*.pkg;*.zip;project.json|" +
-               "Videos|*.mp4;*.webm;*.mkv;*.mov;*.avi|" +
-               "Images|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif|" +
-               "Animated GIFs|*.gif|" +
-               "Web|*.html;*.htm";
+        return "All Supported|*.mp4;*.webm;*.mkv;*.mov;*.avi;*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif;*.html;*.htm|" +
+               "Videos (*.mp4, *.webm, *.mkv, *.mov, *.avi)|*.mp4;*.webm;*.mkv;*.mov;*.avi|" +
+               "Images (*.png, *.jpg, *.jpeg, *.bmp, *.webp, *.tiff)|*.png;*.jpg;*.jpeg;*.bmp;*.webp;*.tiff;*.tif|" +
+               "Web (*.html, *.htm)|*.html;*.htm|" +
+               "All Files (*.*)|*.*";
     }
 
     // -------------------------------------------------------------------------

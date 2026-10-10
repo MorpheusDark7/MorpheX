@@ -43,8 +43,6 @@
                     <ComboBoxItem Content="All types" Tag="All" />
                     <ComboBoxItem Content="Images" Tag="Image" />
                     <ComboBoxItem Content="Videos" Tag="Video" />
-                    <ComboBoxItem Content="Animated" Tag="AnimatedImage" />
-                    <ComboBoxItem Content="Scenes" Tag="Scene" />
                 </ComboBox>
                 <ComboBox
                     x:Name="SortCombo"
@@ -77,6 +75,15 @@
                     Icon="{ui:SymbolIcon FolderAdd24}"
                     Appearance="Secondary"
                     Click="ImportFolderButton_Click"
+                    Margin="0,0,8,0" />
+                <ui:Button
+                    x:Name="DeleteAllButton"
+                    Content="Delete All"
+                    Icon="{ui:SymbolIcon Delete24}"
+                    Appearance="Secondary"
+                    Foreground="#FF8888"
+                    ToolTip="Delete all wallpapers from library"
+                    Click="DeleteAllButton_Click"
                     Margin="0,0,8,0" />
                 <ui:Button
                     x:Name="RefreshButton"
@@ -120,8 +127,9 @@
                                     <MenuItem Header="Open File Location" Click="ContextMenu_OpenLocation_Click">
                                         <MenuItem.Icon><ui:SymbolIcon Symbol="FolderOpen24" /></MenuItem.Icon>
                                     </MenuItem>
-                                    <MenuItem Header="Remove from Library" Click="ContextMenu_Delete_Click">
-                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Delete24" /></MenuItem.Icon>
+                                    <Separator />
+                                    <MenuItem Header="Remove from Library" Click="ContextMenu_Delete_Click" Foreground="#FF8888">
+                                        <MenuItem.Icon><ui:SymbolIcon Symbol="Delete24" Foreground="#FF8888" /></MenuItem.Icon>
                                     </MenuItem>
                                 </ContextMenu>
                             </ui:CardAction.ContextMenu>

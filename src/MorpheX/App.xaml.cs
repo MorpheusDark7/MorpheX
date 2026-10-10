@@ -116,12 +116,6 @@ public partial class App : Application
         _providerFactory.Register(WallpaperType.Video,
             () => new VideoWallpaperProvider(),
             new[] { ".mp4", ".webm", ".mkv", ".mov", ".avi" });
-        _providerFactory.Register(WallpaperType.AnimatedImage,
-            () => new GifWallpaperProvider(),
-            new[] { ".gif" });
-        _providerFactory.Register(WallpaperType.Scene,
-            () => new SceneWallpaperProvider(),
-            new[] { ".pkg", ".zip" });
 
         WallpaperService = new WallpaperService(MonitorService, SettingsService, _providerFactory, LibraryService);
 
@@ -194,6 +188,12 @@ public partial class App : Application
 
         Microsoft.Win32.SystemEvents.PowerModeChanged += async (_, args) =>
         {
+            if (args.Mode == Microsoft.Win32.PowerModes.StatusChange)
+            {
+                PlaybackService?.PollNow();
+                return;
+            }
+
             if (args.Mode == Microsoft.Win32.PowerModes.Resume)
             {
                 Log.Information("System resumed from sleep — refreshing display and recovering wallpapers");

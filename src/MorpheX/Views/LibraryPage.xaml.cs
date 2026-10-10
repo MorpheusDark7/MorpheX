@@ -73,7 +73,7 @@ public partial class LibraryPage : Page
         var filter = (FilterCombo?.SelectedItem as ComboBoxItem)?.Tag as string ?? "All";
         filtered = filter switch
         {
-            "Image" or "Video" or "AnimatedImage" or "Scene" when Enum.TryParse<WallpaperType>(filter, out var type) =>
+            "Image" or "Video" when Enum.TryParse<WallpaperType>(filter, out var type) =>
                 filtered.Where(w => w.Type == type),
             _ => filtered
         };
@@ -155,43 +155,38 @@ public partial class LibraryPage : Page
         var knownIds = app.LibraryService.Wallpapers.Select(w => w.Id).ToHashSet();
         int importedCount = 0;
         int duplicateCount = 0;
-        bool shownSceneWarning = false;
+        bool hasGifFiles = false;
+        bool hasSceneFiles = false;
 
         foreach (var file in ExpandImportFiles(files, failedFiles))
         {
+            var ext = Path.GetExtension(file);
+
+            // 1. Check for unsupported GIF files
+            if (ext.Equals(".gif", StringComparison.OrdinalIgnoreCase))
+            {
+                hasGifFiles = true;
+                continue;
+            }
+
+            // 2. Check for unsupported Wallpaper Engine / Scene files
+            bool isSceneFile = ext.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
+                               (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) && LibraryService.IsSceneZip(file)) ||
+                               string.Equals(Path.GetFileName(file), "project.json", StringComparison.OrdinalIgnoreCase) ||
+                               LibraryService.IsSceneFolder(file);
+
+            if (isSceneFile)
+            {
+                hasSceneFiles = true;
+                continue;
+            }
+
             try
             {
-                // Show a one-time resource warning for Scene wallpapers before importing
-                var ext = Path.GetExtension(file);
-                bool isSceneFile = (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) && LibraryService.IsSceneZip(file)) ||
-                                   ext.Equals(".pkg", StringComparison.OrdinalIgnoreCase) ||
-                                   string.Equals(Path.GetFileName(file), "project.json", StringComparison.OrdinalIgnoreCase) ||
-                                   LibraryService.IsSceneFolder(file);
-                if (isSceneFile && !shownSceneWarning)
-                {
-                    shownSceneWarning = true;
-                    bool confirmed = ModernDialogWindow.Confirm(
-                        title:         "Wallpaper Engine Scene",
-                        heading:       "Scene Wallpaper Import",
-                        message:       "This wallpaper will be imported with its animated preview and original scene audio.\n\n" +
-                                       "Note: Proprietary 3D particle physics and shader scripts are replaced by the high-resolution animated preview to ensure low CPU usage and stability.\n\n" +
-                                       "Audio is cached locally in your library (~1–5 MB).",
-                        primaryText:   "Import",
-                        secondaryText: "Cancel",
-                        icon:          ModernDialogIcon.Info);
-                    if (!confirmed) break;
-                }
-
                 var added = await app.LibraryService.AddWallpaperAsync(file);
                 if (added == null)
                 {
-                    var ext2 = Path.GetExtension(file);
-                    if (!ext2.Equals(".zip", StringComparison.OrdinalIgnoreCase) &&
-                        !ext2.Equals(".pkg", StringComparison.OrdinalIgnoreCase) &&
-                        !string.Equals(Path.GetFileName(file), "project.json", StringComparison.OrdinalIgnoreCase))
-                    {
-                        failedFiles.Add($"{Path.GetFileName(file)} (unsupported format '{ext2}')");
-                    }
+                    failedFiles.Add($"{Path.GetFileName(file)} (unsupported format '{ext}')");
                 }
                 else if (knownIds.Add(added.Id))
                 {
@@ -209,15 +204,32 @@ public partial class LibraryPage : Page
             }
         }
 
+        if (hasGifFiles)
+        {
+            ModernDialogWindow.Warning(
+                title:   "GIF Not Supported",
+                heading: "GIF files are not supported",
+                message: "GIF playback is low quality and is not supported in MorpheX.\n\n" +
+                         "For animated and moving wallpapers, please use high-quality video files (MP4, WebM) or static images (PNG, JPG, WebP) instead.");
+        }
+
+        if (hasSceneFiles)
+        {
+            ModernDialogWindow.Warning(
+                title:   "File Type Not Supported",
+                heading: "Wallpaper Engine files not supported",
+                message: "Wallpaper Engine Scene and package files (.pkg, .zip) are not supported.\n\n" +
+                         "Please use supported video formats like MP4 or WebM instead.");
+        }
+
         if (failedFiles.Count > 0)
         {
             ModernDialogWindow.Warning(
-                title:      "Import Failed",
-                heading:    $"{failedFiles.Count} file{(failedFiles.Count == 1 ? "" : "s")} could not be added",
-                message:    "The following file(s) could not be added to the library:\n" +
-                            string.Join("\n", failedFiles.Select(f => $"  • {f}")) +
-                            "\n\nSupported formats: Wallpaper Engine Scenes (*.pkg, *.zip, project.json), " +
-                            "Video (MP4, WEBM, MKV, MOV, AVI), Images & GIF (PNG, JPG, BMP, WEBP, TIFF, GIF), Web (HTML, HTM).");
+                title:   "Import Failed",
+                heading: $"{failedFiles.Count} file{(failedFiles.Count == 1 ? "" : "s")} could not be added",
+                message: "The following file(s) could not be added to the library:\n" +
+                         string.Join("\n", failedFiles.Select(f => $"  • {f}")) +
+                         "\n\nSupported formats: Video (MP4, WEBM, MKV, MOV, AVI), Images (PNG, JPG, JPEG, BMP, WEBP, TIFF), Web (HTML, HTM).");
         }
 
         if (importedCount > 1 || duplicateCount > 0)
@@ -240,14 +252,14 @@ public partial class LibraryPage : Page
         {
             if (Directory.Exists(entry))
             {
-                // 1. If entry itself is a WE scene folder, yield it directly
+                // If entry itself is a WE scene folder, skip it (will be flagged if needed)
                 if (LibraryService.IsSceneFolder(entry))
                 {
                     yield return entry;
                     continue;
                 }
 
-                // 2. Scan directory recursively
+                // Scan directory recursively
                 IEnumerable<string> files;
                 try
                 {
@@ -264,29 +276,14 @@ public partial class LibraryPage : Page
                     continue;
                 }
 
-                var seenSceneDirs = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 foreach (var file in files)
                 {
-                    var dir = Path.GetDirectoryName(file);
-                    if (dir != null)
-                    {
-                        // If file is inside an already recognized scene directory, ignore internal files
-                        if (seenSceneDirs.Any(s => dir.StartsWith(s, StringComparison.OrdinalIgnoreCase)))
-                            continue;
-
-                        // Check if dir or an ancestor under entry is a scene folder
-                        if (LibraryService.IsSceneFolder(dir))
-                        {
-                            seenSceneDirs.Add(dir);
-                            yield return dir;
-                            continue;
-                        }
-                    }
-
                     var ext = Path.GetExtension(file);
                     if (ext.Equals(".pkg", StringComparison.OrdinalIgnoreCase))
                         continue;
-                    if (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase) && !LibraryService.IsSceneZip(file))
+                    if (ext.Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (ext.Equals(".gif", StringComparison.OrdinalIgnoreCase))
                         continue;
 
                     if (LibraryService.IsSupportedExtension(ext))
@@ -418,17 +415,66 @@ public partial class LibraryPage : Page
         }
     }
 
+    private async void DeleteAllButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        if (_allWallpapers.Count == 0)
+        {
+            ModernDialogWindow.Information(
+                title:   "Library Empty",
+                heading: "No wallpapers to delete",
+                message: "There are currently no wallpapers in your library.");
+            return;
+        }
+
+        bool confirmed = ModernDialogWindow.Confirm(
+            title:         "Delete All Wallpapers",
+            heading:       $"Delete all {_allWallpapers.Count} wallpaper{(_allWallpapers.Count == 1 ? "" : "s")}?",
+            message:       "This will remove all wallpapers from your MorpheX library.\n\nYour original wallpaper files on disk will not be deleted.",
+            primaryText:   "Delete All",
+            secondaryText: "Cancel",
+            icon:          ModernDialogIcon.Warning);
+
+        if (!confirmed) return;
+
+        await app.LibraryService.ClearAllWallpapersAsync();
+        Log.Information("User cleared all wallpapers from library");
+        ModernDialogWindow.Success(
+            title:   "Library Cleared",
+            heading: "All wallpapers removed",
+            message: "All wallpapers have been removed from your library.");
+        RefreshWallpaperList();
+    }
+
     private async Task ApplyWallpaperAsync(WallpaperInfo wallpaper)
     {
-        if (wallpaper.Type is not (WallpaperType.Image or WallpaperType.Video
-                                   or WallpaperType.AnimatedImage or WallpaperType.Scene))
+        if (wallpaper.Type == WallpaperType.AnimatedImage)
+        {
+            ModernDialogWindow.Warning(
+                title:   "Not Supported",
+                heading: "GIF files are not supported",
+                message: "GIF playback is low quality and is no longer supported in MorpheX. Please use MP4 or WebM videos instead.");
+            return;
+        }
+
+        if (wallpaper.Type == WallpaperType.Scene)
+        {
+            ModernDialogWindow.Warning(
+                title:   "Not Supported",
+                heading: "Wallpaper Engine files not supported",
+                message: "Wallpaper Engine Scene files are not supported. Please use MP4 or WebM videos instead.");
+            return;
+        }
+
+        if (wallpaper.Type is not (WallpaperType.Image or WallpaperType.Video or WallpaperType.Web))
         {
             ModernDialogWindow.Information(
                 title:   "Not Supported",
                 heading: $"{wallpaper.Type} type not supported",
-                message: $"{wallpaper.Type} wallpapers are not yet supported by the MorpheX playback engine.");
+                message: $"{wallpaper.Type} wallpapers are not supported by the MorpheX playback engine.");
             return;
         }
+
         await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wallpaper, RefreshWallpaperList);
     }
 }

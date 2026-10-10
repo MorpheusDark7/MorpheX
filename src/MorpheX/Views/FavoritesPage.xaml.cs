@@ -41,7 +41,7 @@ public partial class FavoritesPage : Page
     {
         if (sender is FrameworkElement element && element.DataContext is WallpaperInfo wallpaper)
         {
-            await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wallpaper, RefreshFavorites);
+            await ApplyWallpaperAsync(wallpaper);
         }
     }
 
@@ -86,7 +86,30 @@ public partial class FavoritesPage : Page
     {
         var wp = GetWallpaperFromMenuItem(sender);
         if (wp != null)
-            await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wp, RefreshFavorites);
+            await ApplyWallpaperAsync(wp);
+    }
+
+    private async Task ApplyWallpaperAsync(WallpaperInfo wallpaper)
+    {
+        if (wallpaper.Type == WallpaperType.AnimatedImage)
+        {
+            ModernDialogWindow.Warning(
+                title:   "Not Supported",
+                heading: "GIF files are not supported",
+                message: "GIF playback is low quality and is no longer supported in MorpheX. Please use MP4 or WebM videos instead.");
+            return;
+        }
+
+        if (wallpaper.Type == WallpaperType.Scene)
+        {
+            ModernDialogWindow.Warning(
+                title:   "Not Supported",
+                heading: "Wallpaper Engine files not supported",
+                message: "Wallpaper Engine Scene files are not supported. Please use MP4 or WebM videos instead.");
+            return;
+        }
+
+        await MonitorPickerHelper.ApplyWallpaperWithPickerAsync(wallpaper, RefreshFavorites);
     }
 
     private void ContextMenu_RemoveFavorite_Click(object sender, RoutedEventArgs e)
