@@ -23,9 +23,8 @@ public partial class DayWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        // Position by stored centre — so changing day-name length never shifts the visual position
-        Loaded += (_, _) => RecenterFromAnchor();
-        SizeChanged += (_, _) => RecenterFromAnchor();
+        Left = settings.DayX;
+        Top  = settings.DayY;
 
         UpdateLockState();
         UpdateDayDisplay();
@@ -35,18 +34,6 @@ public partial class DayWidget : Window
         _timer.Start();
 
         Closing += OnClosing;
-    }
-
-    // ── Centre-anchor helpers ────────────────────────────────────────────
-    // DayX/DayY store the CENTRE of the widget. On each render we move Left/Top
-    // so the centre stays pinned even when the text width changes day to day.
-
-    private void RecenterFromAnchor()
-    {
-        if (ActualWidth > 0)
-            Left = _settings.DayX - ActualWidth  / 2;
-        if (ActualHeight > 0)
-            Top  = _settings.DayY - ActualHeight / 2;
     }
 
     public void RefreshDisplay() => UpdateDayDisplay();
@@ -280,20 +267,16 @@ public partial class DayWidget : Window
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        // Save the centre point so repositioning next session is stable
-        _settings.DayX = Left + ActualWidth  / 2;
-        _settings.DayY = Top  + ActualHeight / 2;
+        _settings.DayX = Left;
+        _settings.DayY = Top;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        if (ActualWidth > 0)
-        {
-            _settings.DayX = Left + ActualWidth  / 2;
-            _settings.DayY = Top  + ActualHeight / 2;
-        }
+        _settings.DayX = Left;
+        _settings.DayY = Top;
     }
 
     private void Save()

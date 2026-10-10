@@ -48,22 +48,14 @@ public partial class QuoteWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        // Centre-anchor: QuoteX/QuoteY store the widget's centre.
-        // When cycling quotes the card width changes — keep visual centre fixed.
-        Loaded      += (_, _) => RecenterFromAnchor();
-        SizeChanged += (_, _) => RecenterFromAnchor();
+        Left = settings.QuoteX;
+        Top  = settings.QuoteY;
 
         ApplyTheme();
         UpdateLockState();
         ShowQuote(_settings.QuoteIndex);
 
         Closing += OnClosing;
-    }
-
-    private void RecenterFromAnchor()
-    {
-        if (ActualWidth  > 0) Left = _settings.QuoteX - ActualWidth  / 2;
-        if (ActualHeight > 0) Top  = _settings.QuoteY - ActualHeight / 2;
     }
 
     public void ApplyTheme()
@@ -136,17 +128,16 @@ public partial class QuoteWidget : Window
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        // Save centre, not top-left
-        _settings.QuoteX = Left + ActualWidth  / 2;
-        _settings.QuoteY = Top  + ActualHeight / 2;
+        _settings.QuoteX = Left;
+        _settings.QuoteY = Top;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        _settings.QuoteX = Left + ActualWidth  / 2;
-        _settings.QuoteY = Top  + ActualHeight / 2;
+        _settings.QuoteX = Left;
+        _settings.QuoteY = Top;
     }
 
     private void Save()

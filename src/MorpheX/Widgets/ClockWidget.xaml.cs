@@ -25,9 +25,8 @@ public partial class ClockWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        // Position by stored centre so switching 12h/24h or font size never shifts the clock
-        Loaded      += (_, _) => RecenterFromAnchor();
-        SizeChanged += (_, _) => RecenterFromAnchor();
+        Left = settings.ClockX;
+        Top  = settings.ClockY;
 
         ApplyAppearance();
         UpdateLockState();
@@ -38,12 +37,6 @@ public partial class ClockWidget : Window
         Tick();
 
         Closing += OnClosing;
-    }
-
-    private void RecenterFromAnchor()
-    {
-        if (ActualWidth  > 0) Left = _settings.ClockX - ActualWidth  / 2;
-        if (ActualHeight > 0) Top  = _settings.ClockY - ActualHeight / 2;
     }
 
     public void RefreshFormat()
@@ -243,18 +236,16 @@ public partial class ClockWidget : Window
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
         _timer.Stop();
-        // Save centre coordinates
-        _settings.ClockX = Left + ActualWidth  / 2;
-        _settings.ClockY = Top  + ActualHeight / 2;
+        _settings.ClockX = Left;
+        _settings.ClockY = Top;
         Save();
     }
 
     protected override void OnLocationChanged(EventArgs e)
     {
         base.OnLocationChanged(e);
-        // Save centre, not top-left
-        _settings.ClockX = Left + ActualWidth  / 2;
-        _settings.ClockY = Top  + ActualHeight / 2;
+        _settings.ClockX = Left;
+        _settings.ClockY = Top;
     }
 
     private void Save()

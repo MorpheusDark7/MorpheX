@@ -17,10 +17,10 @@
 
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
-            <MenuItem x:Name="ToggleCardMenu" Header="Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleCardMenu" Header="Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF" Icon="{x:Null}"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="CustomTextMenu" Header="Set Custom Text..." Click="CustomText_Click" Foreground="#A0C4FF"/>
-            <MenuItem x:Name="AutoDayMenu" Header="Use Weekday Name" Click="AutoDay_Click" Foreground="#AAFFFFFF"/>
+            <MenuItem x:Name="CustomTextMenu" Header="Set Custom Text..." Click="CustomText_Click" Foreground="#FFFFFF" Icon="{x:Null}"/>
+            <MenuItem x:Name="AutoDayMenu" Header="Use Weekday Name" Click="AutoDay_Click" Foreground="#AAFFFFFF" Icon="{x:Null}"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Size">
                 <MenuItem Header="Small (42px)" Click="SizePreset_Click" Tag="0"/>
