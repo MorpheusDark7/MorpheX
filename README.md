@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.31-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.38-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -31,7 +31,7 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 
 ## Features
 
-- **Direct3D 11 Hardware Acceleration**: Powered by LibVLC with native GPU decoding (`.mp4`, `.webm`, `.mov`, `.mkv`, `.gif`).
+- **Direct3D 11 Hardware Acceleration**: Powered by LibVLC with native GPU decoding (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`).
 - **Smart Pause Detection**: Automatically freezes video playback when running fullscreen games or applications so your frame rates never take a hit.
 - **Multi-Monitor Support**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
 - **Wallpaper Playlist & Auto-Rotation**: Shuffle or cycle through your library on a customizable timer. Filter by favorites. Postpones rotation while in a game.
@@ -63,8 +63,7 @@ Grab the latest setup from the [**Releases**](https://github.com/MorpheusDark7/M
 | Format | Extensions | Engine |
 |---|---|---|
 | **Video** | `.mp4`, `.webm`, `.mkv`, `.mov`, `.avi` | LibVLC with Direct3D 11 GPU decode |
-| **Animated** | `.gif` | Native hardware WPF renderer |
-| **Static** | `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp` | Fast WIC image loader |
+| **Static Images** | `.png`, `.jpg`, `.jpeg`, `.webp`, `.bmp` | Fast WIC image loader |
 
 ---
 
@@ -116,6 +115,12 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.38
+- **Simplified Format Support** — Deprecated GIF and Scene package formats in favor of high-performance, GPU-accelerated video formats (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`) and static wallpapers.
+- **Bulk Library Management** — Added a "Delete All" button in the wallpaper library to clear imported media in one click.
+- **Modern Dialogs & UI Polish** — Replaced native Windows message boxes with custom Fluent dark dialogs and text prompts across all widgets and settings.
+- **Battery & Widget Optimizations** — Stabilized battery pause detection, refined widget context menus, and cleaned up filter options.
 
 ### v0.1.31
 - **Windows 11 Taskbar Fix** — Implemented an automatic 900ms DWM composition refresher loop, corrected unmanaged memory layout, and set `AccentFlags = 2` to keep Clear, Blur, and Acrylic taskbar effects persistently active against Windows 11 shell repaints.
