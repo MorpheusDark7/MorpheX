@@ -4,7 +4,11 @@ using System.Windows.Controls;
 using ComboBox = System.Windows.Controls.ComboBox;
 using ComboBoxItem = System.Windows.Controls.ComboBoxItem;
 using Application = System.Windows.Application;
+using MorpheX.Core.Configuration;
 using MorpheX.Services;
+using Serilog;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
+using Key = System.Windows.Input.Key;
 
 namespace MorpheX;
 
@@ -74,6 +78,14 @@ public partial class WidgetsPage : Page
         NotesToggle.IsChecked    = w.NotesEnabled;
         QuoteToggle.IsChecked    = w.QuoteEnabled;
         WeatherToggle.IsChecked  = w.WeatherEnabled;
+        WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
+        SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
+        SelectComboItem(WeatherScaleCombo, w.WeatherScale);
+        WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
+        WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
+        WeatherWindCheck.IsChecked = w.WeatherShowWind;
+        WeatherCardBgCheck.IsChecked = w.WeatherShowBackground;
+        UpdateWeatherLocationStatusText(w);
 
         _isInitializing = false;
     }
@@ -355,8 +367,152 @@ public partial class WidgetsPage : Page
     {
         if (_isInitializing) return;
         var app = (App)Application.Current;
-        app.SettingsService.Settings.Widgets.WeatherEnabled = WeatherToggle.IsChecked == true;
+        bool enabled = WeatherToggle.IsChecked == true;
+        app.SettingsService.Settings.Widgets.WeatherEnabled = enabled;
+        WeatherOptionsPanel.Visibility = enabled ? Visibility.Visible : Visibility.Collapsed;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
+    }
+
+    private void UpdateWeatherLocationStatusText(WidgetSettings w)
+    {
+        if (WeatherLocationStatusText == null) return;
+        if (!string.IsNullOrEmpty(w.WeatherLocationName))
+        {
+            WeatherLocationStatusText.Text = $"📍 Current: {w.WeatherLocationName} ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
+        }
+        else if (w.WeatherLat != 0 || w.WeatherLon != 0)
+        {
+            WeatherLocationStatusText.Text = $"📍 Current: ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
+        }
+        else
+        {
+            WeatherLocationStatusText.Text = "📍 Current: Not set (click Auto-Detect or enter a city above)";
+        }
+    }
+
+    private async void WeatherOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (WeatherUnitsCombo?.SelectedItem is ComboBoxItem ui && int.TryParse(ui.Tag?.ToString(), out int u))
+            w.WeatherUseFahrenheit = u == 1;
+
+        if (WeatherScaleCombo?.SelectedItem is ComboBoxItem sc && int.TryParse(sc.Tag?.ToString(), out int s))
+            w.WeatherScale = s;
+
+        if (WeatherHiLoCheck != null)
+            w.WeatherShowHiLo = WeatherHiLoCheck.IsChecked == true;
+
+        if (WeatherHumidityCheck != null)
+            w.WeatherShowHumidity = WeatherHumidityCheck.IsChecked == true;
+
+        if (WeatherWindCheck != null)
+            w.WeatherShowWind = WeatherWindCheck.IsChecked == true;
+
+        if (WeatherCardBgCheck != null)
+            w.WeatherShowBackground = WeatherCardBgCheck.IsChecked == true;
+
+        app.WidgetService.RefreshWeather();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void WeatherSearchBtn_Click(object sender, RoutedEventArgs e)
+    {
+        string city = WeatherLocationInput?.Text?.Trim() ?? "";
+        if (string.IsNullOrEmpty(city)) return;
+
+        WeatherSearchBtn.IsEnabled = false;
+        WeatherLocationStatusText.Text = $"🔍 Searching for '{city}'...";
+
+        try
+        {
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            string url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(city)}&count=1&language=en&format=json";
+            var json = await http.GetStringAsync(url);
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
+            {
+                var first = results[0];
+                double lat = first.GetProperty("latitude").GetDouble();
+                double lon = first.GetProperty("longitude").GetDouble();
+                string name = first.GetProperty("name").GetString() ?? city;
+                string? country = first.TryGetProperty("country", out var c) ? c.GetString() : null;
+                string locName = !string.IsNullOrEmpty(country) ? $"{name}, {country}" : name;
+
+                var app = (App)Application.Current;
+                var w = app.SettingsService.Settings.Widgets;
+                w.WeatherLat = lat;
+                w.WeatherLon = lon;
+                w.WeatherLocationName = locName;
+
+                UpdateWeatherLocationStatusText(w);
+                app.WidgetService.RefreshWeather();
+                await app.SettingsService.SaveAsync();
+                if (WeatherLocationInput != null)
+                    WeatherLocationInput.Text = "";
+            }
+            else
+            {
+                WeatherLocationStatusText.Text = $"⚠ Location '{city}' not found. Please try another city name.";
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to geocode weather city {City}", city);
+            WeatherLocationStatusText.Text = "⚠ Geocoding failed. Check your internet connection.";
+        }
+        finally
+        {
+            WeatherSearchBtn.IsEnabled = true;
+        }
+    }
+
+    private void WeatherLocationInput_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            WeatherSearchBtn_Click(sender, e);
+        }
+    }
+
+    private async void WeatherAutoDetectBtn_Click(object sender, RoutedEventArgs e)
+    {
+        WeatherAutoDetectBtn.IsEnabled = false;
+        WeatherLocationStatusText.Text = "📍 Auto-detecting location via IP...";
+
+        try
+        {
+            using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            var json = await http.GetStringAsync("https://ipapi.co/json/");
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+            double lat = root.GetProperty("latitude").GetDouble();
+            double lon = root.GetProperty("longitude").GetDouble();
+            string city = root.GetProperty("city").GetString() ?? "";
+            string country = root.TryGetProperty("country_name", out var cn) ? (cn.GetString() ?? "") : "";
+            string locName = !string.IsNullOrEmpty(country) ? $"{city}, {country}" : (city.Length > 0 ? city : "Your Location");
+
+            var app = (App)Application.Current;
+            var w = app.SettingsService.Settings.Widgets;
+            w.WeatherLat = lat;
+            w.WeatherLon = lon;
+            w.WeatherLocationName = locName;
+
+            UpdateWeatherLocationStatusText(w);
+            app.WidgetService.RefreshWeather();
+            await app.SettingsService.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to auto-detect location");
+            WeatherLocationStatusText.Text = "⚠ Could not auto-detect location. Please enter your city manually.";
+        }
+        finally
+        {
+            WeatherAutoDetectBtn.IsEnabled = true;
+        }
     }
 }

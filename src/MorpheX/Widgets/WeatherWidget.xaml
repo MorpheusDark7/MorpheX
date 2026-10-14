@@ -15,10 +15,19 @@
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem Header="Refresh Now" Click="RefreshNow_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="📍 Set Location..." Click="SetLocation_Click" Foreground="#38BDF8"/>
+            <MenuItem Header="📍 Auto-Detect Location" Click="AutoDetectLocation_Click" Foreground="#FFFFFF"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="UnitsMenuItem" Header="Switch to °F" Click="ToggleUnits_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="CardBgMenuItem" Header="Disable Frosted Card" Click="ToggleCardBg_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Show / Hide Details" Foreground="#FFFFFF">
+                <MenuItem x:Name="HiLoMenuItem" Header="High / Low Temp" IsCheckable="True" Click="ToggleHiLo_Click"/>
+                <MenuItem x:Name="HumidityMenuItem" Header="Humidity" IsCheckable="True" Click="ToggleHumidity_Click"/>
+                <MenuItem x:Name="WindMenuItem" Header="Wind Speed" IsCheckable="True" Click="ToggleWind_Click"/>
+            </MenuItem>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
-            <MenuItem Header="Center on Screen" Click="CenterOnScreen_Click" Foreground="#88CCFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>
@@ -33,38 +42,31 @@
         Margin="6"
         CornerRadius="14"
         Background="#B8101013"
-        MinWidth="200"
+        MinWidth="180"
         Effect="{StaticResource Glow}"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
         Cursor="SizeAll">
 
+        <Border.LayoutTransform>
+            <ScaleTransform x:Name="WidgetScaleTransform" ScaleX="1.0" ScaleY="1.0"/>
+        </Border.LayoutTransform>
+
         <StackPanel Margin="16,14,16,14">
 
-            <!-- Location + refresh icon -->
-            <Grid Margin="0,0,0,6">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock
-                    x:Name="LocationText"
-                    Grid.Column="0"
-                    Text="Weather"
-                    FontSize="11"
-                    FontFamily="Segoe UI"
-                    Foreground="#88FFFFFF"
-                    VerticalAlignment="Center" />
-                <TextBlock
-                    x:Name="LastUpdatedText"
-                    Grid.Column="1"
-                    Text="—"
-                    FontSize="10"
-                    Foreground="#55FFFFFF"
-                    VerticalAlignment="Center" />
-            </Grid>
+            <!-- Location row (no time display) -->
+            <TextBlock
+                x:Name="LocationText"
+                Text="Weather"
+                FontSize="11"
+                FontFamily="Segoe UI"
+                Foreground="#88FFFFFF"
+                Cursor="Hand"
+                ToolTip="Click to change location (or right-click)"
+                MouseLeftButtonDown="LocationText_Click"
+                Margin="0,0,0,6" />
 
             <!-- Main temp + icon row -->
-            <Grid Margin="0,0,0,10">
+            <Grid Margin="0,0,0,8">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="*" />
@@ -74,18 +76,18 @@
                     x:Name="WeatherEmojiText"
                     Grid.Column="0"
                     Text="🌤"
-                    FontSize="48"
+                    FontSize="46"
                     VerticalAlignment="Center"
-                    Margin="0,0,14,0" />
+                    Margin="0,0,12,0" />
 
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock
                         x:Name="TempText"
                         Text="—°"
-                        FontSize="42"
+                        FontSize="40"
                         FontFamily="Bahnschrift Light, Segoe UI Light"
                         Foreground="#FFFFFF"
-                        LineHeight="44" />
+                        LineHeight="42" />
                     <TextBlock
                         x:Name="ConditionText"
                         Text="Loading..."
@@ -93,12 +95,12 @@
                         FontFamily="Segoe UI"
                         Foreground="#AAFFFFFF"
                         TextWrapping="Wrap"
-                        MaxWidth="120" />
+                        MaxWidth="130" />
                 </StackPanel>
             </Grid>
 
             <!-- Hi/Lo + humidity row -->
-            <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+            <StackPanel x:Name="HiLoHumidityRow" Orientation="Horizontal" Margin="0,0,0,2">
                 <TextBlock
                     x:Name="HiLoText"
                     Text="↑ — / ↓ —"

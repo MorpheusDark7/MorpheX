@@ -99,7 +99,16 @@ public sealed class WidgetService : IDisposable
             _day?.ApplyTheme();
             _sysmon?.ApplyTheme();
             _media?.ApplyTheme();
-            _weather?.ApplyTheme();
+            _weather?.ApplyCustomizations();
+        });
+    }
+
+    public void RefreshWeather()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            _weather?.ApplyCustomizations();
+            _ = _weather?.FetchWeatherAsync();
         });
     }
 

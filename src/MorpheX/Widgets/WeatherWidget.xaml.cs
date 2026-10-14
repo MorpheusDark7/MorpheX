@@ -12,8 +12,7 @@ namespace MorpheX.Widgets;
 /// <summary>
 /// Transparent desktop weather widget powered by the free Open-Meteo API
 /// (no API key required, no account, GDPR-compliant, non-commercial use).
-/// Location is resolved from the Windows locale/timezone; a lat/lon can be
-/// stored in settings for precision.
+/// Location can be auto-detected via IP geolocation or set manually by city name.
 /// </summary>
 public partial class WeatherWidget : Window
 {
@@ -73,7 +72,7 @@ public partial class WeatherWidget : Window
         }
 
         UpdateLockState();
-        ApplyTheme();
+        ApplyCustomizations();
 
         _refreshTimer = new DispatcherTimer
         {
@@ -178,24 +177,90 @@ public partial class WeatherWidget : Window
             var root = doc.RootElement;
             _lat = root.GetProperty("latitude").GetDouble();
             _lon = root.GetProperty("longitude").GetDouble();
-            _locationName = root.GetProperty("city").GetString() ?? "Your Location";
+            string city = root.GetProperty("city").GetString() ?? "";
+            string country = root.TryGetProperty("country_name", out var cn) ? (cn.GetString() ?? "") : "";
+            _locationName = !string.IsNullOrEmpty(country) ? $"{city}, {country}" : (city.Length > 0 ? city : "Your Location");
 
             _settings.WeatherLat = _lat;
             _settings.WeatherLon = _lon;
             _settings.WeatherLocationName = _locationName;
-            _ = ((App)Application.Current).SettingsService.SaveAsync();
+            LocationText.Text = _locationName;
+            Save();
         }
         catch (Exception ex)
         {
-            Log.Warning(ex, "WeatherWidget: IP geolocation failed, using default (London)");
-            _lat = 51.5074;
-            _lon = -0.1278;
-            _locationName = "London";
+            Log.Warning(ex, "WeatherWidget: IP geolocation failed");
+            _locationName = "Location Not Detected";
+            LocationText.Text = "📍 Click to set location";
+            ConditionText.Text = "Click to set location";
         }
     }
 
-    private async Task FetchWeatherAsync()
+    public async Task<bool> SetLocationByCityAsync(string query)
     {
+        if (string.IsNullOrWhiteSpace(query)) return false;
+
+        // Check if query is raw "lat, lon"
+        var parts = query.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length == 2 &&
+            double.TryParse(parts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lat) &&
+            double.TryParse(parts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lon))
+        {
+            _lat = lat;
+            _lon = lon;
+            _locationName = $"{lat:F2}, {lon:F2}";
+            _settings.WeatherLat = _lat;
+            _settings.WeatherLon = _lon;
+            _settings.WeatherLocationName = _locationName;
+            LocationText.Text = _locationName;
+            Save();
+            await FetchWeatherAsync();
+            return true;
+        }
+
+        try
+        {
+            string url = $"https://geocoding-api.open-meteo.com/v1/search?name={Uri.EscapeDataString(query)}&count=1&language=en&format=json";
+            var json = await _http.GetStringAsync(url);
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
+            {
+                var first = results[0];
+                _lat = first.GetProperty("latitude").GetDouble();
+                _lon = first.GetProperty("longitude").GetDouble();
+                string name = first.GetProperty("name").GetString() ?? query;
+                string? country = first.TryGetProperty("country", out var c) ? c.GetString() : null;
+
+                _locationName = !string.IsNullOrEmpty(country) ? $"{name}, {country}" : name;
+                _settings.WeatherLat = _lat;
+                _settings.WeatherLon = _lon;
+                _settings.WeatherLocationName = _locationName;
+                LocationText.Text = _locationName;
+                Save();
+                await FetchWeatherAsync();
+                return true;
+            }
+            else
+            {
+                ConditionText.Text = "City not found";
+                ErrorText.Text = $"Could not find '{query}'";
+                ErrorText.Visibility = Visibility.Visible;
+                return false;
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "WeatherWidget: Geocoding failed for {Query}", query);
+            ErrorText.Text = "Search failed (check internet)";
+            ErrorText.Visibility = Visibility.Visible;
+            return false;
+        }
+    }
+
+    public async Task FetchWeatherAsync()
+    {
+        if (_lat == 0 && _lon == 0) return;
+
         try
         {
             string unit = _useFahrenheit ? "fahrenheit" : "celsius";
@@ -241,12 +306,10 @@ public partial class WeatherWidget : Window
         ConditionText.Text = WmoCodeToDescription(code);
         WeatherEmojiText.Text = WmoCodeToEmoji(code);
         LocationText.Text  = _locationName;
-        LastUpdatedText.Text = DateTime.Now.ToString("HH:mm");
         ErrorText.Visibility = Visibility.Collapsed;
     }
 
     // ── WMO Weather Code mapping ───────────────────────────────────────────
-    // Source: https://open-meteo.com/en/docs (WMO Weather interpretation codes)
     private static string WmoCodeToEmoji(int code) => code switch
     {
         0                   => "☀️",
@@ -308,6 +371,49 @@ public partial class WeatherWidget : Window
         await FetchWeatherAsync();
     }
 
+    private async void LocationText_Click(object sender, MouseButtonEventArgs e)
+    {
+        await PromptSetLocationAsync();
+    }
+
+    private async void SetLocation_Click(object sender, RoutedEventArgs e)
+    {
+        await PromptSetLocationAsync();
+    }
+
+    private async Task PromptSetLocationAsync()
+    {
+        string current = _settings.WeatherLocationName.Length > 0 ? _settings.WeatherLocationName : "";
+        string? result = Views.ModernDialogWindow.Prompt(
+            "Weather Location",
+            "Set Your City or Location",
+            "Enter your city name (e.g. New York, London, Tokyo, Mumbai):",
+            current,
+            "Save",
+            "Cancel",
+            owner: this);
+
+        if (!string.IsNullOrWhiteSpace(result))
+        {
+            ConditionText.Text = "Searching...";
+            bool ok = await SetLocationByCityAsync(result.Trim());
+            if (!ok)
+            {
+                Views.ModernDialogWindow.Warning(
+                    "Location Not Found",
+                    $"Could not find '{result}'",
+                    "Please check the spelling or enter 'Latitude, Longitude' (e.g. 51.5, -0.12).");
+            }
+        }
+    }
+
+    private async void AutoDetectLocation_Click(object sender, RoutedEventArgs e)
+    {
+        ConditionText.Text = "Detecting location...";
+        await ResolveLocationFromIpAsync();
+        await FetchWeatherAsync();
+    }
+
     private void ToggleTheme_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
@@ -325,17 +431,40 @@ public partial class WeatherWidget : Window
         await FetchWeatherAsync();
     }
 
+    private void ToggleCardBg_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WeatherShowBackground = !_settings.WeatherShowBackground;
+        ApplyCustomizations();
+        Save();
+    }
+
+    private void ToggleHiLo_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WeatherShowHiLo = !_settings.WeatherShowHiLo;
+        ApplyCustomizations();
+        Save();
+    }
+
+    private void ToggleHumidity_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WeatherShowHumidity = !_settings.WeatherShowHumidity;
+        ApplyCustomizations();
+        Save();
+    }
+
+    private void ToggleWind_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.WeatherShowWind = !_settings.WeatherShowWind;
+        ApplyCustomizations();
+        Save();
+    }
+
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
         UpdateLockState();
         Save();
         ((App)Application.Current).WidgetService.RefreshLockState();
-    }
-
-    private void CenterOnScreen_Click(object sender, RoutedEventArgs e)
-    {
-        CenterOnPrimaryMonitor();
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
@@ -345,29 +474,74 @@ public partial class WeatherWidget : Window
         Close();
     }
 
-    // ── Appearance ────────────────────────────────────────────────────────
+    // ── Appearance & Customization ─────────────────────────────────────────
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
+    public void ApplyCustomizations()
+    {
+        // 1. Scale
+        double scale = _settings.WeatherScale switch
+        {
+            0 => 0.85,
+            2 => 1.20,
+            _ => 1.0
+        };
+        WidgetScaleTransform.ScaleX = scale;
+        WidgetScaleTransform.ScaleY = scale;
+
+        // 2. Details visibility
+        HiLoText.Visibility = _settings.WeatherShowHiLo ? Visibility.Visible : Visibility.Collapsed;
+        HumidityText.Visibility = _settings.WeatherShowHumidity ? Visibility.Visible : Visibility.Collapsed;
+        WindText.Visibility = _settings.WeatherShowWind ? Visibility.Visible : Visibility.Collapsed;
+        HiLoHumidityRow.Visibility = (_settings.WeatherShowHiLo || _settings.WeatherShowHumidity) ? Visibility.Visible : Visibility.Collapsed;
+
+        // 3. Theme & Card styling
+        ApplyTheme();
+
+        // 4. Update Context Menu checkboxes
+        if (HiLoMenuItem != null) HiLoMenuItem.IsChecked = _settings.WeatherShowHiLo;
+        if (HumidityMenuItem != null) HumidityMenuItem.IsChecked = _settings.WeatherShowHumidity;
+        if (WindMenuItem != null) WindMenuItem.IsChecked = _settings.WeatherShowWind;
+        if (UnitsMenuItem != null) UnitsMenuItem.Header = _useFahrenheit ? "Switch to °C" : "Switch to °F";
+    }
+
     public void ApplyTheme()
     {
         bool isLight = _settings.WidgetTheme == 1;
-        WidgetStyles.ApplyFrostedGlass(CardBorder, showBackground: true, cornerRadius: 14,
-            padding: new Thickness(16, 14, 16, 14), isLightTheme: isLight);
-        ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
+        bool showBg  = _settings.WeatherShowBackground;
 
-        // Adjust text colours for light theme
+        if (showBg)
+        {
+            WidgetStyles.ApplyFrostedGlass(CardBorder, showBackground: true, cornerRadius: 14,
+                padding: new Thickness(16, 14, 16, 14), isLightTheme: isLight);
+        }
+        else
+        {
+            CardBorder.Background  = System.Windows.Media.Brushes.Transparent;
+            CardBorder.BorderBrush = System.Windows.Media.Brushes.Transparent;
+            CardBorder.Padding     = new Thickness(16, 14, 16, 14);
+        }
+
+        ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
+        if (CardBgMenuItem != null)
+            CardBgMenuItem.Header = showBg ? "Disable Frosted Card" : "Enable Frosted Card";
+
+        // Adjust text colours for light / dark theme
         var primary   = isLight ? "#CC000000" : "#FFFFFFFF";
         var secondary = isLight ? "#88000000" : "#88FFFFFF";
-        TempText.Foreground      = new System.Windows.Media.BrushConverter().ConvertFromString(primary)   as System.Windows.Media.Brush;
-        ConditionText.Foreground = new System.Windows.Media.BrushConverter().ConvertFromString(secondary) as System.Windows.Media.Brush;
-        HiLoText.Foreground      = new System.Windows.Media.BrushConverter().ConvertFromString(secondary) as System.Windows.Media.Brush;
-        HumidityText.Foreground  = new System.Windows.Media.BrushConverter().ConvertFromString(secondary) as System.Windows.Media.Brush;
-        WindText.Foreground      = new System.Windows.Media.BrushConverter().ConvertFromString(secondary) as System.Windows.Media.Brush;
-        LocationText.Foreground  = new System.Windows.Media.BrushConverter().ConvertFromString(secondary) as System.Windows.Media.Brush;
+        var tertiary  = isLight ? "#66000000" : "#66FFFFFF";
+        var brushConv = new System.Windows.Media.BrushConverter();
+
+        TempText.Foreground      = brushConv.ConvertFromString(primary)   as System.Windows.Media.Brush;
+        ConditionText.Foreground = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
+        HiLoText.Foreground      = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
+        HumidityText.Foreground  = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
+        WindText.Foreground      = brushConv.ConvertFromString(tertiary)  as System.Windows.Media.Brush;
+        LocationText.Foreground  = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
     }
 
     // ── Position save ────────────────────────────────────────────────────

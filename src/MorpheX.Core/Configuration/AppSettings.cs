@@ -141,6 +141,11 @@ public sealed class WidgetSettings
     public double WeatherLon { get; set; } = 0;
     public string WeatherLocationName { get; set; } = string.Empty;
     public bool WeatherUseFahrenheit { get; set; } = false;
+    public bool WeatherShowHiLo { get; set; } = true;
+    public bool WeatherShowHumidity { get; set; } = true;
+    public bool WeatherShowWind { get; set; } = true;
+    public bool WeatherShowBackground { get; set; } = true;
+    public int WeatherScale { get; set; } = 1; // 0=Small (85%), 1=Normal (100%), 2=Large (120%)
 }
 
 public sealed class GeneralSettings

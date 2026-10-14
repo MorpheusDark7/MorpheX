@@ -81,6 +81,18 @@
                     Foreground="#9099B0"
                     TextWrapping="Wrap"
                     LineHeight="20"/>
+
+                <TextBox
+                    x:Name="InputTextBox"
+                    Visibility="Collapsed"
+                    Margin="0,14,0,0"
+                    Padding="10,8"
+                    FontSize="13"
+                    Background="#111118"
+                    Foreground="#FFFFFF"
+                    BorderBrush="#35FFFFFF"
+                    BorderThickness="1"
+                    KeyDown="InputTextBox_KeyDown"/>
             </StackPanel>
 
             <!-- Footer -->

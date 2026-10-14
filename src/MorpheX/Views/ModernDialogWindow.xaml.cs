@@ -123,7 +123,45 @@ public partial class ModernDialogWindow : Window
         Close();
     }
 
+    private void InputTextBox_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter)
+        {
+            Result = true;
+            DialogResult = true;
+            Close();
+        }
+        else if (e.Key == Key.Escape)
+        {
+            Result = false;
+            DialogResult = false;
+            Close();
+        }
+    }
+
     // ─── Static Convenience API ──────────────────────────────────────────────
+
+    public static string? Prompt(
+        string title,
+        string heading,
+        string message,
+        string defaultText = "",
+        string primaryText = "Save",
+        string secondaryText = "Cancel",
+        ModernDialogIcon icon = ModernDialogIcon.Info,
+        Window? owner = null)
+    {
+        var dlg = new ModernDialogWindow(title, heading, message, primaryText, secondaryText, icon, owner);
+        dlg.InputTextBox.Visibility = Visibility.Visible;
+        dlg.InputTextBox.Text = defaultText;
+        dlg.Loaded += (_, _) =>
+        {
+            dlg.InputTextBox.Focus();
+            dlg.InputTextBox.SelectAll();
+        };
+        dlg.ShowDialog();
+        return dlg.Result ? dlg.InputTextBox.Text.Trim() : null;
+    }
 
     public static bool Confirm(
         string title,
