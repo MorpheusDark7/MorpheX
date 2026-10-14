@@ -25,6 +25,7 @@ public sealed class WidgetService : IDisposable
     private CalendarWidget?      _calendar;
     private NotesWidget?         _notes;
     private QuoteWidget?         _quote;
+    private WeatherWidget?       _weather;
 
     private bool _disposed;
 
@@ -50,6 +51,7 @@ public sealed class WidgetService : IDisposable
     public bool IsCalendarOpen => _calendar != null && _calendar.IsVisible;
     public bool IsNotesOpen    => _notes    != null && _notes.IsVisible;
     public bool IsQuoteOpen    => _quote    != null && _quote.IsVisible;
+    public bool IsWeatherOpen  => _weather  != null && _weather.IsVisible;
 
     public void RefreshClock()
     {
@@ -82,6 +84,7 @@ public sealed class WidgetService : IDisposable
             _calendar?.UpdateLockState();
             _notes?.UpdateLockState();
             _quote?.UpdateLockState();
+            _weather?.UpdateLockState();
         });
     }
 
@@ -96,6 +99,7 @@ public sealed class WidgetService : IDisposable
             _day?.ApplyTheme();
             _sysmon?.ApplyTheme();
             _media?.ApplyTheme();
+            _weather?.ApplyTheme();
         });
     }
 
@@ -110,6 +114,7 @@ public sealed class WidgetService : IDisposable
         SetWidget(ref _calendar, _settings.CalendarEnabled,        () => new CalendarWidget(_settings));
         SetWidget(ref _notes,    _settings.NotesEnabled,           () => new NotesWidget(_settings));
         SetWidget(ref _quote,    _settings.QuoteEnabled,           () => new QuoteWidget(_settings));
+        SetWidget(ref _weather,  _settings.WeatherEnabled,         () => new WeatherWidget(_settings));
     }
 
     private void SetWidget<T>(ref T? field, bool enabled, Func<T> factory)
@@ -157,6 +162,7 @@ public sealed class WidgetService : IDisposable
             CloseWidget(ref _calendar);
             CloseWidget(ref _notes);
             CloseWidget(ref _quote);
+            CloseWidget(ref _weather);
         });
     }
 

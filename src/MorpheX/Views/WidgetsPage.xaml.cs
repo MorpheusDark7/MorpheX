@@ -73,6 +73,7 @@ public partial class WidgetsPage : Page
         CalendarToggle.IsChecked = w.CalendarEnabled;
         NotesToggle.IsChecked    = w.NotesEnabled;
         QuoteToggle.IsChecked    = w.QuoteEnabled;
+        WeatherToggle.IsChecked  = w.WeatherEnabled;
 
         _isInitializing = false;
     }
@@ -346,6 +347,15 @@ public partial class WidgetsPage : Page
         if (_isInitializing) return;
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
+        app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void WeatherToggle_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.WeatherEnabled = WeatherToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
     }

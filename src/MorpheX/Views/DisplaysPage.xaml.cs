@@ -1,9 +1,11 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using Application = System.Windows.Application;
 using Panel = System.Windows.Controls.Panel;
 using MorpheX.Core.Models;
 using MorpheX.Core.Services;
+using MorpheX.Core.Configuration;
 using Serilog;
 
 namespace MorpheX;
@@ -22,10 +24,24 @@ public sealed class DisplayViewModel
     public int Volume { get; set; }
     public string VolumeText => $"{Volume}%";
     public string MuteTooltip => IsMuted ? "Unmute this display" : "Mute this display";
+
+    // Per-monitor effects (0-200 range for sliders, maps to 0.0-2.0f)
+    public int BrightnessValue { get; set; } = 100;
+    public int ContrastValue { get; set; } = 100;
+    public int SaturationValue { get; set; } = 100;
+    public int ColorTempValue { get; set; } = 0;
+    public string BrightnessText => $"{BrightnessValue}%";
+    public string ContrastText => $"{ContrastValue}%";
+    public string SaturationText => $"{SaturationValue}%";
+    public string ColorTempText => ColorTempValue == 0 ? "Neutral" : (ColorTempValue > 0 ? $"+{ColorTempValue} Warm" : $"{ColorTempValue} Cool");
+    public bool HasEffectsOverride { get; set; }
 }
 
 public partial class DisplaysPage : Page
 {
+    // Guard against recursive slider-change events during load
+    private bool _loadingEffects;
+
     public DisplaysPage()
     {
         InitializeComponent();
@@ -52,6 +68,7 @@ public partial class DisplaysPage : Page
 
     public void RefreshDisplays()
     {
+        _loadingEffects = true;
         var app = (App)Application.Current;
         var monitors = app.MonitorService.Monitors;
 
@@ -65,6 +82,11 @@ public partial class DisplaysPage : Page
             bool isMuted = app.WallpaperService.IsMonitorMuted(m.DeviceId);
             int volume = app.WallpaperService.GetMonitorVolume(m.DeviceId);
 
+            // Load per-monitor effects
+            app.SettingsService.Settings.MonitorAssignments.TryGetValue(m.DeviceId, out var assignment);
+            var fx = assignment?.Effects;
+            var global = app.SettingsService.Settings.Effects;
+
             list.Add(new DisplayViewModel
             {
                 DeviceId = m.DeviceId,
@@ -74,11 +96,17 @@ public partial class DisplaysPage : Page
                 ActiveWallpaperString = active != null ? $"Active Wallpaper: {active.Name} ({active.Type})" : "Active Wallpaper: None",
                 HasAudioControls = hasAudio,
                 IsMuted = isMuted,
-                Volume = volume
+                Volume = volume,
+                BrightnessValue  = (int)Math.Round((fx?.Brightness   ?? global.Brightness)   * 100f),
+                ContrastValue    = (int)Math.Round((fx?.Contrast     ?? global.Contrast)     * 100f),
+                SaturationValue  = (int)Math.Round((fx?.Saturation   ?? global.Saturation)   * 100f),
+                ColorTempValue   = fx?.ColorTemperature ?? global.ColorTemperature,
+                HasEffectsOverride = fx?.HasAnyOverride == true,
             });
         }
 
         DisplaysList.ItemsSource = list;
+        _loadingEffects = false;
     }
 
     private void MuteToggle_Click(object sender, RoutedEventArgs e)
@@ -126,6 +154,114 @@ public partial class DisplaysPage : Page
             {
                 Log.Error(ex, "Failed to clear wallpaper for display {DeviceId}", deviceId);
             }
+        }
+    }
+
+    // ── Per-Monitor Effects ──────────────────────────────────────────────────
+
+    private MonitorEffectsSettings GetOrCreateMonitorEffects(string deviceId)
+    {
+        var app = (App)Application.Current;
+        var assignments = app.SettingsService.Settings.MonitorAssignments;
+        if (!assignments.TryGetValue(deviceId, out var assignment))
+        {
+            assignment = new MonitorAssignment();
+            assignments[deviceId] = assignment;
+        }
+        assignment.Effects ??= new MonitorEffectsSettings();
+        return assignment.Effects;
+    }
+
+    private void BrightnessSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_loadingEffects) return;
+        if (sender is FrameworkElement element && element.Tag is string deviceId)
+        {
+            int val = (int)Math.Round(e.NewValue);
+            // Safe limit warning: > 170% can cause burn-in on OLED displays
+            if (val > 170)
+            {
+                Views.ModernDialogWindow.Warning(
+                    "High Brightness Warning",
+                    "Brightness above 170% may accelerate OLED display wear",
+                    "Consider keeping brightness at or below 170% for OLED/AMOLED screens to reduce panel stress.");
+            }
+            var fx = GetOrCreateMonitorEffects(deviceId);
+            fx.Brightness = Math.Clamp(val / 100f, 0.05f, 2.0f);
+            ApplyAndSaveMonitor(deviceId);
+            UpdateEffectLabel(element, $"{val}%");
+        }
+    }
+
+    private void ContrastSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_loadingEffects) return;
+        if (sender is FrameworkElement element && element.Tag is string deviceId)
+        {
+            int val = (int)Math.Round(e.NewValue);
+            var fx = GetOrCreateMonitorEffects(deviceId);
+            fx.Contrast = Math.Clamp(val / 100f, 0.05f, 2.5f);
+            ApplyAndSaveMonitor(deviceId);
+            UpdateEffectLabel(element, $"{val}%");
+        }
+    }
+
+    private void SaturationSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_loadingEffects) return;
+        if (sender is FrameworkElement element && element.Tag is string deviceId)
+        {
+            int val = (int)Math.Round(e.NewValue);
+            var fx = GetOrCreateMonitorEffects(deviceId);
+            fx.Saturation = Math.Clamp(val / 100f, 0.0f, 3.0f);
+            ApplyAndSaveMonitor(deviceId);
+            UpdateEffectLabel(element, $"{val}%");
+        }
+    }
+
+    private void ColorTempSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (_loadingEffects) return;
+        if (sender is FrameworkElement element && element.Tag is string deviceId)
+        {
+            int val = (int)Math.Round(e.NewValue);
+            var fx = GetOrCreateMonitorEffects(deviceId);
+            fx.ColorTemperature = Math.Clamp(val, -50, 50);
+            ApplyAndSaveMonitor(deviceId);
+            string label = val == 0 ? "Neutral" : (val > 0 ? $"+{val} Warm" : $"{val} Cool");
+            UpdateEffectLabel(element, label);
+        }
+    }
+
+    private void ResetMonitorEffects_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is FrameworkElement element && element.Tag is string deviceId)
+        {
+            var app = (App)Application.Current;
+            if (app.SettingsService.Settings.MonitorAssignments.TryGetValue(deviceId, out var assignment))
+            {
+                assignment.Effects = null;
+            }
+            app.WallpaperService.ApplyEffectsToMonitor(deviceId);
+            _ = app.SettingsService.SaveAsync();
+            RefreshDisplays();
+        }
+    }
+
+    private void ApplyAndSaveMonitor(string deviceId)
+    {
+        var app = (App)Application.Current;
+        app.WallpaperService.ApplyEffectsToMonitor(deviceId);
+        _ = app.SettingsService.SaveAsync();
+    }
+
+    private static void UpdateEffectLabel(FrameworkElement slider, string text)
+    {
+        // Walk up to find sibling TextBlock in parent StackPanel
+        if (slider.Parent is Panel panel)
+        {
+            var tb = panel.Children.OfType<TextBlock>().LastOrDefault();
+            if (tb != null) tb.Text = text;
         }
     }
 }

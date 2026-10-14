@@ -132,6 +132,15 @@ public sealed class WidgetSettings
     public double QuoteX { get; set; } = 30;
     public double QuoteY { get; set; } = 600;
     public int QuoteIndex { get; set; } = 0;
+
+    // ── Weather widget ─────────────────────────────────────────────────────
+    public bool WeatherEnabled { get; set; } = false;
+    public double WeatherX { get; set; } = 30;
+    public double WeatherY { get; set; } = 760;
+    public double WeatherLat { get; set; } = 0;
+    public double WeatherLon { get; set; } = 0;
+    public string WeatherLocationName { get; set; } = string.Empty;
+    public bool WeatherUseFahrenheit { get; set; } = false;
 }
 
 public sealed class GeneralSettings
@@ -213,6 +222,30 @@ public sealed class WallpaperEffectsSettings
         ColorTemperature == 0;
 }
 
+/// <summary>
+/// Per-monitor visual effects override. When set, these replace the global Effects for that display.
+/// All values nullable — null means "inherit from global Effects".
+/// Safe limits: Brightness 0.05–2.0, Contrast 0.05–2.5, Saturation 0.0–3.0, ColorTemp -50..+50
+/// </summary>
+public sealed class MonitorEffectsSettings
+{
+    public float? Brightness { get; set; }
+    public float? Contrast { get; set; }
+    public float? Saturation { get; set; }
+    public int? ColorTemperature { get; set; }
+
+    public bool HasAnyOverride =>
+        Brightness.HasValue || Contrast.HasValue || Saturation.HasValue || ColorTemperature.HasValue;
+
+    /// <summary>Merge with a global fallback, returning effective values.</summary>
+    public (float brightness, float contrast, float saturation, int colorTemp)
+        Resolve(WallpaperEffectsSettings global) => (
+            Brightness   ?? global.Brightness,
+            Contrast     ?? global.Contrast,
+            Saturation   ?? global.Saturation,
+            ColorTemperature ?? global.ColorTemperature);
+}
+
 /// <summary>Automatically dims the wallpaper when the system has been idle for a while.</summary>
 public sealed class AmbientDimSettings
 {
@@ -282,4 +315,7 @@ public sealed class MonitorAssignment
     public double? SavedPositionSeconds { get; set; }
     public bool? AudioMuted { get; set; }
     public int? Volume { get; set; }
+
+    /// <summary>Per-monitor visual effects. Null = inherit global Effects settings.</summary>
+    public MonitorEffectsSettings? Effects { get; set; }
 }

@@ -200,6 +200,27 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
 
         State = WallpaperState.Playing;
         Log.Debug("Video resumed");
+
+        // Volume fade-in: ramp from 0 → target over ~800 ms so audio doesn't slam back
+        if (AudioEnabled && _mediaPlayer != null)
+        {
+            int targetVolume = _mediaPlayer.Volume;
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    const int steps = 16;
+                    _mediaPlayer.Volume = 0;
+                    for (int i = 1; i <= steps; i++)
+                    {
+                        if (State != WallpaperState.Playing) break;
+                        _mediaPlayer.Volume = (int)Math.Round(targetVolume * (i / (float)steps));
+                        await Task.Delay(50);
+                    }
+                }
+                catch { }
+            });
+        }
     }
 
     public void SetVolume(float volume)

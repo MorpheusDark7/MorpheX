@@ -50,8 +50,12 @@ public interface IWallpaperService : IDisposable
 
     Task ReloadActiveWallpapersAsync();
 
-    /// <summary>Apply brightness/contrast/saturation/colorTemp effects to all active wallpapers.</summary>
+    /// <summary>Apply brightness/contrast/saturation/colorTemp effects to all active wallpapers.
+    /// Each monitor uses its own Effects override if set, otherwise falls back to global Effects.</summary>
     void ApplyEffectsToAll(float brightnessOverride = -1f);
+
+    /// <summary>Apply effects to a single monitor (used by per-monitor effects UI).</summary>
+    void ApplyEffectsToMonitor(string monitorDeviceId);
 
     /// <summary>Set playback speed on all active video wallpapers.</summary>
     void SetPlaybackRate(float rate);
@@ -343,11 +347,55 @@ public sealed class WallpaperService : IWallpaperService
     /// <inheritdoc />
     public void ApplyEffectsToAll(float brightnessOverride = -1f)
     {
-        var effects = _settingsService.Settings.Effects;
-        foreach (var state in _monitorStates.Values)
+        var globalEffects = _settingsService.Settings.Effects;
+        foreach (var (deviceId, state) in _monitorStates)
         {
-            if (state.Provider != null)
-                WallpaperEffectsService.Apply(state.Provider, effects, brightnessOverride);
+            if (state.Provider == null) continue;
+
+            var monitorEffects = _settingsService.Settings.MonitorAssignments
+                .GetValueOrDefault(deviceId)?.Effects;
+
+            if (monitorEffects != null && monitorEffects.HasAnyOverride)
+            {
+                var (b, c, s, t) = monitorEffects.Resolve(globalEffects);
+                var effectiveEffects = new Configuration.WallpaperEffectsSettings
+                {
+                    Brightness = brightnessOverride >= 0 ? brightnessOverride : b,
+                    Contrast = c,
+                    Saturation = s,
+                    ColorTemperature = t
+                };
+                WallpaperEffectsService.Apply(state.Provider, effectiveEffects);
+            }
+            else
+            {
+                WallpaperEffectsService.Apply(state.Provider, globalEffects, brightnessOverride);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void ApplyEffectsToMonitor(string monitorDeviceId)
+    {
+        if (!_monitorStates.TryGetValue(monitorDeviceId, out var state) || state.Provider == null)
+            return;
+
+        var globalEffects = _settingsService.Settings.Effects;
+        var monitorEffects = _settingsService.Settings.MonitorAssignments
+            .GetValueOrDefault(monitorDeviceId)?.Effects;
+
+        if (monitorEffects != null && monitorEffects.HasAnyOverride)
+        {
+            var (b, c, s, t) = monitorEffects.Resolve(globalEffects);
+            var effectiveEffects = new Configuration.WallpaperEffectsSettings
+            {
+                Brightness = b, Contrast = c, Saturation = s, ColorTemperature = t
+            };
+            WallpaperEffectsService.Apply(state.Provider, effectiveEffects);
+        }
+        else
+        {
+            WallpaperEffectsService.Apply(state.Provider, globalEffects);
         }
     }
 
