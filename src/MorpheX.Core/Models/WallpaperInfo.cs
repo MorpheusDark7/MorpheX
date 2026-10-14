@@ -41,6 +41,29 @@ public sealed class WallpaperInfo
         Width.HasValue && Height.HasValue ? $"{Width}×{Height}" : null;
 
     [JsonIgnore]
+    public string? FileSizeText
+    {
+        get
+        {
+            long size = FileSize;
+            if (size <= 0 && !string.IsNullOrEmpty(EffectivePath) && File.Exists(EffectivePath))
+            {
+                try { size = new FileInfo(EffectivePath).Length; } catch { }
+            }
+
+            return size > 0
+                ? size switch
+                {
+                    < 1024 => $"{size} B",
+                    < 1024 * 1024 => $"{size / 1024.0:F1} KB",
+                    < 1024 * 1024 * 1024 => $"{size / (1024.0 * 1024.0):F1} MB",
+                    _ => $"{size / (1024.0 * 1024.0 * 1024.0):F2} GB"
+                }
+                : null;
+        }
+    }
+
+    [JsonIgnore]
     public bool IsActive { get; set; }
 
     [JsonIgnore]

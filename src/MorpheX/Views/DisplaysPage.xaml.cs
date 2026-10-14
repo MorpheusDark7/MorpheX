@@ -42,6 +42,11 @@ public partial class DisplaysPage : Page
     // Guard against recursive slider-change events during load
     private bool _loadingEffects;
 
+    // Tracks which monitors have already shown the OLED brightness warning this session.
+    // Clears for a monitor when brightness goes back below 170%, so warning fires again
+    // if they exceed it a second time.
+    private readonly HashSet<string> _oledWarned = new();
+
     public DisplaysPage()
     {
         InitializeComponent();
@@ -87,6 +92,12 @@ public partial class DisplaysPage : Page
             var fx = assignment?.Effects;
             var global = app.SettingsService.Settings.Effects;
 
+            int brightness = (int)Math.Round((fx?.Brightness ?? global.Brightness) * 100f);
+            if (brightness > 170)
+            {
+                _oledWarned.Add(m.DeviceId);
+            }
+
             list.Add(new DisplayViewModel
             {
                 DeviceId = m.DeviceId,
@@ -97,7 +108,7 @@ public partial class DisplaysPage : Page
                 HasAudioControls = hasAudio,
                 IsMuted = isMuted,
                 Volume = volume,
-                BrightnessValue  = (int)Math.Round((fx?.Brightness   ?? global.Brightness)   * 100f),
+                BrightnessValue  = brightness,
                 ContrastValue    = (int)Math.Round((fx?.Contrast     ?? global.Contrast)     * 100f),
                 SaturationValue  = (int)Math.Round((fx?.Saturation   ?? global.Saturation)   * 100f),
                 ColorTempValue   = fx?.ColorTemperature ?? global.ColorTemperature,
@@ -178,14 +189,24 @@ public partial class DisplaysPage : Page
         if (sender is FrameworkElement element && element.Tag is string deviceId)
         {
             int val = (int)Math.Round(e.NewValue);
-            // Safe limit warning: > 170% can cause burn-in on OLED displays
+
             if (val > 170)
             {
-                Views.ModernDialogWindow.Warning(
-                    "High Brightness Warning",
-                    "Brightness above 170% may accelerate OLED display wear",
-                    "Consider keeping brightness at or below 170% for OLED/AMOLED screens to reduce panel stress.");
+                // Only warn once per crossing — reset when they go back below 170
+                if (_oledWarned.Add(deviceId))
+                {
+                    Views.ModernDialogWindow.Warning(
+                        "High Brightness Warning",
+                        "Brightness above 170% may accelerate OLED display wear",
+                        "Consider keeping brightness at or below 170% for OLED/AMOLED screens to reduce panel stress.");
+                }
             }
+            else
+            {
+                // Reset so warning fires again next time they cross the threshold
+                _oledWarned.Remove(deviceId);
+            }
+
             var fx = GetOrCreateMonitorEffects(deviceId);
             fx.Brightness = Math.Clamp(val / 100f, 0.05f, 2.0f);
             ApplyAndSaveMonitor(deviceId);

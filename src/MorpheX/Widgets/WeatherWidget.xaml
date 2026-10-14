@@ -18,6 +18,7 @@
             <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="UnitsMenuItem" Header="Switch to °F" Click="ToggleUnits_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
+            <MenuItem Header="Center on Screen" Click="CenterOnScreen_Click" Foreground="#88CCFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>
         </ContextMenu>

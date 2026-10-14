@@ -38,9 +38,39 @@ public partial class WeatherWidget : Window
         InitializeComponent();
         _settings = settings;
 
-        Left = settings.WeatherX;
-        Top  = settings.WeatherY;
         _useFahrenheit = settings.WeatherUseFahrenheit;
+
+        // Determine if initial centering on Monitor 1 is needed:
+        // 1. Default initial coordinates (30, 760)
+        // 2. Saved coordinates are off-screen, NaN, or invalid
+        Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+        double estW = DesiredSize.Width > 50 ? DesiredSize.Width : 220;
+        double estH = DesiredSize.Height > 50 ? DesiredSize.Height : 180;
+
+        bool needsCenter = (settings.WeatherX == 30 && settings.WeatherY == 760)
+            || !IsPositionVisibleOnAnyScreen(settings.WeatherX, settings.WeatherY, estW, estH);
+
+        if (needsCenter)
+        {
+            var primary = GetPrimaryScreen();
+            if (primary != null)
+            {
+                Left = primary.WorkingArea.Left + (primary.WorkingArea.Width - estW) / 2.0;
+                Top  = primary.WorkingArea.Top + (primary.WorkingArea.Height - estH) / 2.0;
+            }
+            else
+            {
+                Left = 200;
+                Top  = 200;
+            }
+
+            Loaded += (_, _) => CenterOnPrimaryMonitor();
+        }
+        else
+        {
+            Left = settings.WeatherX;
+            Top  = settings.WeatherY;
+        }
 
         UpdateLockState();
         ApplyTheme();
@@ -56,6 +86,68 @@ public partial class WeatherWidget : Window
 
         // Initial fetch on background thread
         _ = InitLocationAndFetchAsync();
+    }
+
+    // ── Monitor centering ────────────────────────────────────────────────────
+    private static System.Windows.Forms.Screen? GetPrimaryScreen()
+    {
+        return System.Windows.Forms.Screen.PrimaryScreen 
+            ?? System.Windows.Forms.Screen.AllScreens.FirstOrDefault();
+    }
+
+    private static bool IsPositionVisibleOnAnyScreen(double x, double y, double width, double height)
+    {
+        if (double.IsNaN(x) || double.IsNaN(y) || double.IsInfinity(x) || double.IsInfinity(y))
+            return false;
+        if (x < -5000 || y < -5000 || x > 50000 || y > 50000)
+            return false;
+
+        var rect = new System.Drawing.Rectangle((int)x, (int)y, (int)Math.Max(1, width), (int)Math.Max(1, height));
+        return System.Windows.Forms.Screen.AllScreens.Any(s => s.WorkingArea.IntersectsWith(rect));
+    }
+
+    public void CenterOnPrimaryMonitor()
+    {
+        try
+        {
+            var primary = GetPrimaryScreen();
+            if (primary == null) return;
+
+            var wa = primary.WorkingArea; // pixels
+
+            // WPF DIPs to pixel ratio
+            double dpi = 1.0;
+            try
+            {
+                var source = PresentationSource.FromVisual(this);
+                if (source?.CompositionTarget != null)
+                {
+                    dpi = source.CompositionTarget.TransformToDevice.M11;
+                }
+            }
+            catch { }
+
+            if (dpi <= 0.1) dpi = 1.0;
+
+            double cardWidth = ActualWidth > 50 ? ActualWidth : (DesiredSize.Width > 50 ? DesiredSize.Width : 220);
+            double cardHeight = ActualHeight > 50 ? ActualHeight : (DesiredSize.Height > 50 ? DesiredSize.Height : 180);
+
+            double waWidthDip  = wa.Width  / dpi;
+            double waHeightDip = wa.Height / dpi;
+            double waLeftDip   = wa.Left   / dpi;
+            double waTopDip    = wa.Top    / dpi;
+
+            Left = waLeftDip + Math.Max(0, (waWidthDip - cardWidth) / 2.0);
+            Top  = waTopDip  + Math.Max(0, (waHeightDip - cardHeight) / 2.0);
+
+            _settings.WeatherX = Left;
+            _settings.WeatherY = Top;
+            Save();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "WeatherWidget: Failed to center on primary monitor");
+        }
     }
 
     // ── Location + Fetch ──────────────────────────────────────────────────
@@ -239,6 +331,11 @@ public partial class WeatherWidget : Window
         UpdateLockState();
         Save();
         ((App)Application.Current).WidgetService.RefreshLockState();
+    }
+
+    private void CenterOnScreen_Click(object sender, RoutedEventArgs e)
+    {
+        CenterOnPrimaryMonitor();
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
