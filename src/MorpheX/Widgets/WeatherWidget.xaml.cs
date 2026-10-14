@@ -26,18 +26,24 @@ public partial class WeatherWidget : Window
     private readonly DispatcherTimer _refreshTimer;
     private static readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(15) };
 
-    private double _lat;
-    private double _lon;
-    private string _locationName = "Your Location";
-    private bool   _useFahrenheit;
+    // Cached base metric values (Celsius & km/h) to allow instant unit conversion without waiting for network
+    private double? _lastTempC;
+    private double? _lastHiC;
+    private double? _lastLoC;
+    private double? _lastWindKmh;
+    private int?    _lastCode;
+    private int?    _lastHumidity;
+
+    private bool   UseFahrenheit => _settings.WeatherUseFahrenheit;
+    private double Latitude      => _settings.WeatherLat;
+    private double Longitude     => _settings.WeatherLon;
+    private string LocationName  => !string.IsNullOrEmpty(_settings.WeatherLocationName) ? _settings.WeatherLocationName : "Your Location";
 
     // ── Constructor ────────────────────────────────────────────────────────
     public WeatherWidget(WidgetSettings settings)
     {
         InitializeComponent();
         _settings = settings;
-
-        _useFahrenheit = settings.WeatherUseFahrenheit;
 
         // Determine if initial centering on Monitor 1 is needed:
         // 1. Default initial coordinates (30, 760)
@@ -153,15 +159,7 @@ public partial class WeatherWidget : Window
     private async Task InitLocationAndFetchAsync()
     {
         // Use saved lat/lon if available, otherwise resolve from IP
-        if (_settings.WeatherLat != 0 || _settings.WeatherLon != 0)
-        {
-            _lat = _settings.WeatherLat;
-            _lon = _settings.WeatherLon;
-            _locationName = _settings.WeatherLocationName.Length > 0
-                ? _settings.WeatherLocationName
-                : "Custom Location";
-        }
-        else
+        if (_settings.WeatherLat == 0 && _settings.WeatherLon == 0)
         {
             await ResolveLocationFromIpAsync();
         }
@@ -175,22 +173,21 @@ public partial class WeatherWidget : Window
             var json = await _http.GetStringAsync(GeoUrl);
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
-            _lat = root.GetProperty("latitude").GetDouble();
-            _lon = root.GetProperty("longitude").GetDouble();
+            double lat = root.GetProperty("latitude").GetDouble();
+            double lon = root.GetProperty("longitude").GetDouble();
             string city = root.GetProperty("city").GetString() ?? "";
             string country = root.TryGetProperty("country_name", out var cn) ? (cn.GetString() ?? "") : "";
-            _locationName = !string.IsNullOrEmpty(country) ? $"{city}, {country}" : (city.Length > 0 ? city : "Your Location");
+            string locName = !string.IsNullOrEmpty(country) ? $"{city}, {country}" : (city.Length > 0 ? city : "Your Location");
 
-            _settings.WeatherLat = _lat;
-            _settings.WeatherLon = _lon;
-            _settings.WeatherLocationName = _locationName;
-            LocationText.Text = _locationName;
+            _settings.WeatherLat = lat;
+            _settings.WeatherLon = lon;
+            _settings.WeatherLocationName = locName;
+            LocationText.Text = locName;
             Save();
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "WeatherWidget: IP geolocation failed");
-            _locationName = "Location Not Detected";
             LocationText.Text = "📍 Click to set location";
             ConditionText.Text = "Click to set location";
         }
@@ -206,13 +203,10 @@ public partial class WeatherWidget : Window
             double.TryParse(parts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lat) &&
             double.TryParse(parts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lon))
         {
-            _lat = lat;
-            _lon = lon;
-            _locationName = $"{lat:F2}, {lon:F2}";
-            _settings.WeatherLat = _lat;
-            _settings.WeatherLon = _lon;
-            _settings.WeatherLocationName = _locationName;
-            LocationText.Text = _locationName;
+            _settings.WeatherLat = lat;
+            _settings.WeatherLon = lon;
+            _settings.WeatherLocationName = $"{lat:F2}, {lon:F2}";
+            LocationText.Text = _settings.WeatherLocationName;
             Save();
             await FetchWeatherAsync();
             return true;
@@ -226,16 +220,15 @@ public partial class WeatherWidget : Window
             if (doc.RootElement.TryGetProperty("results", out var results) && results.GetArrayLength() > 0)
             {
                 var first = results[0];
-                _lat = first.GetProperty("latitude").GetDouble();
-                _lon = first.GetProperty("longitude").GetDouble();
+                double rLat = first.GetProperty("latitude").GetDouble();
+                double rLon = first.GetProperty("longitude").GetDouble();
                 string name = first.GetProperty("name").GetString() ?? query;
                 string? country = first.TryGetProperty("country", out var c) ? c.GetString() : null;
 
-                _locationName = !string.IsNullOrEmpty(country) ? $"{name}, {country}" : name;
-                _settings.WeatherLat = _lat;
-                _settings.WeatherLon = _lon;
-                _settings.WeatherLocationName = _locationName;
-                LocationText.Text = _locationName;
+                _settings.WeatherLat = rLat;
+                _settings.WeatherLon = rLon;
+                _settings.WeatherLocationName = !string.IsNullOrEmpty(country) ? $"{name}, {country}" : name;
+                LocationText.Text = _settings.WeatherLocationName;
                 Save();
                 await FetchWeatherAsync();
                 return true;
@@ -259,16 +252,17 @@ public partial class WeatherWidget : Window
 
     public async Task FetchWeatherAsync()
     {
-        if (_lat == 0 && _lon == 0) return;
+        if (Latitude == 0 && Longitude == 0) return;
 
         try
         {
-            string unit = _useFahrenheit ? "fahrenheit" : "celsius";
-            string url = $"{BaseUrl}?latitude={_lat:F4}&longitude={_lon:F4}" +
+            string tempUnitParam = UseFahrenheit ? "fahrenheit" : "celsius";
+            string windUnitParam = UseFahrenheit ? "mph" : "kmh";
+            string url = $"{BaseUrl}?latitude={Latitude:F4}&longitude={Longitude:F4}" +
                          $"&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
                          $"&daily=temperature_2m_max,temperature_2m_min" +
-                         $"&temperature_unit={unit}" +
-                         $"&wind_speed_unit=kmh&timezone=auto&forecast_days=1";
+                         $"&temperature_unit={tempUnitParam}" +
+                         $"&wind_speed_unit={windUnitParam}&timezone=auto&forecast_days=1";
 
             var json = await _http.GetStringAsync(url);
             using var doc = JsonDocument.Parse(json);
@@ -279,9 +273,27 @@ public partial class WeatherWidget : Window
             double temp     = cur.GetProperty("temperature_2m").GetDouble();
             int    code     = cur.GetProperty("weather_code").GetInt32();
             int    humidity = cur.GetProperty("relative_humidity_2m").GetInt32();
-            double wind     = cur.GetProperty("wind_speed_10m").GetDouble();
-            double hi       = daily.GetProperty("temperature_2m_max")[0].GetDouble();
-            double lo       = daily.GetProperty("temperature_2m_min")[0].GetDouble();
+
+            double? wind = null;
+            if (cur.TryGetProperty("wind_speed_10m", out var wsp) && wsp.ValueKind == JsonValueKind.Number)
+            {
+                wind = wsp.GetDouble();
+            }
+
+            double hi = temp;
+            double lo = temp;
+            if (daily.TryGetProperty("temperature_2m_max", out var hArr) && hArr.GetArrayLength() > 0)
+                hi = hArr[0].GetDouble();
+            if (daily.TryGetProperty("temperature_2m_min", out var lArr) && lArr.GetArrayLength() > 0)
+                lo = lArr[0].GetDouble();
+
+            // Cache in base metric (Celsius & km/h) for instantaneous recalculation when toggling units
+            _lastTempC   = UseFahrenheit ? (temp - 32.0) * 5.0 / 9.0 : temp;
+            _lastHiC     = UseFahrenheit ? (hi - 32.0) * 5.0 / 9.0 : hi;
+            _lastLoC     = UseFahrenheit ? (lo - 32.0) * 5.0 / 9.0 : lo;
+            _lastWindKmh = wind.HasValue ? (UseFahrenheit ? (wind.Value * 1.60934) : wind.Value) : null;
+            _lastCode    = code;
+            _lastHumidity = humidity;
 
             await Dispatcher.InvokeAsync(() => UpdateUI(temp, code, humidity, wind, hi, lo));
         }
@@ -296,16 +308,40 @@ public partial class WeatherWidget : Window
         }
     }
 
-    private void UpdateUI(double temp, int code, int humidity, double wind, double hi, double lo)
+    private void RenderCurrentWeather()
     {
-        string sym = _useFahrenheit ? "°F" : "°C";
+        if (!_lastTempC.HasValue) return;
+
+        double dispTemp = UseFahrenheit ? (_lastTempC.Value * 9.0 / 5.0 + 32.0) : _lastTempC.Value;
+        double dispHi   = _lastHiC.HasValue ? (UseFahrenheit ? (_lastHiC.Value * 9.0 / 5.0 + 32.0) : _lastHiC.Value) : dispTemp;
+        double dispLo   = _lastLoC.HasValue ? (UseFahrenheit ? (_lastLoC.Value * 9.0 / 5.0 + 32.0) : _lastLoC.Value) : dispTemp;
+        double? dispWind = _lastWindKmh.HasValue ? (UseFahrenheit ? (_lastWindKmh.Value * 0.621371) : _lastWindKmh.Value) : null;
+
+        UpdateUI(dispTemp, _lastCode ?? 0, _lastHumidity ?? 0, dispWind, dispHi, dispLo);
+    }
+
+    private void UpdateUI(double temp, int code, int humidity, double? wind, double hi, double lo)
+    {
+        string sym = UseFahrenheit ? "°F" : "°C";
         TempText.Text      = $"{Math.Round(temp, 1)}{sym}";
         HiLoText.Text      = $"↑ {Math.Round(hi, 0)}{sym}  ↓ {Math.Round(lo, 0)}{sym}";
         HumidityText.Text  = $"💧 {humidity}%";
-        WindText.Text      = $"💨 {Math.Round(wind, 0)} km/h";
+
+        // Display wind speed only if it exists in API response and is enabled in settings
+        if (wind.HasValue && wind.Value >= 0 && _settings.WeatherShowWind)
+        {
+            string wUnit = UseFahrenheit ? "mph" : "km/h";
+            WindText.Text = $"💨 {Math.Round(wind.Value, 0)} {wUnit}";
+            WindText.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            WindText.Visibility = Visibility.Collapsed;
+        }
+
         ConditionText.Text = WmoCodeToDescription(code);
         WeatherEmojiText.Text = WmoCodeToEmoji(code);
-        LocationText.Text  = _locationName;
+        LocationText.Text  = LocationName;
         ErrorText.Visibility = Visibility.Collapsed;
     }
 
@@ -424,10 +460,9 @@ public partial class WeatherWidget : Window
 
     private async void ToggleUnits_Click(object sender, RoutedEventArgs e)
     {
-        _useFahrenheit = !_useFahrenheit;
-        _settings.WeatherUseFahrenheit = _useFahrenheit;
-        UnitsMenuItem.Header = _useFahrenheit ? "Switch to °C" : "Switch to °F";
-        Save();
+        _settings.WeatherUseFahrenheit = !_settings.WeatherUseFahrenheit;
+        ApplyCustomizations(); // Instant display recalculation
+        Save();                // Sync with Settings & WidgetsPage
         await FetchWeatherAsync();
     }
 
@@ -496,17 +531,21 @@ public partial class WeatherWidget : Window
         // 2. Details visibility
         HiLoText.Visibility = _settings.WeatherShowHiLo ? Visibility.Visible : Visibility.Collapsed;
         HumidityText.Visibility = _settings.WeatherShowHumidity ? Visibility.Visible : Visibility.Collapsed;
-        WindText.Visibility = _settings.WeatherShowWind ? Visibility.Visible : Visibility.Collapsed;
+        WindText.Visibility = (_settings.WeatherShowWind && _lastWindKmh.HasValue) ? Visibility.Visible : Visibility.Collapsed;
         HiLoHumidityRow.Visibility = (_settings.WeatherShowHiLo || _settings.WeatherShowHumidity) ? Visibility.Visible : Visibility.Collapsed;
 
         // 3. Theme & Card styling
         ApplyTheme();
 
-        // 4. Update Context Menu checkboxes
+        // 4. Update Context Menu checkboxes & headers
         if (HiLoMenuItem != null) HiLoMenuItem.IsChecked = _settings.WeatherShowHiLo;
         if (HumidityMenuItem != null) HumidityMenuItem.IsChecked = _settings.WeatherShowHumidity;
         if (WindMenuItem != null) WindMenuItem.IsChecked = _settings.WeatherShowWind;
-        if (UnitsMenuItem != null) UnitsMenuItem.Header = _useFahrenheit ? "Switch to °C" : "Switch to °F";
+        if (UnitsMenuItem != null) UnitsMenuItem.Header = UseFahrenheit ? "Switch to °C" : "Switch to °F";
+        LocationText.Text = LocationName;
+
+        // 5. Instantly recalculate & render displayed numbers with current unit
+        RenderCurrentWeather();
     }
 
     public void ApplyTheme()

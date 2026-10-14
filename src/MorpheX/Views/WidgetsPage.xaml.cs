@@ -20,14 +20,22 @@ public partial class WidgetsPage : Page
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        var app = (App)Application.Current;
+        if (app?.SettingsService != null)
+        {
+            app.SettingsService.SettingsChanged -= OnSettingsChanged;
+            app.SettingsService.SettingsChanged += OnSettingsChanged;
+        }
+
         _isInitializing = true;
 
-        var app = (App)Application.Current;
-        var w = app.SettingsService.Settings.Widgets;
+        var w = app?.SettingsService?.Settings?.Widgets;
+        if (w == null) return;
 
         LockWidgetsToggle.IsChecked = w.WidgetsLocked;
         SelectComboItem(WidgetThemeCombo, w.WidgetTheme);
@@ -361,6 +369,43 @@ public partial class WidgetsPage : Page
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
         await app.SettingsService.SaveAsync();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        if (app?.SettingsService != null)
+        {
+            app.SettingsService.SettingsChanged -= OnSettingsChanged;
+        }
+    }
+
+    private void OnSettingsChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.InvokeAsync(() =>
+        {
+            if (_isInitializing) return;
+            var app = (App)Application.Current;
+            var w = app.SettingsService.Settings.Widgets;
+
+            _isInitializing = true;
+            try
+            {
+                WeatherToggle.IsChecked = w.WeatherEnabled;
+                WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
+                SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
+                SelectComboItem(WeatherScaleCombo, w.WeatherScale);
+                if (WeatherHiLoCheck != null) WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
+                if (WeatherHumidityCheck != null) WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
+                if (WeatherWindCheck != null) WeatherWindCheck.IsChecked = w.WeatherShowWind;
+                if (WeatherCardBgCheck != null) WeatherCardBgCheck.IsChecked = w.WeatherShowBackground;
+                UpdateWeatherLocationStatusText(w);
+            }
+            finally
+            {
+                _isInitializing = false;
+            }
+        });
     }
 
     private async void WeatherToggle_Changed(object sender, RoutedEventArgs e)

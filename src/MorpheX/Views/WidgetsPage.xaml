@@ -100,13 +100,70 @@
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
                                 <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="ClockColorCombo" SelectionChanged="ClockSetting_Changed">
-                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
-                                    <ComboBoxItem Content="🔘  Dim Slate" Tag="1"/>
-                                    <ComboBoxItem Content="🔵  Electric Cyan" Tag="2"/>
-                                    <ComboBoxItem Content="🟢  Neon Mint" Tag="3"/>
-                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="4"/>
-                                    <ComboBoxItem Content="🟠  Sunset Orange" Tag="5"/>
-                                    <ComboBoxItem Content="🟡  Amber Gold" Tag="6"/>
+
+                                    <ComboBoxItem Tag="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#CCCCCC" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Pure White" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#8899AA" Offset="0"/><GradientStop Color="#445566" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Dim Slate" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#00FFFF" Offset="0"/><GradientStop Color="#007BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Electric Cyan" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="3">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#4CAF93" Offset="0"/><GradientStop Color="#1B6E55" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Neon Mint" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="4">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BF7FFF" Offset="0"/><GradientStop Color="#7B2FBE" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Cyber Violet" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFB347" Offset="0"/><GradientStop Color="#E05C00" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Sunset Orange" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFE05A" Offset="0"/><GradientStop Color="#C8A800" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Amber Gold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -174,15 +231,88 @@
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
                                 <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="DayColorCombo" SelectionChanged="DaySetting_Changed">
-                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
-                                    <ComboBoxItem Content="🔘  Dim Slate" Tag="1"/>
-                                    <ComboBoxItem Content="🔵  Electric Cyan" Tag="2"/>
-                                    <ComboBoxItem Content="🟢  Neon Mint" Tag="3"/>
-                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="4"/>
-                                    <ComboBoxItem Content="🟠  Sunset Orange" Tag="5"/>
-                                    <ComboBoxItem Content="🟡  Amber Gold" Tag="6"/>
-                                    <ComboBoxItem Content="🔴  Rose Pink" Tag="7"/>
-                                    <ComboBoxItem Content="🌹  Crimson Red" Tag="8"/>
+
+                                    <ComboBoxItem Tag="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#CCCCCC" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Pure White" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#8899AA" Offset="0"/><GradientStop Color="#445566" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Dim Slate" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#00FFFF" Offset="0"/><GradientStop Color="#007BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Electric Cyan" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="3">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#4CAF93" Offset="0"/><GradientStop Color="#1B6E55" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Neon Mint" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="4">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BF7FFF" Offset="0"/><GradientStop Color="#7B2FBE" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Cyber Violet" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFB347" Offset="0"/><GradientStop Color="#E05C00" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Sunset Orange" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFE05A" Offset="0"/><GradientStop Color="#C8A800" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Amber Gold" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="7">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF7FAA" Offset="0"/><GradientStop Color="#D94080" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Rose Pink" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="8">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF4040" Offset="0"/><GradientStop Color="#A00000" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Crimson Red" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -305,11 +435,52 @@
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
                                 <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="SysMonColorCombo" SelectionChanged="SysMonSetting_Changed">
-                                    <ComboBoxItem Content="⚪  Pure White" Tag="0"/>
-                                    <ComboBoxItem Content="🔵  Cyan Neon" Tag="1"/>
-                                    <ComboBoxItem Content="🟢  Emerald Mint" Tag="2"/>
-                                    <ComboBoxItem Content="🟣  Cyber Violet" Tag="3"/>
-                                    <ComboBoxItem Content="🟠  Sunset Amber" Tag="4"/>
+
+                                    <ComboBoxItem Tag="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#CCCCCC" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Pure White" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#00FFFF" Offset="0"/><GradientStop Color="#007BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Cyan Neon" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#4CAF93" Offset="0"/><GradientStop Color="#1B6E55" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Emerald Mint" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="3">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BF7FFF" Offset="0"/><GradientStop Color="#7B2FBE" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Cyber Violet" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="4">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFB347" Offset="0"/><GradientStop Color="#E05C00" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Sunset Amber" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -367,20 +538,107 @@
                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
                                 <TextBlock Text="Visualizer Style" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="VisualizerStyleCombo" SelectionChanged="MediaSetting_Changed">
-                                    <ComboBoxItem Content="📊  Equalizer Bars" Tag="0"/>
-                                    <ComboBoxItem Content="🪞  Mirrored Center" Tag="1"/>
-                                    <ComboBoxItem Content="🌊  Waveform Curve" Tag="2"/>
+
+                                    <!-- Equalizer Bars -->
+                                    <ComboBoxItem Tag="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Canvas Width="22" Height="16" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Rectangle Canvas.Left="0"  Canvas.Bottom="0" Width="3" Height="6"  Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="4"  Canvas.Bottom="0" Width="3" Height="11" Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="8"  Canvas.Bottom="0" Width="3" Height="15" Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="12" Canvas.Bottom="0" Width="3" Height="9"  Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="16" Canvas.Bottom="0" Width="3" Height="13" Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="20" Canvas.Bottom="0" Width="3" Height="7"  Fill="#4CAF93" RadiusX="1" RadiusY="1"/>
+                                            </Canvas>
+                                            <TextBlock Text="Equalizer Bars" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <!-- Mirrored Center -->
+                                    <ComboBoxItem Tag="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Canvas Width="22" Height="16" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Rectangle Canvas.Left="0"  Canvas.Bottom="8" Width="3" Height="5"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="4"  Canvas.Bottom="8" Width="3" Height="8"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="8"  Canvas.Bottom="8" Width="3" Height="7"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="16" Canvas.Bottom="8" Width="3" Height="5"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="12" Canvas.Bottom="8" Width="3" Height="8"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="20" Canvas.Bottom="8" Width="3" Height="7"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="0"  Canvas.Top="8"    Width="3" Height="5"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="4"  Canvas.Top="8"    Width="3" Height="8"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="8"  Canvas.Top="8"    Width="3" Height="7"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="12" Canvas.Top="8"    Width="3" Height="8"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="16" Canvas.Top="8"    Width="3" Height="5"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Rectangle Canvas.Left="20" Canvas.Top="8"    Width="3" Height="7"  Fill="#7C9FFF" RadiusX="1" RadiusY="1"/>
+                                                <Line X1="0" Y1="8" X2="23" Y2="8" Stroke="#50FFFFFF" StrokeThickness="1"/>
+                                            </Canvas>
+                                            <TextBlock Text="Mirrored Center" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <!-- Waveform Curve -->
+                                    <ComboBoxItem Tag="2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Canvas Width="22" Height="16" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Path Stroke="#FF9F5A" StrokeThickness="1.8" Fill="Transparent"
+                                                      Data="M 0,8 C 2,2 4,14 6,8 C 8,2 10,14 12,8 C 14,2 16,14 18,8 C 20,2 22,14 24,8"/>
+                                            </Canvas>
+                                            <TextBlock Text="Waveform Curve" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
                                 <TextBlock Text="Color Theme" FontSize="11" Foreground="#AAFFFFFF" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="VisualizerColorCombo" SelectionChanged="MediaSetting_Changed">
-                                    <ComboBoxItem Content="⚪  Minimalist White" Tag="0"/>
-                                    <ComboBoxItem Content="🔵  Cyber Neon Cyan" Tag="1"/>
-                                    <ComboBoxItem Content="🟣  Violet Glow" Tag="2"/>
-                                    <ComboBoxItem Content="🟢  Emerald Mint" Tag="3"/>
-                                    <ComboBoxItem Content="🟠  Sunset Amber" Tag="4"/>
+
+                                    <ComboBoxItem Tag="0">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFFFFF" Offset="0"/><GradientStop Color="#CCCCCC" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Minimalist White" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="1">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#00FFFF" Offset="0"/><GradientStop Color="#007BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Cyber Neon Cyan" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="2">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BF7FFF" Offset="0"/><GradientStop Color="#7B2FBE" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Violet Glow" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="3">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#4CAF93" Offset="0"/><GradientStop Color="#1B6E55" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Emerald Mint" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="4">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FFB347" Offset="0"/><GradientStop Color="#E05C00" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Sunset Amber" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
