@@ -43,10 +43,10 @@ jobs:
           Remove-Item -Path ./publish/*.pdb, ./publish/*.xml, ./publish/libvlc/win-x64/*.lib, ./publish/libvlc/win-x64/vlc-cache-gen.exe -Force -ErrorAction SilentlyContinue
           Remove-Item -Path ./publish/libvlc/win-x64/lua, ./publish/libvlc/win-x64/hrtfs, ./publish/runtimes -Recurse -Force -ErrorAction SilentlyContinue
           Remove-Item -Path ./publish/libvlc/win-arm64, ./publish/libvlc/win-x86 -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access_output, ./publish/libvlc/win-x64/plugins/stream_out, ./publish/libvlc/win-x64/plugins/mux, ./publish/libvlc/win-x64/plugins/services_discovery, ./publish/libvlc/win-x64/plugins/keystore, ./publish/libvlc/win-x64/plugins/visualization, ./publish/libvlc/win-x64/plugins/video_splitter -Recurse -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access/libdcp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libaccess_srt_plugin.dll, ./publish/libvlc/win-x64/plugins/access/librist_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblibbluray_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libcdda_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libdtv_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsftp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/*.jar, ./publish/libvlc/win-x64/plugins/access/librtp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblive555_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libnfs_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvcd_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvdr_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsatip_plugin.dll -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path ./publish/libvlc/win-x64/plugins/codec/libzvbi_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libgme_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libx26410b_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libaom_plugin.dll, ./publish/libvlc/win-x64/plugins/audio_filter/libspatialaudio_plugin.dll, ./publish/libvlc/win-x64/plugins/video_output/libcaca_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpuzzle_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libball_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpsychedelic_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libanaglyph_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libripple_plugin.dll -Force -ErrorAction SilentlyContinue
-          Remove-Item -Path ./publish/libvlc/win-x64/plugins/text_renderer/liblibass_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libadaptive_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libdvdnav_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libdvdread_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libaccess_output_*.dll -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access_output, ./publish/libvlc/win-x64/plugins/stream_out, ./publish/libvlc/win-x64/plugins/mux, ./publish/libvlc/win-x64/plugins/services_discovery, ./publish/libvlc/win-x64/plugins/keystore, ./publish/libvlc/win-x64/plugins/visualization, ./publish/libvlc/win-x64/plugins/video_splitter, ./publish/libvlc/win-x64/plugins/gui, ./publish/libvlc/win-x64/plugins/spu, ./publish/libvlc/win-x64/plugins/meta_engine, ./publish/libvlc/win-x64/plugins/control, ./publish/libvlc/win-x64/plugins/notify -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/access/libdcp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libaccess_srt_plugin.dll, ./publish/libvlc/win-x64/plugins/access/librist_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblibbluray_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libcdda_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libdtv_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsftp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/*.jar, ./publish/libvlc/win-x64/plugins/access/librtp_plugin.dll, ./publish/libvlc/win-x64/plugins/access/liblive555_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libnfs_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvcd_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libvdr_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libsatip_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libdvd*.dll -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/codec/libzvbi_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libgme_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libx264*.dll, ./publish/libvlc/win-x64/plugins/codec/libaom_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libtwolame_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libshine_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libschroedinger_plugin.dll, ./publish/libvlc/win-x64/plugins/codec/libdaala_plugin.dll, ./publish/libvlc/win-x64/plugins/audio_filter/libspatialaudio_plugin.dll, ./publish/libvlc/win-x64/plugins/video_output/libcaca_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpuzzle_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libball_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libpsychedelic_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libanaglyph_plugin.dll, ./publish/libvlc/win-x64/plugins/video_filter/libripple_plugin.dll -Force -ErrorAction SilentlyContinue
+          Remove-Item -Path ./publish/libvlc/win-x64/plugins/text_renderer/liblibass_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libadaptive_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libdvdnav_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libdvdread_plugin.dll, ./publish/libvlc/win-x64/plugins/demux/libvcd_plugin.dll, ./publish/libvlc/win-x64/plugins/access/libaccess_output_*.dll -Force -ErrorAction SilentlyContinue
           Get-ChildItem -Path ./publish -Directory | Where-Object { (Get-ChildItem $_.FullName -Recurse -File).Count -eq 0 } | Remove-Item -Recurse -Force
 
       - name: Compile Inno Setup Installer
@@ -74,6 +74,7 @@ jobs:
 
       - name: Deploy Installer to GitHub Pages Docs
         if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         shell: pwsh
         run: |
           # Step 1: Find installer and copy to TEMP before switching branches
@@ -82,7 +83,14 @@ jobs:
           $installerName = $setup.Name
           $tempPath = Join-Path $env:TEMP $installerName
           Copy-Item -Path $setup.FullName -Destination $tempPath -Force
-          Write-Host "Saved installer to: $tempPath"
+          $fileSizeMB = (Get-Item $tempPath).Length / 1MB
+          Write-Host "Saved installer to: $tempPath ($([math]::Round($fileSizeMB, 2)) MB)"
+
+          # Check 100MB limit before attempting git push
+          if ($fileSizeMB -gt 99.5) {
+            Write-Host "Warning: Installer size ($([math]::Round($fileSizeMB, 2)) MB) exceeds GitHub 100MB git limit. Skipping commit to docs/ to prevent push rejection. Release is published on GitHub Releases!"
+            exit 0
+          }
 
           # Step 2: Switch to main branch
           git config --global user.name "github-actions[bot]"
