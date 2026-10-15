@@ -20,7 +20,7 @@ PrivilegesRequiredOverridesAllowed=dialog commandline
 OutputDir=dist
 OutputBaseFilename=MorpheX-Live-Setup-v{#MyAppVersion}
 SetupIconFile=src\MorpheX\Assets\Branding\morphex-icon.ico
-UninstallDisplayIcon={app}\{#MyAppExeName}
+UninstallDisplayIcon={app}\Assets\Branding\morphex-icon.ico
 
 WizardStyle=modern
 WizardSizePercent=110
@@ -46,8 +46,8 @@ Name: "startwithwindows"; Description: "Launch MorpheX automatically when Window
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\Branding\morphex-icon.ico"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\Branding\morphex-icon.ico"; Tasks: desktopicon
 
 [Registry]
 Root: HKCU; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "MorpheX"; ValueData: """{app}\{#MyAppExeName}"" --minimized"; Flags: uninsdeletevalue; Tasks: startwithwindows
