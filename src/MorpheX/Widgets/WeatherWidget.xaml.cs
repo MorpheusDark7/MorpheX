@@ -1,4 +1,4 @@
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
@@ -258,8 +258,11 @@ public partial class WeatherWidget : Window
         {
             string tempUnitParam = UseFahrenheit ? "fahrenheit" : "celsius";
             string windUnitParam = UseFahrenheit ? "mph" : "kmh";
+            // Also request precipitation + cloud_cover to sanity-check the weather_code.
+            // Global NWP models often return thunderstorm/rain codes in tropical regions
+            // based on atmospheric instability (CAPE), even when no rain is occurring.
             string url = $"{BaseUrl}?latitude={Latitude:F4}&longitude={Longitude:F4}" +
-                         $"&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m" +
+                         $"&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation,cloud_cover" +
                          $"&daily=temperature_2m_max,temperature_2m_min" +
                          $"&temperature_unit={tempUnitParam}" +
                          $"&wind_speed_unit={windUnitParam}&timezone=auto&forecast_days=1";
@@ -273,6 +276,15 @@ public partial class WeatherWidget : Window
             double temp     = cur.GetProperty("temperature_2m").GetDouble();
             int    code     = cur.GetProperty("weather_code").GetInt32();
             int    humidity = cur.GetProperty("relative_humidity_2m").GetInt32();
+
+            // Read observed precipitation + cloud cover to correct false-positive weather codes
+            double precipitation = cur.TryGetProperty("precipitation", out var precProp) && precProp.ValueKind == JsonValueKind.Number
+                ? precProp.GetDouble() : 0.0;
+            int cloudCover = cur.TryGetProperty("cloud_cover", out var ccProp) && ccProp.ValueKind == JsonValueKind.Number
+                ? ccProp.GetInt32() : 50;
+
+            // Correct false-positive rain/storm codes when no actual precipitation is observed
+            code = SanitizeWeatherCode(code, precipitation, cloudCover);
 
             double? wind = null;
             if (cur.TryGetProperty("wind_speed_10m", out var wsp) && wsp.ValueKind == JsonValueKind.Number)
@@ -306,6 +318,32 @@ public partial class WeatherWidget : Window
                 ErrorText.Visibility = Visibility.Visible;
             });
         }
+    }
+
+    /// <summary>
+    /// Sanity-checks a WMO weather code against observed precipitation and cloud cover.
+    /// Open-Meteo's global NWP models frequently generate false-positive thunderstorm /
+    /// rain codes (WMO 51-99) in tropical regions because high CAPE triggers convective
+    /// parameterizations even when no precipitation actually reaches the ground.
+    /// </summary>
+    private static int SanitizeWeatherCode(int code, double precipMm, int cloudCoverPct)
+    {
+        bool isWetCode     = code is >= 51 and <= 99;
+        bool hasActualRain = precipMm > 0.05; // ignore trace amounts below 0.05 mm
+
+        if (isWetCode && !hasActualRain)
+        {
+            // Replace with cloud-cover-derived condition
+            return cloudCoverPct switch
+            {
+                <= 10 => 0,  // Clear sky
+                <= 30 => 1,  // Mainly clear
+                <= 65 => 2,  // Partly cloudy
+                _     => 3   // Overcast
+            };
+        }
+
+        return code;
     }
 
     private void RenderCurrentWeather()
