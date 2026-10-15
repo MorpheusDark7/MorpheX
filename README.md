@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.38-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.45-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -35,10 +35,12 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 - **Smart Pause Detection**: Automatically freezes video playback when running fullscreen games or applications so your frame rates never take a hit.
 - **Multi-Monitor Support**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
 - **Wallpaper Playlist & Auto-Rotation**: Shuffle or cycle through your library on a customizable timer. Filter by favorites. Postpones rotation while in a game.
-- **Desktop Widgets**: Transparent, drag-and-drop overlays — Clock, Day Name, System Monitor (CPU/GPU/RAM/Disk), Audio Visualizer, Calendar, Notes, and Motivational Quotes.
+- **Desktop Widgets**: Transparent, drag-and-drop overlays with custom scaling, frosted card options, and dark/light themes.
+- **Real-Time Weather Widget**: Live temperature, condition, high/low, humidity, and wind speed powered by free Open-Meteo API (no API key required). Features dynamic Google Weather-style background gradients, automatic IP geolocation or city search, and crisp vector weather icons.
+- **Audio Visualizer**: Live audio reactive spectrum analyzer (WASAPI loopback) with vector styles (Equalizer Bars, Mirrored Center, and Smooth Waveform Curve) and vibrant gradient theme presets.
+- **Minimalist Clock & Day Widget**: Sleek typography with designer fonts (Anurati, Aquatico, Quicksand) and glowing drop shadows.
+- **System Monitor Widget (SysMon)**: Real-time hardware rings displaying CPU, GPU, RAM, and Disk metrics with multi-GPU discrete card detection.
 - **Taskbar Styling**: Apply Clear, Blur (Aero Glass), or Acrylic (Frosted Glass) effects to your taskbar — including secondary monitor taskbars. Resets automatically when MorpheX exits.
-- **System Monitor Widget**: Simplicity Circles showing real-time CPU, GPU, RAM, and Disk usage. Supports multi-GPU setups with discrete GPU tracking.
-- **Audio Visualizer**: Reactive bar, mirrored, or waveform visualizer synced to your system audio, with an optional neon glow toggle.
 - **Custom Global Hotkeys**: Set keyboard shortcuts to pause/resume, mute/unmute, or skip wallpapers from anywhere in Windows.
 - **Native Windows Shell Integration**: Embeds cleanly behind your desktop icons using the `WorkerW` layer without interfering with desktop clicks.
 - **1-Click Built-in Updates**: Check for and install updates directly inside the app.
