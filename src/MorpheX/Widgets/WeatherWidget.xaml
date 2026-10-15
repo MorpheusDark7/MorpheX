@@ -34,18 +34,30 @@
     </Window.ContextMenu>
 
     <Window.Resources>
-        <DropShadowEffect x:Key="Glow" BlurRadius="18" ShadowDepth="0" Color="#000000" Opacity="0.55"/>
+        <DropShadowEffect x:Key="Glow" BlurRadius="22" ShadowDepth="0" Color="#000000" Opacity="0.55"/>
+        <DropShadowEffect x:Key="SunGlow" BlurRadius="16" ShadowDepth="0" Color="#FFCC44" Opacity="0.7"/>
+        <DropShadowEffect x:Key="RainGlow" BlurRadius="16" ShadowDepth="0" Color="#60AAFF" Opacity="0.5"/>
+        <DropShadowEffect x:Key="SnowGlow" BlurRadius="16" ShadowDepth="0" Color="#AADDFF" Opacity="0.5"/>
+        <DropShadowEffect x:Key="StormGlow" BlurRadius="16" ShadowDepth="0" Color="#9966FF" Opacity="0.5"/>
     </Window.Resources>
 
+    <!-- Outer border carries the dynamic condition-tinted background -->
     <Border
         x:Name="CardBorder"
         Margin="6"
         CornerRadius="14"
-        Background="#B8101013"
-        MinWidth="180"
+        MinWidth="190"
         Effect="{StaticResource Glow}"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
         Cursor="SizeAll">
+
+        <!-- Dynamic gradient overlay that shifts colour by weather condition -->
+        <Border.Background>
+            <LinearGradientBrush x:Name="CardGradient" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop x:Name="GradStop1" Color="#CC101013" Offset="0"/>
+                <GradientStop x:Name="GradStop2" Color="#CC1A1A22" Offset="1"/>
+            </LinearGradientBrush>
+        </Border.Background>
 
         <Border.LayoutTransform>
             <ScaleTransform x:Name="WidgetScaleTransform" ScaleX="1.0" ScaleY="1.0"/>
@@ -53,7 +65,7 @@
 
         <StackPanel Margin="16,14,16,14">
 
-            <!-- Location row (no time display) -->
+            <!-- Location row -->
             <TextBlock
                 x:Name="LocationText"
                 Text="Weather"
@@ -72,13 +84,14 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock
-                    x:Name="WeatherEmojiText"
+                <!-- WPF vector weather icon (drawn from code-behind) -->
+                <Viewbox
                     Grid.Column="0"
-                    Text="🌤"
-                    FontSize="46"
+                    Width="52" Height="52"
                     VerticalAlignment="Center"
-                    Margin="0,0,12,0" />
+                    Margin="0,0,10,0">
+                    <Canvas x:Name="WeatherIconCanvas" Width="64" Height="64"/>
+                </Viewbox>
 
                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
                     <TextBlock

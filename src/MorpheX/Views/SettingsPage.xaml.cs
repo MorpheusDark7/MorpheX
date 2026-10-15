@@ -536,11 +536,14 @@ public partial class SettingsPage : Page
             }
             else
             {
+                var curVer = app.UpdateService.CurrentVersion;
+                string verStr = curVer.Build >= 0 ? curVer.ToString(3) : curVer.ToString();
                 UpdateStatusCard.Visibility = Visibility.Visible;
                 UpdateTitleText.Text = "You're up to date!";
-                UpdateDescText.Text = $"MorpheX Live v{app.UpdateService.CurrentVersion} is the latest available release.";
+                UpdateDescText.Text = $"MorpheX Live v{verStr} is the latest available release.";
                 InstallUpdateBtn.Visibility = Visibility.Collapsed;
                 UpdateProgressPanel.Visibility = Visibility.Collapsed;
+                UpdateStatusCard.BringIntoView();
             }
         }
         catch (Exception ex)
@@ -550,6 +553,7 @@ public partial class SettingsPage : Page
             UpdateDescText.Text = "Unable to connect to GitHub. Please check your internet connection.";
             InstallUpdateBtn.Visibility = Visibility.Collapsed;
             UpdateProgressPanel.Visibility = Visibility.Collapsed;
+            UpdateStatusCard.BringIntoView();
             Log.Warning(ex, "Update check failed from Settings page");
         }
         finally
@@ -569,6 +573,7 @@ public partial class SettingsPage : Page
         InstallUpdateBtn.IsEnabled = true;
         InstallUpdateBtn.Content = "1-Click Update Now";
         UpdateProgressPanel.Visibility = Visibility.Collapsed;
+        UpdateStatusCard.BringIntoView();
     }
 
     private async void InstallUpdateBtn_Click(object sender, RoutedEventArgs e)

@@ -1,11 +1,22 @@
-﻿using System.Net.Http;
+using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using MorpheX.Core.Configuration;
 using Application = System.Windows.Application;
 using Serilog;
+using Brush     = System.Windows.Media.Brush;
+using Brushes   = System.Windows.Media.Brushes;
+using Color     = System.Windows.Media.Color;
+using Canvas    = System.Windows.Controls.Canvas;
+using Rectangle = System.Windows.Shapes.Rectangle;
+using WpfColor  = System.Windows.Media.Color;
+using WpfCanvas = System.Windows.Controls.Canvas;
+using WpfRect   = System.Windows.Shapes.Rectangle;
 
 namespace MorpheX.Widgets;
 
@@ -378,36 +389,21 @@ public partial class WeatherWidget : Window
         }
 
         ConditionText.Text = WmoCodeToDescription(code);
-        WeatherEmojiText.Text = WmoCodeToEmoji(code);
+        DrawWeatherIcon(code);
+        ApplyConditionTint(code);
         LocationText.Text  = LocationName;
         ErrorText.Visibility = Visibility.Collapsed;
     }
 
     // ── WMO Weather Code mapping ───────────────────────────────────────────
-    private static string WmoCodeToEmoji(int code) => code switch
-    {
-        0                   => "☀️",
-        1                   => "🌤",
-        2                   => "⛅",
-        3                   => "☁️",
-        45 or 48            => "🌫",
-        51 or 53 or 55      => "🌦",
-        61 or 63 or 65      => "🌧",
-        66 or 67            => "🌨",
-        71 or 73 or 75 or 77 => "❄️",
-        80 or 81 or 82      => "🌦",
-        85 or 86            => "🌨",
-        95                  => "⛈",
-        96 or 99            => "⛈",
-        _                   => "🌡"
-    };
+    // (Emoji lookup removed — replaced by WPF vector DrawWeatherIcon())
 
     private static string WmoCodeToDescription(int code) => code switch
     {
         0                   => "Clear sky",
         1                   => "Mainly clear",
         2                   => "Partly cloudy",
-        3                   => "Overcast",
+        3                   => "Cloudy",
         45                  => "Foggy",
         48                  => "Icy fog",
         51                  => "Light drizzle",
@@ -593,13 +589,16 @@ public partial class WeatherWidget : Window
 
         if (showBg)
         {
-            WidgetStyles.ApplyFrostedGlass(CardBorder, showBackground: true, cornerRadius: 14,
-                padding: new Thickness(16, 14, 16, 14), isLightTheme: isLight);
+            // Apply frosted border/shadow but preserve our dynamic gradient background
+            CardBorder.BorderBrush = new SolidColorBrush(WpfColor.FromArgb(40, 255, 255, 255));
+            CardBorder.BorderThickness = new Thickness(1);
+            CardBorder.Padding = new Thickness(16, 14, 16, 14);
+            // Background gradient is managed by ApplyConditionTint — don't override it here
         }
         else
         {
-            CardBorder.Background  = System.Windows.Media.Brushes.Transparent;
-            CardBorder.BorderBrush = System.Windows.Media.Brushes.Transparent;
+            CardBorder.Background  = Brushes.Transparent;
+            CardBorder.BorderBrush = Brushes.Transparent;
             CardBorder.Padding     = new Thickness(16, 14, 16, 14);
         }
 
@@ -611,14 +610,269 @@ public partial class WeatherWidget : Window
         var primary   = isLight ? "#CC000000" : "#FFFFFFFF";
         var secondary = isLight ? "#88000000" : "#88FFFFFF";
         var tertiary  = isLight ? "#66000000" : "#66FFFFFF";
-        var brushConv = new System.Windows.Media.BrushConverter();
+        var brushConv = new BrushConverter();
 
-        TempText.Foreground      = brushConv.ConvertFromString(primary)   as System.Windows.Media.Brush;
-        ConditionText.Foreground = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
-        HiLoText.Foreground      = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
-        HumidityText.Foreground  = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
-        WindText.Foreground      = brushConv.ConvertFromString(tertiary)  as System.Windows.Media.Brush;
-        LocationText.Foreground  = brushConv.ConvertFromString(secondary) as System.Windows.Media.Brush;
+        TempText.Foreground      = brushConv.ConvertFromString(primary)   as Brush;
+        ConditionText.Foreground = brushConv.ConvertFromString(secondary) as Brush;
+        HiLoText.Foreground      = brushConv.ConvertFromString(secondary) as Brush;
+        HumidityText.Foreground  = brushConv.ConvertFromString(secondary) as Brush;
+        WindText.Foreground      = brushConv.ConvertFromString(tertiary)  as Brush;
+        LocationText.Foreground  = brushConv.ConvertFromString(secondary) as Brush;
+    }
+
+    // ── Dynamic condition tint ─────────────────────────────────────────────
+    /// <summary>
+    /// Shifts the card background gradient to match the current weather condition,
+    /// similar to how Google Weather changes its background colour dynamically.
+    /// Only takes effect when the frosted card background is enabled.
+    /// </summary>
+    private void ApplyConditionTint(int code)
+    {
+        if (!_settings.WeatherShowBackground) return;
+
+        bool isLight = _settings.WidgetTheme == 1;
+
+        // Pick gradient colours based on condition group and theme
+        (Color c1, Color c2) = (isLight, code) switch
+        {
+            (true, 0 or 1) => (Color.FromArgb(0xDD, 0xFF, 0xF3, 0xD6), Color.FromArgb(0xDD, 0xFD, 0xE6, 0xAA)),
+            (true, 2)      => (Color.FromArgb(0xDD, 0xEE, 0xF2, 0xF8), Color.FromArgb(0xDD, 0xDA, 0xE4, 0xF2)),
+            (true, 3)      => (Color.FromArgb(0xDD, 0xEA, 0xED, 0xF1), Color.FromArgb(0xDD, 0xD8, 0xDC, 0xE4)),
+            (true, 45 or 48) => (Color.FromArgb(0xDD, 0xE4, 0xE8, 0xEE), Color.FromArgb(0xDD, 0xD0, 0xD6, 0xE0)),
+            (true, 51 or 53 or 55) => (Color.FromArgb(0xDD, 0xDE, 0xEC, 0xF9), Color.FromArgb(0xDD, 0xC4, 0xDC, 0xF5)),
+            (true, 61 or 63 or 65 or 80 or 81 or 82) => (Color.FromArgb(0xDD, 0xCC, 0xDF, 0xF5), Color.FromArgb(0xDD, 0xAE, 0xCD, 0xEE)),
+            (true, 66 or 67) => (Color.FromArgb(0xDD, 0xDA, 0xEB, 0xF7), Color.FromArgb(0xDD, 0xC0, 0xDC, 0xF0)),
+            (true, 71 or 73 or 75 or 77 or 85 or 86) => (Color.FromArgb(0xDD, 0xE8, 0xF2, 0xFA), Color.FromArgb(0xDD, 0xD4, 0xE4, 0xF2)),
+            (true, 95 or 96 or 99) => (Color.FromArgb(0xDD, 0xE4, 0xDE, 0xF5), Color.FromArgb(0xDD, 0xCE, 0xC2, 0xEB)),
+            (true, _)      => (Color.FromArgb(0xDD, 0xF0, 0xF2, 0xF6), Color.FromArgb(0xDD, 0xE0, 0xE4, 0xEC)),
+
+            (false, 0 or 1) => (Color.FromArgb(0xCC, 0x1A, 0x14, 0x08), Color.FromArgb(0xCC, 0x2A, 0x1E, 0x06)),
+            (false, 2)      => (Color.FromArgb(0xCC, 0x10, 0x14, 0x1E), Color.FromArgb(0xCC, 0x18, 0x1E, 0x2A)),
+            (false, 3)      => (Color.FromArgb(0xCC, 0x0E, 0x0E, 0x12), Color.FromArgb(0xCC, 0x16, 0x16, 0x1C)),
+            (false, 45 or 48) => (Color.FromArgb(0xCC, 0x14, 0x14, 0x18), Color.FromArgb(0xCC, 0x1E, 0x1E, 0x24)),
+            (false, 51 or 53 or 55) => (Color.FromArgb(0xCC, 0x08, 0x12, 0x22), Color.FromArgb(0xCC, 0x0C, 0x18, 0x2C)),
+            (false, 61 or 63 or 65 or 80 or 81 or 82) => (Color.FromArgb(0xCC, 0x06, 0x0E, 0x1E), Color.FromArgb(0xCC, 0x08, 0x14, 0x28)),
+            (false, 66 or 67) => (Color.FromArgb(0xCC, 0x08, 0x14, 0x26), Color.FromArgb(0xCC, 0x0A, 0x1A, 0x30)),
+            (false, 71 or 73 or 75 or 77 or 85 or 86) => (Color.FromArgb(0xCC, 0x0C, 0x16, 0x28), Color.FromArgb(0xCC, 0x14, 0x22, 0x38)),
+            (false, 95 or 96 or 99) => (Color.FromArgb(0xCC, 0x0E, 0x08, 0x1E), Color.FromArgb(0xCC, 0x18, 0x0C, 0x2C)),
+            _               => (Color.FromArgb(0xCC, 0x10, 0x10, 0x14), Color.FromArgb(0xCC, 0x18, 0x18, 0x22))
+        };
+
+        CardBorder.Background = new LinearGradientBrush(
+            new GradientStopCollection
+            {
+                new GradientStop(c1, 0.0),
+                new GradientStop(c2, 1.0)
+            },
+            new System.Windows.Point(0, 0),
+            new System.Windows.Point(1, 1));
+    }
+
+    // ── WPF Vector weather icon drawing ───────────────────────────────────
+    /// <summary>
+    /// Draws a colourful WPF vector icon into the WeatherIconCanvas based on the
+    /// WMO weather code. All shapes are drawn programmatically — no images or emoji.
+    /// Canvas coordinate space: 64×64.
+    /// </summary>
+    private void DrawWeatherIcon(int code)
+    {
+        WeatherIconCanvas.Children.Clear();
+
+        if      (code == 0)                                 DrawSun(fullyVisible: true);
+        else if (code == 1)                                 DrawSunWithCloud(smallCloud: true);
+        else if (code == 2)                                 DrawSunWithCloud(smallCloud: false);
+        else if (code == 3)                                 DrawCloud(color: WpfColor.FromRgb(0xC0, 0xC8, 0xD8));
+        else if (code is 45 or 48)                          DrawFog();
+        else if (code is 51 or 53 or 55)                    DrawRain(drops: 2, heavy: false);
+        else if (code is 61 or 63 or 80 or 81)              DrawRain(drops: 3, heavy: false);
+        else if (code is 65 or 82)                          DrawRain(drops: 4, heavy: true);
+        else if (code is 66 or 67)                          DrawSleet();
+        else if (code is 71 or 73 or 77 or 85)              DrawSnow(flakes: 3);
+        else if (code is 75 or 86)                          DrawSnow(flakes: 5);
+        else if (code is 95 or 96 or 99)                    DrawThunderstorm();
+        else                                                DrawSun(fullyVisible: true); // fallback
+    }
+
+    private void DrawSun(bool fullyVisible)
+    {
+        var c = WeatherIconCanvas;
+        // Glow halo
+        var halo = new Ellipse { Width = 46, Height = 46 };
+        halo.Fill = new RadialGradientBrush(
+            WpfColor.FromArgb(80, 0xFF, 0xDD, 0x44),
+            WpfColor.FromArgb(0, 0xFF, 0xDD, 0x44));
+        WpfCanvas.SetLeft(halo, 9); WpfCanvas.SetTop(halo, 9);
+        c.Children.Add(halo);
+
+        // Sun rays
+        var rayBrush = new SolidColorBrush(WpfColor.FromArgb(200, 0xFF, 0xCC, 0x33));
+        double cx = 32, cy = 32, r = 13, rayLen = 7;
+        for (int i = 0; i < 8; i++)
+        {
+            double angle = i * Math.PI / 4;
+            double x1 = cx + r * Math.Cos(angle);
+            double y1 = cy + r * Math.Sin(angle);
+            double x2 = cx + (r + rayLen) * Math.Cos(angle);
+            double y2 = cy + (r + rayLen) * Math.Sin(angle);
+            c.Children.Add(new Line { X1=x1, Y1=y1, X2=x2, Y2=y2, Stroke=rayBrush, StrokeThickness=2.5, StrokeStartLineCap=PenLineCap.Round, StrokeEndLineCap=PenLineCap.Round });
+        }
+
+        // Sun disc
+        var disc = new Ellipse { Width = 26, Height = 26 };
+        disc.Fill = new RadialGradientBrush(WpfColor.FromRgb(0xFF, 0xEE, 0x44), WpfColor.FromRgb(0xFF, 0xAA, 0x11));
+        WpfCanvas.SetLeft(disc, 19); WpfCanvas.SetTop(disc, 19);
+        c.Children.Add(disc);
+    }
+
+    private void DrawSunWithCloud(bool smallCloud)
+    {
+        var c = WeatherIconCanvas;
+        // Partial sun (top-left)
+        var rayBrush = new SolidColorBrush(WpfColor.FromArgb(180, 0xFF, 0xCC, 0x33));
+        double cx = 22, cy = 22, r = 10, rayLen = 5;
+        for (int i = 0; i < 8; i++)
+        {
+            double angle = i * Math.PI / 4;
+            double x1 = cx + r * Math.Cos(angle);
+            double y1 = cy + r * Math.Sin(angle);
+            double x2 = cx + (r + rayLen) * Math.Cos(angle);
+            double y2 = cy + (r + rayLen) * Math.Sin(angle);
+            c.Children.Add(new Line { X1=x1, Y1=y1, X2=x2, Y2=y2, Stroke=rayBrush, StrokeThickness=2, StrokeStartLineCap=PenLineCap.Round, StrokeEndLineCap=PenLineCap.Round });
+        }
+        var disc = new Ellipse { Width = 20, Height = 20 };
+        disc.Fill = new RadialGradientBrush(WpfColor.FromRgb(0xFF, 0xEE, 0x44), WpfColor.FromRgb(0xFF, 0xAA, 0x11));
+        WpfCanvas.SetLeft(disc, 12); WpfCanvas.SetTop(disc, 12);
+        c.Children.Add(disc);
+
+        // Cloud in front (bottom-right)
+        DrawCloudAt(smallCloud ? 28 : 24, smallCloud ? 34 : 30,
+                    smallCloud ? 32 : 36, smallCloud ? 24 : 28,
+                    WpfColor.FromRgb(0xD4, 0xDC, 0xEC));
+    }
+
+    private void DrawCloud(WpfColor color)
+    {
+        DrawCloudAt(10, 24, 44, 28, color);
+    }
+
+    private void DrawCloudAt(double left, double top, double width, double height, WpfColor color)
+    {
+        var c = WeatherIconCanvas;
+        var brush = new LinearGradientBrush(
+            WpfColor.FromArgb(255, (byte)Math.Min(color.R + 30, 255), (byte)Math.Min(color.G + 30, 255), (byte)Math.Min(color.B + 30, 255)),
+            color, 90);
+
+        // Cloud body: two overlapping ellipses + a rectangle base
+        double r1 = height * 0.55, r2 = height * 0.40;
+        var e1 = new Ellipse { Width = r1 * 2, Height = r1 * 2, Fill = brush };
+        WpfCanvas.SetLeft(e1, left + width * 0.20 - r1); WpfCanvas.SetTop(e1, top - r1 * 0.6);
+        c.Children.Add(e1);
+
+        var e2 = new Ellipse { Width = r2 * 2, Height = r2 * 2, Fill = brush };
+        WpfCanvas.SetLeft(e2, left + width * 0.55 - r2); WpfCanvas.SetTop(e2, top - r2 * 0.2);
+        c.Children.Add(e2);
+
+        var body = new WpfRect { Width = width, Height = height * 0.55, Fill = brush };
+        body.RadiusX = height * 0.27; body.RadiusY = height * 0.27;
+        WpfCanvas.SetLeft(body, left); WpfCanvas.SetTop(body, top + height * 0.20);
+        c.Children.Add(body);
+    }
+
+    private void DrawFog()
+    {
+        var c = WeatherIconCanvas;
+        var fogBrush = new SolidColorBrush(WpfColor.FromArgb(160, 0xC0, 0xC8, 0xD4));
+        for (int i = 0; i < 4; i++)
+        {
+            double y = 18 + i * 10;
+            double xOff = (i % 2 == 0) ? 0 : 4;
+            var line = new Line { X1 = 8 + xOff, Y1 = y, X2 = 56 - xOff, Y2 = y,
+                Stroke = fogBrush, StrokeThickness = 4,
+                StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round };
+            c.Children.Add(line);
+        }
+    }
+
+    private void DrawRain(int drops, bool heavy)
+    {
+        var c = WeatherIconCanvas;
+        // Cloud
+        DrawCloudAt(10, 8, 44, 30, WpfColor.FromRgb(0xA0, 0xAC, 0xC0));
+        // Rain drops
+        var dropBrush = new LinearGradientBrush(
+            WpfColor.FromArgb(220, 0x60, 0xA8, 0xFF),
+            WpfColor.FromArgb(140, 0x30, 0x78, 0xCC), 90);
+        double[] xPositions = drops switch { 2 => new[]{20.0,40.0}, 3 => new[]{16.0,32.0,48.0}, _ => new[]{12.0,24.0,38.0,50.0} };
+        for (int i = 0; i < drops; i++)
+        {
+            double x = xPositions[Math.Min(i, xPositions.Length-1)];
+            double h = heavy ? 10 : 7;
+            var drop = new Line { X1=x+3, Y1=42, X2=x, Y2=42+h,
+                Stroke=dropBrush, StrokeThickness=2.5,
+                StrokeStartLineCap=PenLineCap.Round, StrokeEndLineCap=PenLineCap.Round };
+            c.Children.Add(drop);
+        }
+    }
+
+    private void DrawSleet()
+    {
+        var c = WeatherIconCanvas;
+        DrawCloudAt(10, 8, 44, 28, WpfColor.FromRgb(0x98, 0xA8, 0xC0));
+        var rain = new SolidColorBrush(WpfColor.FromArgb(200, 0x60, 0xA8, 0xFF));
+        var snow = new SolidColorBrush(WpfColor.FromArgb(220, 0xC8, 0xE8, 0xFF));
+        // 2 rain lines
+        c.Children.Add(new Line {X1=16,Y1=42,X2=13,Y2=50,Stroke=rain,StrokeThickness=2.5,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+        c.Children.Add(new Line {X1=32,Y1=42,X2=29,Y2=50,Stroke=rain,StrokeThickness=2.5,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+        // 1 snowflake dot
+        var dot = new Ellipse { Width=5, Height=5, Fill=snow };
+        WpfCanvas.SetLeft(dot, 44); WpfCanvas.SetTop(dot, 46);
+        c.Children.Add(dot);
+    }
+
+    private void DrawSnow(int flakes)
+    {
+        var c = WeatherIconCanvas;
+        DrawCloudAt(10, 6, 44, 28, WpfColor.FromRgb(0xB8, 0xCC, 0xE4));
+        var snowBrush = new SolidColorBrush(WpfColor.FromArgb(230, 0xCC, 0xE8, 0xFF));
+        double[] xs = { 15, 25, 35, 45, 20 };
+        double[] ys = { 44, 50, 44, 50, 56 };
+        for (int i = 0; i < Math.Min(flakes, xs.Length); i++)
+        {
+            // Snowflake as a small 6-pointed star (2 lines + 1 diagonal cross)
+            double x = xs[i], y = ys[i], r = 4;
+            c.Children.Add(new Line {X1=x,Y1=y-r,X2=x,Y2=y+r,Stroke=snowBrush,StrokeThickness=2,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+            c.Children.Add(new Line {X1=x-r*0.87,Y1=y-r*0.5,X2=x+r*0.87,Y2=y+r*0.5,Stroke=snowBrush,StrokeThickness=2,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+            c.Children.Add(new Line {X1=x+r*0.87,Y1=y-r*0.5,X2=x-r*0.87,Y2=y+r*0.5,Stroke=snowBrush,StrokeThickness=2,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+        }
+    }
+
+    private void DrawThunderstorm()
+    {
+        var c = WeatherIconCanvas;
+        DrawCloudAt(8, 6, 48, 30, WpfColor.FromRgb(0x60, 0x60, 0x80));
+        // Lightning bolt
+        var boltBrush = new LinearGradientBrush(
+            WpfColor.FromArgb(255, 0xFF, 0xEE, 0x44),
+            WpfColor.FromArgb(200, 0xFF, 0xAA, 0x00), 90);
+        var bolt = new Polygon
+        {
+            Fill = boltBrush,
+            Points = new PointCollection
+            {
+                new System.Windows.Point(34, 38),
+                new System.Windows.Point(27, 52),
+                new System.Windows.Point(33, 52),
+                new System.Windows.Point(28, 63),
+                new System.Windows.Point(40, 47),
+                new System.Windows.Point(33, 47)
+            },
+            Effect = new DropShadowEffect { BlurRadius=8, ShadowDepth=0, Color=WpfColor.FromRgb(0xFF,0xEE,0x00), Opacity=0.8 }
+        };
+        c.Children.Add(bolt);
+        // Rain drops behind the bolt
+        var dropBrush = new SolidColorBrush(WpfColor.FromArgb(180, 0x60, 0xA8, 0xFF));
+        c.Children.Add(new Line {X1=16,Y1=40,X2=13,Y2=50,Stroke=dropBrush,StrokeThickness=2.5,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
+        c.Children.Add(new Line {X1=22,Y1=42,X2=19,Y2=52,Stroke=dropBrush,StrokeThickness=2.5,StrokeStartLineCap=PenLineCap.Round,StrokeEndLineCap=PenLineCap.Round});
     }
 
     // ── Position save ────────────────────────────────────────────────────
