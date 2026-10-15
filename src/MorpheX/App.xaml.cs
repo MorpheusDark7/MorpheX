@@ -398,7 +398,8 @@ public partial class App : Application
 
         try
         {
-            var iconUri = new Uri("pack://application:,,,/MorpheX;component/Assets/Branding/icon.ico", UriKind.Absolute);
+            // Tray icon: use dedicated small circular icon (restored from original design)
+            var iconUri = new Uri("pack://application:,,,/MorpheX;component/Assets/Branding/tray-icon.ico", UriKind.Absolute);
             var stream = Application.GetResourceStream(iconUri)?.Stream;
             if (stream != null)
             {
@@ -406,6 +407,20 @@ public partial class App : Application
             }
         }
         catch { }
+
+        if (icon == null)
+        {
+            try
+            {
+                var iconUri = new Uri("pack://application:,,,/MorpheX;component/Assets/Branding/icon.ico", UriKind.Absolute);
+                var stream = Application.GetResourceStream(iconUri)?.Stream;
+                if (stream != null)
+                {
+                    icon = new System.Drawing.Icon(stream);
+                }
+            }
+            catch { }
+        }
 
         if (icon == null)
         {

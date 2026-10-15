@@ -190,17 +190,23 @@ public partial class WeatherWidget : Window
             string country = root.TryGetProperty("country_name", out var cn) ? (cn.GetString() ?? "") : "";
             string locName = !string.IsNullOrEmpty(country) ? $"{city}, {country}" : (city.Length > 0 ? city : "Your Location");
 
+            // Settings fields are not UI elements — safe to write from any thread
             _settings.WeatherLat = lat;
             _settings.WeatherLon = lon;
             _settings.WeatherLocationName = locName;
-            LocationText.Text = locName;
             Save();
+
+            // UI element updates must be marshaled back to the UI thread
+            await Dispatcher.InvokeAsync(() => { LocationText.Text = locName; });
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "WeatherWidget: IP geolocation failed");
-            LocationText.Text = "📍 Click to set location";
-            ConditionText.Text = "Click to set location";
+            await Dispatcher.InvokeAsync(() =>
+            {
+                LocationText.Text = "📍 Click to set location";
+                ConditionText.Text = "Click to set location";
+            });
         }
     }
 
