@@ -44,6 +44,7 @@ Name: "startwithwindows"; Description: "Launch MorpheX automatically when Window
 
 [Files]
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "src\MorpheX\Assets\Branding\morphex-icon.ico"; DestDir: "{app}\Assets\Branding"; Flags: ignoreversion
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\Branding\morphex-icon.ico"

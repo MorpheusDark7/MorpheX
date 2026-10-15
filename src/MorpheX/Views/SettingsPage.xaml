@@ -471,7 +471,7 @@
 
                     <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                         <Image
-                            Source="/Assets/Branding/morphex-icon.png"
+                            Source="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
                             Width="44" Height="44"
                             RenderOptions.BitmapScalingMode="HighQuality"
                             VerticalAlignment="Center"

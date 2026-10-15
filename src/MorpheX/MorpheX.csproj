@@ -13,7 +13,7 @@
     <Description>Lightweight live wallpapers for Windows.</Description>
     <Company>MorpheusDark</Company>
     <Product>MorpheX Live</Product>
-    <Version>0.1.49</Version>
+    <Version>0.1.50</Version>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
@@ -28,18 +28,18 @@
   </PropertyGroup>
 
   <Target Name="RemoveUnusedLibVlcRuntimes" AfterTargets="Publish">
-    <RemoveDir Directories="$(PublishDir)libvlc\win-arm64" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x86" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\lua" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\hrtfs" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\access_output" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\stream_out" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\mux" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\services_discovery" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\keystore" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\visualization" />
-    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\video_splitter" />
-    <RemoveDir Directories="$(PublishDir)runtimes" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-arm64" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x86" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\lua" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\hrtfs" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\access_output" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\stream_out" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\mux" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\services_discovery" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\keystore" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\visualization" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)libvlc\win-x64\plugins\video_splitter" ContinueOnError="true" />
+    <RemoveDir Directories="$(PublishDir)runtimes" ContinueOnError="true" />
     <Delete Files="$(PublishDir)libvlc\win-x64\*.lib" />
     <Delete Files="$(PublishDir)libvlc\win-x64\vlc-cache-gen.exe" />
     <Delete Files="$(PublishDir)libvlc\win-x64\plugins\access\libdcp_plugin.dll" />
@@ -82,11 +82,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Assets\**" />
+    <Resource Include="Assets\**" Exclude="Assets\Fonts\**" />
     <Content Include="Assets\Fonts\**">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Branding\morphex-icon.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

@@ -239,6 +239,17 @@ public partial class App : Application
         Log.Information("MorpheX startup complete. Monitors: {Count}, Wallpapers in library: {LibCount}",
             MonitorService.Monitors.Count, LibraryService.Wallpapers.Count);
 
+        // Initialise widgets (after all services are ready, before opening window)
+        try
+        {
+            WidgetService = new WidgetService(SettingsService.Settings.Widgets);
+            WidgetService.ApplySettings();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to initialize WidgetService");
+        }
+
         if (!_startMinimized)
         {
             if (_splash != null)
@@ -248,7 +259,14 @@ public partial class App : Application
                 _splash.Close();
                 _splash = null;
             }
-            ShowMainWindow();
+            try
+            {
+                ShowMainWindow();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to show main window on startup");
+            }
         }
         else
         {
@@ -259,10 +277,6 @@ public partial class App : Application
         {
             _ = CheckForUpdatesInBackgroundAsync();
         }
-
-        // Initialise widgets (after all services are ready)
-        WidgetService = new WidgetService(SettingsService.Settings.Widgets);
-        WidgetService.ApplySettings();
     }
 
     private async Task CheckForUpdatesInBackgroundAsync()
@@ -630,23 +644,39 @@ public partial class App : Application
 
     public void ShowMainWindow()
     {
-        if (_mainWindow == null)
+        try
         {
-            _mainWindow = new MainWindow();
-        }
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+            }
 
-        _mainWindow.BringToFront();
+            _mainWindow.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open or focus MainWindow");
+            _mainWindow = null;
+        }
     }
 
     public void ShowSettings()
     {
-        if (_mainWindow == null)
+        try
         {
-            _mainWindow = new MainWindow();
-        }
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+            }
 
-        _mainWindow.NavigateTo(typeof(SettingsPage));
-        _mainWindow.BringToFront();
+            _mainWindow.NavigateTo(typeof(SettingsPage));
+            _mainWindow.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to open SettingsPage");
+            _mainWindow = null;
+        }
     }
 
     private void ExitApplication()

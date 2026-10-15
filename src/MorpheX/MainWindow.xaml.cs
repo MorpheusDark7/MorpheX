@@ -183,6 +183,7 @@ public partial class MainWindow : FluentWindow
         NavLibrary.IsActive = (pageType == typeof(LibraryPage));
         NavFavorites.IsActive = (pageType == typeof(FavoritesPage));
         NavDisplays.IsActive = (pageType == typeof(DisplaysPage));
+        NavWidgets.IsActive = (pageType == typeof(WidgetsPage));
         NavSettings.IsActive = (pageType == typeof(SettingsPage));
     }
 

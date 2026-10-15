@@ -80,7 +80,7 @@
 
                 <Image
                     x:Name="BrandIcon"
-                    Source="/Assets/Branding/morphex-icon.png"
+                    Source="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
                     Width="64" Height="64"
                     RenderOptions.BitmapScalingMode="HighQuality"
                     HorizontalAlignment="Center"

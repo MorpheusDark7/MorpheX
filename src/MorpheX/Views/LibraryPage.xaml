@@ -330,7 +330,7 @@
                     </RadialGradientBrush>
                 </Border.Background>
                 <Image
-                    Source="/Assets/Branding/morphex-icon.png"
+                    Source="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
                     Width="40" Height="40"
                     RenderOptions.BitmapScalingMode="HighQuality"
                     HorizontalAlignment="Center"
