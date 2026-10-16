@@ -32,24 +32,11 @@ public partial class WidgetsPage : Page
             app.SettingsService.SettingsChanged += OnSettingsChanged;
         }
 
-        if (app?.ProfileService != null)
-        {
-            app.ProfileService.ProfilesChanged -= OnProfilesChanged;
-            app.ProfileService.ProfilesChanged += OnProfilesChanged;
-        }
-
         var w = app?.SettingsService?.Settings?.Widgets;
         if (w != null)
         {
             PopulateControlsFromSettings(w);
         }
-
-        RenderProfiles();
-    }
-
-    private void OnProfilesChanged(object? sender, EventArgs e)
-    {
-        Dispatcher.InvokeAsync(RenderProfiles);
     }
 
     private void PopulateControlsFromSettings(WidgetSettings w)
@@ -121,150 +108,11 @@ public partial class WidgetsPage : Page
         }
     }
 
-    private void RenderProfiles()
+    private void OpenProfiles_Click(object sender, RoutedEventArgs e)
     {
-        var app = (App)Application.Current;
-        if (app?.ProfileService == null) return;
-
-        ProfilesPanel.Children.Clear();
-        var profiles = app.ProfileService.Profiles;
-        var activeId = app.ProfileService.ActiveProfileId;
-
-        var activeProfile = profiles.FirstOrDefault(p => p.Id == activeId) ?? profiles.FirstOrDefault();
-        if (activeProfile != null)
+        if (Application.Current.MainWindow is MainWindow mw)
         {
-            ActiveProfileBadgeText.Text = activeProfile.Name;
-            ProfileActionsBar.Visibility = Visibility.Visible;
-            DeleteProfileButton.IsEnabled = profiles.Count > 1;
-        }
-        else
-        {
-            ProfileActionsBar.Visibility = Visibility.Collapsed;
-        }
-
-        foreach (var p in profiles)
-        {
-            bool isActive = (p.Id == activeId);
-
-            var btn = new System.Windows.Controls.Button
-            {
-                Content = (isActive ? "★  " : "") + p.Name,
-                Height = 32,
-                Margin = new Thickness(0, 0, 8, 8),
-                Padding = new Thickness(14, 0, 14, 0),
-                FontSize = 12,
-                FontWeight = isActive ? FontWeights.SemiBold : FontWeights.Normal,
-                Background = isActive
-                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 30, 58, 95))
-                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 255, 255, 255)),
-                Foreground = isActive
-                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248))
-                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(203, 213, 225)),
-                BorderBrush = isActive
-                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248))
-                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(35, 255, 255, 255)),
-                BorderThickness = new Thickness(1),
-                Cursor = System.Windows.Input.Cursors.Hand,
-                Tag = p.Id
-            };
-
-            btn.Click += async (s, e) =>
-            {
-                if (p.Id == app.ProfileService.ActiveProfileId) return;
-
-                await app.ProfileService.ApplyProfileAsync(
-                    p.Id,
-                    app.WallpaperService,
-                    app.LibraryService,
-                    app.WidgetService,
-                    notice =>
-                    {
-                        MorpheX.Views.ModernDialogWindow.Information("Profile Notice", p.Name, notice);
-                    });
-
-                var updatedSettings = app.SettingsService.Settings.Widgets;
-                PopulateControlsFromSettings(updatedSettings);
-                RenderProfiles();
-            };
-
-            ProfilesPanel.Children.Add(btn);
-        }
-    }
-
-    private async void AddProfileButton_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var dialog = new Views.ProfileNameDialog(title: "New Desktop Profile", heading: "Name your new profile")
-        {
-            Owner = Window.GetWindow(this)
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            await app.ProfileService.CreateProfileAsync(dialog.ProfileName, dialog.IncludeWallpaper);
-            RenderProfiles();
-        }
-    }
-
-    private async void UpdateProfileButton_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var activeId = app.ProfileService.ActiveProfileId;
-        if (string.IsNullOrEmpty(activeId)) return;
-
-        bool ok = await app.ProfileService.UpdateProfileWithCurrentSetupAsync(activeId);
-        if (ok)
-        {
-            var originalContent = UpdateProfileButton.Content;
-            UpdateProfileButton.Content = "✓ Saved!";
-            await Task.Delay(1400);
-            UpdateProfileButton.Content = originalContent;
-        }
-    }
-
-    private async void RenameProfileButton_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var activeId = app.ProfileService.ActiveProfileId;
-        if (string.IsNullOrEmpty(activeId)) return;
-
-        var profile = app.ProfileService.Profiles.FirstOrDefault(p => p.Id == activeId);
-        if (profile == null) return;
-
-        var dialog = new Views.ProfileNameDialog(currentName: profile.Name, title: "Rename Profile", heading: "Enter new profile name", showWallpaperCheck: false)
-        {
-            Owner = Window.GetWindow(this)
-        };
-
-        if (dialog.ShowDialog() == true)
-        {
-            await app.ProfileService.RenameProfileAsync(activeId, dialog.ProfileName);
-            RenderProfiles();
-        }
-    }
-
-    private async void DeleteProfileButton_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var activeId = app.ProfileService.ActiveProfileId;
-        if (string.IsNullOrEmpty(activeId)) return;
-
-        if (app.ProfileService.Profiles.Count <= 1)
-        {
-            Views.ModernDialogWindow.Information("Desktop Profiles", "Cannot delete", "You must keep at least one desktop profile.");
-            return;
-        }
-
-        bool ok = await app.ProfileService.DeleteProfileAsync(activeId);
-        if (ok)
-        {
-            var next = app.ProfileService.Profiles.FirstOrDefault();
-            if (next != null)
-            {
-                await app.ProfileService.ApplyProfileAsync(next.Id, app.WallpaperService, app.LibraryService, app.WidgetService);
-                PopulateControlsFromSettings(app.SettingsService.Settings.Widgets);
-            }
-            RenderProfiles();
+            mw.NavigateTo(typeof(ProfilesPage));
         }
     }
 
@@ -548,10 +396,6 @@ public partial class WidgetsPage : Page
         {
             app.SettingsService.SettingsChanged -= OnSettingsChanged;
         }
-        if (app?.ProfileService != null)
-        {
-            app.ProfileService.ProfilesChanged -= OnProfilesChanged;
-        }
     }
 
     private void OnSettingsChanged(object? sender, EventArgs e)
@@ -598,15 +442,15 @@ public partial class WidgetsPage : Page
         if (WeatherLocationStatusText == null) return;
         if (!string.IsNullOrEmpty(w.WeatherLocationName))
         {
-            WeatherLocationStatusText.Text = $"📍 Current: {w.WeatherLocationName} ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
+            WeatherLocationStatusText.Text = $"Current: {w.WeatherLocationName} ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
         }
         else if (w.WeatherLat != 0 || w.WeatherLon != 0)
         {
-            WeatherLocationStatusText.Text = $"📍 Current: ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
+            WeatherLocationStatusText.Text = $"Current: ({w.WeatherLat:F2}°, {w.WeatherLon:F2}°)";
         }
         else
         {
-            WeatherLocationStatusText.Text = "📍 Current: Not set (click Auto-Detect or enter a city above)";
+            WeatherLocationStatusText.Text = "Current: Not set (click Auto-Detect or enter a city above)";
         }
     }
 
@@ -644,7 +488,7 @@ public partial class WidgetsPage : Page
         if (string.IsNullOrEmpty(city)) return;
 
         WeatherSearchBtn.IsEnabled = false;
-        WeatherLocationStatusText.Text = $"🔍 Searching for '{city}'...";
+        WeatherLocationStatusText.Text = $"Searching for '{city}'...";
 
         try
         {
@@ -675,13 +519,13 @@ public partial class WidgetsPage : Page
             }
             else
             {
-                WeatherLocationStatusText.Text = $"⚠ Location '{city}' not found. Please try another city name.";
+                WeatherLocationStatusText.Text = $"Location '{city}' not found. Please try another city name.";
             }
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to geocode weather city {City}", city);
-            WeatherLocationStatusText.Text = "⚠ Geocoding failed. Check your internet connection.";
+            WeatherLocationStatusText.Text = "Geocoding failed. Check your internet connection.";
         }
         finally
         {
@@ -700,7 +544,7 @@ public partial class WidgetsPage : Page
     private async void WeatherAutoDetectBtn_Click(object sender, RoutedEventArgs e)
     {
         WeatherAutoDetectBtn.IsEnabled = false;
-        WeatherLocationStatusText.Text = "📍 Auto-detecting location via IP...";
+        WeatherLocationStatusText.Text = "Auto-detecting location via IP...";
 
         try
         {
@@ -727,7 +571,7 @@ public partial class WidgetsPage : Page
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to auto-detect location");
-            WeatherLocationStatusText.Text = "⚠ Could not auto-detect location. Please enter your city manually.";
+            WeatherLocationStatusText.Text = "Could not auto-detect location. Please enter your city manually.";
         }
         finally
         {

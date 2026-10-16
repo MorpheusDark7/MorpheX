@@ -111,77 +111,7 @@
                         <ui:CardAction
                             Style="{StaticResource WallpaperCardStyle}"
                             Tag="{Binding}"
-                            Click="WallpaperCard_Click"
-                            ToolTipService.ShowDuration="8000"
-                            ToolTipService.InitialShowDelay="600">
-
-                            <!-- ═══ HOVER PREVIEW TOOLTIP ═══ -->
-                            <ui:CardAction.ToolTip>
-                                <ToolTip Background="Transparent" BorderThickness="0" Padding="0"
-                                         HasDropShadow="True">
-                                    <Border CornerRadius="12" ClipToBounds="True" Width="320"
-                                            Background="#CC0D0D14"
-                                            BorderBrush="#30FFFFFF" BorderThickness="1">
-                                        <Border.Effect>
-                                            <DropShadowEffect BlurRadius="24" ShadowDepth="0" Color="#000000" Opacity="0.7"/>
-                                        </Border.Effect>
-                                        <StackPanel>
-                                            <!-- Large preview image -->
-                                            <Grid Height="185">
-                                                <Border Background="#111118" CornerRadius="12,12,0,0" ClipToBounds="True">
-                                                    <Image
-                                                        Source="{Binding PreviewImagePath, Converter={StaticResource ThumbnailConverter}}"
-                                                        Stretch="UniformToFill"
-                                                        RenderOptions.BitmapScalingMode="HighQuality" />
-                                                </Border>
-                                                <!-- Gradient overlay -->
-                                                <Border VerticalAlignment="Bottom" Height="70" CornerRadius="0">
-                                                    <Border.Background>
-                                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                            <GradientStop Color="#00000000" Offset="0"/>
-                                                            <GradientStop Color="#CC000000" Offset="1"/>
-                                                        </LinearGradientBrush>
-                                                    </Border.Background>
-                                                </Border>
-                                                <!-- Type badge on image -->
-                                                <Border HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                        Margin="0,10,10,0" Padding="8,3" CornerRadius="4"
-                                                        Background="#CC000000">
-                                                    <TextBlock Text="{Binding Type}" FontSize="10"
-                                                               FontWeight="SemiBold" Foreground="White"/>
-                                                </Border>
-                                                <!-- Active badge -->
-                                                <Border HorizontalAlignment="Left" VerticalAlignment="Top"
-                                                        Margin="10,10,0,0" Padding="8,3" CornerRadius="4"
-                                                        Background="{StaticResource MxActiveBadgeBrush}"
-                                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
-                                                    <TextBlock Text="ACTIVE" FontSize="10" FontWeight="Bold" Foreground="White"/>
-                                                </Border>
-                                            </Grid>
-
-                                            <!-- Metadata row -->
-                                            <StackPanel Margin="14,10,14,12">
-                                                <TextBlock
-                                                    Text="{Binding Name}"
-                                                    FontSize="14" FontWeight="SemiBold"
-                                                    Foreground="White"
-                                                    TextTrimming="CharacterEllipsis"/>
-                                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                                    <TextBlock
-                                                        Text="{Binding ResolutionText, TargetNullValue='—'}"
-                                                        FontSize="12" Foreground="#88FFFFFF" Margin="0,0,10,0"/>
-                                                    <TextBlock
-                                                        Text="{Binding FileSizeText, TargetNullValue=''}"
-                                                        FontSize="12" Foreground="#66FFFFFF"/>
-                                                </StackPanel>
-                                                <TextBlock
-                                                    Text="Click to set as wallpaper  •  Right-click for more options"
-                                                    FontSize="10" Foreground="#44FFFFFF" Margin="0,6,0,0"/>
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Border>
-                                </ToolTip>
-                            </ui:CardAction.ToolTip>
+                            Click="WallpaperCard_Click">
 
                             <ui:CardAction.ContextMenu>
                                 <ContextMenu>

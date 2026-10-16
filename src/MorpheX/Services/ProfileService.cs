@@ -176,6 +176,10 @@ public sealed class ProfileService
 
         // 3. Update taskbar visual style
         Settings.Taskbar.Style = profile.TaskbarStyle;
+        if (System.Windows.Application.Current is App appInst)
+        {
+            appInst.TaskbarStyleService?.Apply((TaskbarStyleService.TaskbarStyle)profile.TaskbarStyle);
+        }
 
         // 4. Optionally restore saved wallpapers (with deleted-wallpaper safety!)
         if (profile.IncludeWallpaper && profile.MonitorWallpapers != null && profile.MonitorWallpapers.Count > 0)

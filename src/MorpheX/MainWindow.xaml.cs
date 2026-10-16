@@ -23,6 +23,8 @@ public partial class MainWindow : FluentWindow
         NavFavorites.Click += (_, _) => NavigateTo(typeof(FavoritesPage));
         NavDisplays.Click += (_, _) => NavigateTo(typeof(DisplaysPage));
         NavWidgets.Click += (_, _) => NavigateTo(typeof(WidgetsPage));
+        NavProfiles.Click += (_, _) => NavigateTo(typeof(ProfilesPage));
+        NavEffects.Click += (_, _) => NavigateTo(typeof(EffectsPage));
         NavSettings.Click += (_, _) => NavigateTo(typeof(SettingsPage));
 
         Loaded += MainWindow_Loaded;
@@ -141,6 +143,7 @@ public partial class MainWindow : FluentWindow
                 if (ContentFrame.Content is LibraryPage lib) lib.RefreshWallpaperList();
                 else if (ContentFrame.Content is FavoritesPage fav) fav.RefreshFavorites();
                 else if (ContentFrame.Content is DisplaysPage disp) disp.RefreshDisplays();
+                else if (ContentFrame.Content is ProfilesPage prof) prof.RenderProfiles();
                 SelectNavigationItem(pageType);
                 return;
             }
@@ -163,6 +166,10 @@ public partial class MainWindow : FluentWindow
             {
                 dispPage.RefreshDisplays();
             }
+            else if (page is ProfilesPage profPage)
+            {
+                profPage.RenderProfiles();
+            }
 
             ContentFrame.Navigate(page);
 
@@ -184,6 +191,8 @@ public partial class MainWindow : FluentWindow
         NavFavorites.IsActive = (pageType == typeof(FavoritesPage));
         NavDisplays.IsActive = (pageType == typeof(DisplaysPage));
         NavWidgets.IsActive = (pageType == typeof(WidgetsPage));
+        NavProfiles.IsActive = (pageType == typeof(ProfilesPage));
+        NavEffects.IsActive = (pageType == typeof(EffectsPage));
         NavSettings.IsActive = (pageType == typeof(SettingsPage));
     }
 

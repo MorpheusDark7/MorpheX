@@ -91,6 +91,16 @@
                         Content="Widgets"
                         Icon="{ui:SymbolIcon AppsList24}"
                         TargetPageType="{x:Type local:WidgetsPage}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavProfiles"
+                        Content="Profiles"
+                        Icon="{ui:SymbolIcon Layer24}"
+                        TargetPageType="{x:Type local:ProfilesPage}" />
+                    <ui:NavigationViewItem
+                        x:Name="NavEffects"
+                        Content="Effects"
+                        Icon="{ui:SymbolIcon Color24}"
+                        TargetPageType="{x:Type local:EffectsPage}" />
                 </ui:NavigationView.MenuItems>
 
                 <ui:NavigationView.FooterMenuItems>

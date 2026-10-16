@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.51-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.52-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -32,7 +32,9 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 ## Features
 
 - **Built-in Master CC0 Wallpapers**: Ships with a curated collection of stunning high-resolution CC0 wallpapers out-of-the-box so your desktop looks incredible immediately upon installation.
-- **Custom Desktop Profiles**: Create, rename, update, and switch between customized desktop profiles (e.g., *Productivity*, *Cyberpunk Setup*, *Late Night Chill*) in a single click from the UI or right from the system tray. Safely restores widget configurations, styling, taskbar effects, and wallpaper pairings with graceful fallback if a wallpaper was removed.
+- **Dedicated Desktop Profiles Hub**: Dedicated page to create, rename, save, and switch between customized desktop profiles (e.g., *Productivity*, *Cyberpunk Setup*, *Late Night Chill*) in a single click from the UI or right from the system tray. Safely restores widget configurations, styling, taskbar effects, and wallpaper pairings with graceful fallback if a wallpaper was removed.
+- **Dedicated Effects & Appearance Page**: Complete control over visual filters (Brightness, Contrast, Saturation, Color Temperature, Reset), Taskbar styles (Clear, Blur, Acrylic), Video Playback speeds, and Ambient Dimming in a clean, uncluttered interface.
+- **Polished Fluent Vector UI**: Native Segoe Fluent icons, vector layout diagrams, and styled typography badges across all widget pickers, dropdowns, and settings.
 - **Direct3D 11 Hardware Acceleration**: Powered by LibVLC with native GPU decoding (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`).
 - **Smart Pause Detection**: Automatically freezes video playback when running fullscreen games or applications so your frame rates never take a hit.
 - **Multi-Monitor Support**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
@@ -40,8 +42,8 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 - **Desktop Widgets**: Transparent, drag-and-drop overlays with custom scaling, frosted card options, and dark/light themes.
 - **Real-Time Weather Widget**: Live temperature, condition, high/low, humidity, and wind speed powered by free Open-Meteo API (no API key required). Features dynamic Google Weather-style background gradients, automatic IP geolocation or city search, and crisp vector weather icons.
 - **Audio Visualizer**: Live audio reactive spectrum analyzer (WASAPI loopback) with vector styles (Equalizer Bars, Mirrored Center, and Smooth Waveform Curve) and vibrant gradient theme presets.
-- **Minimalist Clock & Day Widget**: Sleek typography with designer fonts (Anurati, Aquatico, Quicksand) and glowing drop shadows.
-- **System Monitor Widget (SysMon)**: Real-time hardware rings displaying CPU, GPU, RAM, and Disk metrics with multi-GPU discrete card detection.
+- **Minimalist Clock & Day Widget**: Sleek typography with designer fonts (Anurati, Bahnschrift, Segoe UI, Consolas) and glowing drop shadows.
+- **System Monitor Widget (SysMon)**: Real-time hardware rings displaying CPU, GPU, RAM, and Disk metrics with horizontal row, vertical column, and 2x2 grid vector presets.
 - **Taskbar Styling**: Apply Clear, Blur (Aero Glass), or Acrylic (Frosted Glass) effects to your taskbar — including secondary monitor taskbars. Resets automatically when MorpheX exits.
 - **Custom Global Hotkeys**: Set keyboard shortcuts to pause/resume, mute/unmute, or skip wallpapers from anywhere in Windows.
 - **Native Windows Shell Integration**: Embeds cleanly behind your desktop icons using the `WorkerW` layer without interfering with desktop clicks.
