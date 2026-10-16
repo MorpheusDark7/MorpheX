@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.53-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.54-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,15 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.54
+- **Active Internet Connection Warning** — Added a distinct red warning badge (`[ 🌐 Requires Internet ]`) to the Weather Widget in Widgets settings so users immediately know network connectivity is required.
+- **Video Resolution Detection** — Added hardware video track probing using LibVLC to accurately detect and display video resolution (e.g. 1920x1080, 2560x1440, 3840x2160) in the Library and Favorites cards for all video wallpapers on import and retroactively.
+- **Rich Smoked Glass & Contrast Boost** — Overhauled frosted dark card backgrounds to rich smoked glass (80% opacity matching Weather) and boosted typography contrast so all widgets are crisp and legible over bright anime or light wallpapers.
+- **Notes Widget Interaction Fix** — Moved window drag handling strictly to the header title bar, eliminating text selection interference and enabling smooth, reliable typing and editing in desktop sticky notes.
+- **Aesthetic Color Palettes** — Introduced popular curated color presets (Soft Lavender `#A78BFA`, Rose Pink `#FB7185`, Frost Sky `#89B4FA`, Crimson Red `#F43F5E`) inspired by Catppuccin, JaxCore, and Rainmeter without altering existing profile color indexes.
+- **Weekday & Custom Text Color Immunity** — Decoupled the weekday/custom text card from global theme flipping so chosen custom colors are always preserved.
+- **Clean Context Menus & UI Alignment** — Removed legacy emojis and redundant theme toggles from right-click widget menus, centered the active profile badge, and enhanced profile count visibility.
 
 ### v0.1.53
 - **Independent Widget Profiles & Live Positioning** — Desktop profiles now reliably save, restore, and reposition all desktop widgets (Clock, System Monitor, Media Visualizer, Day, Calendar, Notes, Quote, Weather) with independent coordinates and configurations per profile.

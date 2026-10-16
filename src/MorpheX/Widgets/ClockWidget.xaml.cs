@@ -132,6 +132,22 @@ public partial class ClockWidget : Window
                 new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 191, 36)),        // Amber Gold
                 new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 191, 36))
             ),
+            7 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(167, 139, 250)),       // Soft Lavender (#A78BFA)
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 167, 139, 250))
+            ),
+            8 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 113, 133)),       // Rose Pink (#FB7185)
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 113, 133))
+            ),
+            9 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(137, 180, 250)),       // Frost Sky (#89B4FA)
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 137, 180, 250))
+            ),
+            10 => (
+                new SolidColorBrush(System.Windows.Media.Color.FromRgb(244, 63, 94)),         // Crimson Red (#F43F5E)
+                new SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 244, 63, 94))
+            ),
             _ => _settings.WidgetTheme == 1
                 ? (
                     new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 34, 30, 24)),  // Crisp dark charcoal for light mode

@@ -118,7 +118,7 @@ public partial class ProfilesPage : Page
             {
                 Background = new SolidColorBrush(Color.FromRgb(0x10, 0xB9, 0x81)),
                 CornerRadius = new CornerRadius(4),
-                Padding = new Thickness(6, 2, 6, 2),
+                Padding = new Thickness(6, 2.5, 6, 2),
                 Margin = new Thickness(10, 0, 0, 0),
                 VerticalAlignment = VerticalAlignment.Center
             };
@@ -127,7 +127,9 @@ public partial class ProfilesPage : Page
                 Text = "ACTIVE",
                 FontSize = 9,
                 FontWeight = FontWeights.Bold,
-                Foreground = Brushes.White
+                Foreground = Brushes.White,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Center
             };
             nameRow.Children.Add(badge);
         }

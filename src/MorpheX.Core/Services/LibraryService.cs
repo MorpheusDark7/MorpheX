@@ -185,14 +185,17 @@ public sealed class LibraryService : ILibraryService
 
                         await SeedDefaultWallpapersInternalAsync(ct);
 
-                        // Generate any missing thumbnails in the background so startup
-                        // is not blocked by slow shell probing (especially for videos).
+                        // Generate any missing thumbnails and extract missing dimensions in the background
+                        // so startup is not blocked.
                         var thumbDir = Path.Combine(_libraryDir, "thumbnails");
                         var wallpapersMissingThumbs = _manifest.Wallpapers
                             .Where(w => string.IsNullOrEmpty(w.ThumbnailPath) || !File.Exists(w.ThumbnailPath))
                             .ToList();
+                        var wallpapersMissingDims = _manifest.Wallpapers
+                            .Where(w => (w.Width == null || w.Height == null) && File.Exists(w.EffectivePath))
+                            .ToList();
 
-                        if (wallpapersMissingThumbs.Count > 0)
+                        if (wallpapersMissingThumbs.Count > 0 || wallpapersMissingDims.Count > 0)
                         {
                             _ = Task.Run(async () =>
                             {
@@ -207,6 +210,32 @@ public sealed class LibraryService : ILibraryService
                                         updated = true;
                                     }
                                 }
+
+                                foreach (var w in wallpapersMissingDims)
+                                {
+                                    if (w.Type == WallpaperType.Image)
+                                    {
+                                        try
+                                        {
+                                            using var img = System.Drawing.Image.FromFile(w.EffectivePath);
+                                            w.Width = img.Width;
+                                            w.Height = img.Height;
+                                            updated = true;
+                                        }
+                                        catch { /* ignore */ }
+                                    }
+                                    else if (w.Type == WallpaperType.Video)
+                                    {
+                                        var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(w.EffectivePath);
+                                        if (dims.HasValue)
+                                        {
+                                            w.Width = dims.Value.width;
+                                            w.Height = dims.Value.height;
+                                            updated = true;
+                                        }
+                                    }
+                                }
+
                                 if (updated)
                                 {
                                     await SaveAsync(ct);
@@ -341,6 +370,15 @@ public sealed class LibraryService : ILibraryService
                 catch (Exception ex)
                 {
                     Log.Debug(ex, "Could not extract image metadata for {Path}", filePath);
+                }
+            }
+            else if (type == WallpaperType.Video)
+            {
+                var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(filePath);
+                if (dims.HasValue)
+                {
+                    wallpaper.Width = dims.Value.width;
+                    wallpaper.Height = dims.Value.height;
                 }
             }
 
@@ -871,6 +909,15 @@ public sealed class LibraryService : ILibraryService
                     catch (Exception ex)
                     {
                         Log.Debug(ex, "Could not extract image metadata for {Path}", filePath);
+                    }
+                }
+                else if (type == WallpaperType.Video)
+                {
+                    var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(filePath);
+                    if (dims.HasValue)
+                    {
+                        wallpaper.Width = dims.Value.width;
+                        wallpaper.Height = dims.Value.height;
                     }
                 }
 

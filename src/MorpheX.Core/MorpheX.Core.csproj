@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <RootNamespace>MorpheX.Core</RootNamespace>
     <AssemblyName>MorpheX.Core</AssemblyName>
-    <Version>0.1.53</Version>
+    <Version>0.1.54</Version>
     <Description>Core logic for MorpheX Live Wallpaper — models, services, providers, desktop integration</Description>
   </PropertyGroup>
 

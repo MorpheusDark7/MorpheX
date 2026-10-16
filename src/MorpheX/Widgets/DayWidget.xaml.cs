@@ -119,7 +119,7 @@ public partial class DayWidget : Window
 
         // Background card (ultra-clean smoked or cream frosted glass)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.DayShowBackground, 16, new Thickness(14, 6, 14, 6), _settings.WidgetTheme == 1);
-        ToggleCardMenu.Header = _settings.DayShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
+        ToggleCardMenu.Header = _settings.DayShowBackground ? "Hide Background Card" : "Show Background Card";
     }
 
     public void ApplyTheme() => UpdateDayDisplay();
@@ -128,9 +128,7 @@ public partial class DayWidget : Window
     {
         return _settings.DayColorMode switch
         {
-            0 => _settings.WidgetTheme == 1
-                ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 34, 30, 24))   // Charcoal for light theme
-                : new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255)), // Pure White
+            0 => new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255)), // Pure White
             1 => new SolidColorBrush(System.Windows.Media.Color.FromArgb(140, 203, 213, 225)), // Dim Slate
             2 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248)),        // Electric Cyan
             3 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(74, 222, 128)),        // Neon Mint
@@ -139,9 +137,9 @@ public partial class DayWidget : Window
             6 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 191, 36)),        // Amber Gold
             7 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 113, 133)),       // Rose Pink
             8 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(244, 63, 94)),         // Crimson Red
-            _ => _settings.WidgetTheme == 1
-                ? new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 34, 30, 24))
-                : new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255))
+            9 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(167, 139, 250)),       // Soft Lavender (#A78BFA)
+            10 => new SolidColorBrush(System.Windows.Media.Color.FromRgb(137, 180, 250)),      // Frost Sky (#89B4FA)
+            _ => new SolidColorBrush(System.Windows.Media.Color.FromArgb(235, 255, 255, 255))
         };
     }
 

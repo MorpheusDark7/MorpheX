@@ -364,6 +364,41 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
         }
     }
 
+    /// <summary>
+    /// Probes a video file's tracks using LibVLC to extract pixel width and height.
+    /// Returns (width, height) or null if unable to determine.
+    /// </summary>
+    public static (int width, int height)? ProbeVideoDimensions(string filePath)
+    {
+        if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
+            return null;
+
+        try
+        {
+            EnsureLibVLCInitialized();
+            using var media = new Media(_sharedLibVLC!, filePath, FromType.FromPath);
+            media.Parse(MediaParseOptions.ParseLocal);
+            var tracks = media.Tracks;
+            if (tracks != null)
+            {
+                foreach (var track in tracks)
+                {
+                    if (track.TrackType == TrackType.Video && track.Data.Video.Width > 0 && track.Data.Video.Height > 0)
+                    {
+                        return ((int)track.Data.Video.Width, (int)track.Data.Video.Height);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Debug(ex, "Failed to probe video dimensions for {Path}", filePath);
+        }
+
+        return null;
+    }
+
+
     public void Dispose()
     {
         if (_disposed) return;

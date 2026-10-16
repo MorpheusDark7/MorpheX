@@ -201,29 +201,29 @@ public static class WidgetStyles
             }
             else
             {
-                // ── Dark theme — smoked dark glass (original) ────────────────
+                // ── Dark theme — rich smoked dark glass ────────────────
                 bgBrush = new LinearGradientBrush
                 {
                     StartPoint = new System.Windows.Point(0, 0),
                     EndPoint   = new System.Windows.Point(0, 1)
                 };
-                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x2E, 0x10, 0x14, 0x1E), 0.0));
-                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x18, 0x08, 0x0A, 0x12), 1.0));
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xCC, 0x12, 0x14, 0x1E), 0.0));
+                bgBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0xBB, 0x1A, 0x1C, 0x28), 1.0));
 
                 borderBrush = new LinearGradientBrush
                 {
                     StartPoint = new System.Windows.Point(0, 0),
                     EndPoint   = new System.Windows.Point(0, 1)
                 };
-                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF), 0.0));
-                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x0E, 0xFF, 0xFF, 0xFF), 1.0));
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x40, 0xFF, 0xFF, 0xFF), 0.0));
+                borderBrush.GradientStops.Add(new GradientStop(Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF), 1.0));
 
                 shadow = new DropShadowEffect
                 {
                     Color       = Color.FromRgb(0, 0, 0),
                     BlurRadius  = 24,
                     ShadowDepth = 2,
-                    Opacity     = 0.28
+                    Opacity     = 0.50
                 };
             }
 
@@ -258,18 +258,18 @@ public static class WidgetStyles
         {
             // Dark warm charcoal — readable on the cream background
             return new SolidColorBrush(Color.FromArgb(
-                (byte)(0xD8 * opacity), 0x22, 0x1E, 0x18));
+                (byte)(0xE8 * opacity), 0x22, 0x1E, 0x18));
         }
         return new SolidColorBrush(Color.FromArgb(
-            (byte)(0xCC * opacity), 0xFF, 0xFF, 0xFF));
+            (byte)(0xF0 * opacity), 0xFF, 0xFF, 0xFF));
     }
 
     /// <summary>Returns a muted/secondary foreground color (labels, subtitles).</summary>
     public static System.Windows.Media.Brush GetWidgetSubtleForeground(bool isLightTheme)
     {
         if (isLightTheme)
-            return new SolidColorBrush(Color.FromArgb(0x80, 0x44, 0x38, 0x28));
-        return new SolidColorBrush(Color.FromArgb(0x66, 0xFF, 0xFF, 0xFF));
+            return new SolidColorBrush(Color.FromArgb(0x99, 0x44, 0x38, 0x28));
+        return new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF));
     }
 
 

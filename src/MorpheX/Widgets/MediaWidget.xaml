@@ -28,6 +28,8 @@
                 <MenuItem Header="Violet Glow" Click="ColorViolet_Click" Foreground="#C084FC"/>
                 <MenuItem Header="Emerald Mint" Click="ColorMint_Click" Foreground="#4ADE80"/>
                 <MenuItem Header="Sunset Amber" Click="ColorAmber_Click" Foreground="#FB923C"/>
+                <MenuItem Header="Soft Lavender" Click="ColorLavender_Click" Foreground="#A78BFA"/>
+                <MenuItem Header="Rose Pink" Click="ColorRose_Click" Foreground="#FB7185"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
@@ -72,6 +74,16 @@
             <GradientStop Color="#40EA580C" Offset="0"/>
             <GradientStop Color="#CCFB923C" Offset="0.5"/>
             <GradientStop Color="#FFFDE047" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushLavender" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#407C3AED" Offset="0"/>
+            <GradientStop Color="#CCA78BFA" Offset="0.5"/>
+            <GradientStop Color="#FFE9D5FF" Offset="1"/>
+        </LinearGradientBrush>
+        <LinearGradientBrush x:Key="BarBrushRose" StartPoint="0.5,1" EndPoint="0.5,0">
+            <GradientStop Color="#40E11D48" Offset="0"/>
+            <GradientStop Color="#CCFB7185" Offset="0.5"/>
+            <GradientStop Color="#FFFFE4E6" Offset="1"/>
         </LinearGradientBrush>
 
         <SolidColorBrush x:Key="IdleBrush" Color="#28FFFFFF"/>

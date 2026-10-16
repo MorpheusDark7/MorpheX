@@ -194,9 +194,9 @@ public partial class MediaWidget : Window
             MinHeight = 35;
         }
 
-        ToggleCardMenu.Header = _settings.MediaShowBackground ? "🔲  Hide Background Card" : "🔲  Show Background Card";
-        ToggleDetailsMenu.Header = _settings.MediaShowTrackDetails ? "🎵  Hide Track Details" : "🎵  Show Track Details";
-        ToggleGlowMenu.Header = _settings.VisualizerGlow ? "✨  Hide Glow Effect" : "✨  Show Glow Effect";
+        ToggleCardMenu.Header = _settings.MediaShowBackground ? "Hide Background Card" : "Show Background Card";
+        ToggleDetailsMenu.Header = _settings.MediaShowTrackDetails ? "Hide Track Details" : "Show Track Details";
+        ToggleGlowMenu.Header = _settings.VisualizerGlow ? "Hide Glow Effect" : "Show Glow Effect";
     }
 
     private System.Windows.Media.Brush GetVisualizerBrush()
@@ -207,6 +207,8 @@ public partial class MediaWidget : Window
             2 => (System.Windows.Media.Brush)Resources["BarBrushViolet"],
             3 => (System.Windows.Media.Brush)Resources["BarBrushMint"],
             4 => (System.Windows.Media.Brush)Resources["BarBrushAmber"],
+            5 => (System.Windows.Media.Brush)Resources["BarBrushLavender"],
+            6 => (System.Windows.Media.Brush)Resources["BarBrushRose"],
             _ => _settings.WidgetTheme == 1
                 ? (System.Windows.Media.Brush)Resources["BarBrushDark"]
                 : (System.Windows.Media.Brush)Resources["BarBrushWhite"]
@@ -223,6 +225,8 @@ public partial class MediaWidget : Window
             2 => (System.Windows.Media.Color.FromRgb(168, 85, 247),  0.75),  // violet glow
             3 => (System.Windows.Media.Color.FromRgb(74, 222, 128),  0.75),  // emerald mint glow
             4 => (System.Windows.Media.Color.FromRgb(251, 146, 60),  0.75),  // sunset amber glow
+            5 => (System.Windows.Media.Color.FromRgb(167, 139, 250), 0.75),  // lavender glow
+            6 => (System.Windows.Media.Color.FromRgb(251, 113, 133), 0.75),  // rose glow
             _ => _settings.WidgetTheme == 1
                 ? (System.Windows.Media.Color.FromRgb(34, 30, 24),   0.30)
                 : (System.Windows.Media.Color.FromRgb(255, 255, 255), 0.5)   // white glow
@@ -439,6 +443,20 @@ public partial class MediaWidget : Window
         ScheduleDebouncedSave();
     }
 
+    private void ColorLavender_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 5;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
+    private void ColorRose_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.VisualizerColorMode = 6;
+        RefreshVisualizerStyle();
+        ScheduleDebouncedSave();
+    }
+
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
         _settings.WidgetsLocked = !_settings.WidgetsLocked;
@@ -476,9 +494,7 @@ public partial class MediaWidget : Window
 
     private void UpdateLockMenuHeader()
     {
-        LockMenuItem.Header = _settings.WidgetsLocked
-            ? "🔓  Unlock Position"
-            : "🔒  Lock Position";
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

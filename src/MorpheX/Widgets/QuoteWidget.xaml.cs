@@ -65,23 +65,10 @@ public partial class QuoteWidget : Window
 
         QuoteMarkText.Foreground = isLight
             ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x35, 0x22, 0x1E, 0x18))
-            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x33, 0xFF, 0xFF, 0xFF));
+            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0x55, 0xFF, 0xFF, 0xFF));
 
         QuoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
         AuthorText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
-
-        if (ThemeMenuItem != null)
-        {
-            ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
-        }
-    }
-
-    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
-    {
-        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
-        ApplyTheme();
-        Save();
-        (Application.Current as App)?.WidgetService.RefreshTheme();
     }
 
     private void ShowQuote(int index)

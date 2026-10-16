@@ -36,6 +36,10 @@
                 <MenuItem Header="Cyber Violet" Click="ColorPreset_Click" Tag="4"/>
                 <MenuItem Header="Sunset Orange" Click="ColorPreset_Click" Tag="5"/>
                 <MenuItem Header="Amber Gold" Click="ColorPreset_Click" Tag="6"/>
+                <MenuItem Header="Soft Lavender" Click="ColorPreset_Click" Tag="7"/>
+                <MenuItem Header="Rose Pink" Click="ColorPreset_Click" Tag="8"/>
+                <MenuItem Header="Frost Sky" Click="ColorPreset_Click" Tag="9"/>
+                <MenuItem Header="Crimson" Click="ColorPreset_Click" Tag="10"/>
             </MenuItem>
             <MenuItem Header="Font Style">
                 <MenuItem Header="Bahnschrift Light" Click="FontPreset_Click" Tag="0"/>

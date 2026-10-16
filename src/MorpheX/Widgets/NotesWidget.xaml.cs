@@ -36,25 +36,10 @@ public partial class NotesWidget : Window
         WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
 
         HeaderTitleText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
-        if (PencilIcon != null)
-            PencilIcon.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
         NoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
         NoteText.CaretBrush = isLight
             ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0x28, 0x20))
             : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0xAA, 0xFF, 0xFF, 0xFF));
-
-        if (ThemeMenuItem != null)
-        {
-            ThemeMenuItem.Header = isLight ? "🌙  Dark Theme" : "☀️  Light Theme";
-        }
-    }
-
-    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
-    {
-        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
-        ApplyTheme();
-        Save();
-        (Application.Current as App)?.WidgetService.RefreshTheme();
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -66,18 +51,11 @@ public partial class NotesWidget : Window
     private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (_settings.WidgetsLocked) return;
-        // Only drag if not clicking the text area
-        if (e.Source is not System.Windows.Controls.TextBox)
+        if (e.LeftButton == MouseButtonState.Pressed)
         {
             DragMove();
             Save();
         }
-    }
-
-    private void NoteArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        // Prevent drag when clicking inside the text box — let it focus
-        e.Handled = false;
     }
 
     private void NoteText_Changed(object sender, System.Windows.Controls.TextChangedEventArgs e)
@@ -108,8 +86,8 @@ public partial class NotesWidget : Window
 
     public void UpdateLockState()
     {
-        WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked, hasResizeGrip: true);
-        LockMenuItem.Header = _settings.WidgetsLocked ? "🔓  Unlock Position" : "🔒  Lock Position";
+        WidgetStyles.ApplyLockState(this, HeaderPanel, _settings.WidgetsLocked, hasResizeGrip: true);
+        LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
     }
 
     private void ResetSize_Click(object sender, RoutedEventArgs e)

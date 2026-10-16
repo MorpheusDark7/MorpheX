@@ -39,24 +39,11 @@ public partial class CalendarWidget : Window
         bool isLight = _settings.WidgetTheme == 1;
         WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
         MonthYearText.Foreground = isLight
-            ? new SolidColorBrush(Color.FromArgb(200, 34, 30, 24))
-            : new SolidColorBrush(Color.FromArgb(140, 255, 255, 255));
-
-        if (ThemeMenuItem != null)
-        {
-            ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
-        }
+            ? new SolidColorBrush(Color.FromArgb(220, 34, 30, 24))
+            : new SolidColorBrush(Color.FromArgb(215, 255, 255, 255));
 
         BuildDayHeaders();
         RenderMonth(DateTime.Now);
-    }
-
-    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
-    {
-        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
-        ApplyTheme();
-        Save();
-        (Application.Current as App)?.WidgetService.RefreshTheme();
     }
 
     private void BuildDayHeaders()
@@ -64,8 +51,8 @@ public partial class CalendarWidget : Window
         bool isLight = _settings.WidgetTheme == 1;
         DayHeaders.Children.Clear();
         var headerBrush = isLight
-            ? new SolidColorBrush(Color.FromArgb(140, 60, 50, 40))
-            : new SolidColorBrush(Color.FromArgb(120, 255, 255, 255));
+            ? new SolidColorBrush(Color.FromArgb(160, 60, 50, 40))
+            : new SolidColorBrush(Color.FromArgb(180, 255, 255, 255));
 
         foreach (var d in new[] { "Su","Mo","Tu","We","Th","Fr","Sa" })
         {
@@ -99,11 +86,11 @@ public partial class CalendarWidget : Window
             : new SolidColorBrush(Color.FromRgb(14, 14, 18));
 
         var regularFg = isLight
-            ? new SolidColorBrush(Color.FromArgb(215, 34, 30, 24))
-            : new SolidColorBrush(Color.FromArgb(200, 255, 255, 255));
+            ? new SolidColorBrush(Color.FromArgb(235, 34, 30, 24))
+            : new SolidColorBrush(Color.FromArgb(240, 255, 255, 255));
         var weekendFg = isLight
-            ? new SolidColorBrush(Color.FromArgb(130, 80, 70, 60))
-            : new SolidColorBrush(Color.FromArgb(140, 255, 255, 255));
+            ? new SolidColorBrush(Color.FromArgb(150, 80, 70, 60))
+            : new SolidColorBrush(Color.FromArgb(170, 255, 255, 255));
 
         for (int day = 1; day <= daysInMonth; day++)
         {

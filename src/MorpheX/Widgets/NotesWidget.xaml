@@ -16,7 +16,6 @@
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem Header="Notes" IsEnabled="False" Foreground="#88FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <MenuItem Header="Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
@@ -33,9 +32,7 @@
         Margin="6"
         CornerRadius="12"
         Background="#B8101013"
-        Effect="{StaticResource Glow}"
-        MouseLeftButtonDown="Header_MouseLeftButtonDown"
-        Cursor="SizeAll">
+        Effect="{StaticResource Glow}">
 
         <Grid Margin="14,10,14,10">
             <Grid.RowDefinitions>
@@ -43,8 +40,14 @@
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header row -->
-            <DockPanel Grid.Row="0" Margin="0,0,0,8">
+            <!-- Header drag handle row -->
+            <DockPanel
+                x:Name="HeaderPanel"
+                Grid.Row="0"
+                Margin="0,0,0,8"
+                Background="Transparent"
+                Cursor="SizeAll"
+                MouseLeftButtonDown="Header_MouseLeftButtonDown">
                 <TextBlock
                     x:Name="HeaderTitleText"
                     Text="NOTES"
@@ -52,14 +55,6 @@
                     FontFamily="Segoe UI"
                     Foreground="#66FFFFFF"
                     VerticalAlignment="Center"/>
-                <TextBlock
-                    x:Name="PencilIcon"
-                    Text="✏"
-                    FontSize="10"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Center"
-                    Foreground="#66FFFFFF"
-                    Opacity="0.7"/>
             </DockPanel>
 
             <!-- Editable text area -->
@@ -80,18 +75,7 @@
                 VerticalAlignment="Stretch"
                 Cursor="IBeam"
                 Padding="0"
-                TextChanged="NoteText_Changed"
-                MouseLeftButtonDown="NoteArea_MouseLeftButtonDown">
-                <TextBox.Style>
-                    <Style TargetType="TextBox">
-                        <Style.Triggers>
-                            <Trigger Property="IsKeyboardFocused" Value="False">
-                                <Setter Property="Opacity" Value="0.85"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </TextBox.Style>
-            </TextBox>
+                TextChanged="NoteText_Changed"/>
         </Grid>
     </Border>
 </Window>

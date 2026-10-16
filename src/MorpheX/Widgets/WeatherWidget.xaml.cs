@@ -491,14 +491,6 @@ public partial class WeatherWidget : Window
         await FetchWeatherAsync();
     }
 
-    private void ToggleTheme_Click(object sender, RoutedEventArgs e)
-    {
-        _settings.WidgetTheme = _settings.WidgetTheme == 0 ? 1 : 0;
-        ApplyTheme();
-        Save();
-        ((App)Application.Current).WidgetService.RefreshTheme();
-    }
-
     private async void ToggleUnits_Click(object sender, RoutedEventArgs e)
     {
         _settings.WeatherUseFahrenheit = !_settings.WeatherUseFahrenheit;
@@ -618,14 +610,13 @@ public partial class WeatherWidget : Window
             CardBorder.Padding     = new Thickness(16, 14, 16, 14);
         }
 
-        ThemeMenuItem.Header = isLight ? "Dark Theme" : "Light Theme";
         if (CardBgMenuItem != null)
             CardBgMenuItem.Header = showBg ? "Disable Frosted Card" : "Enable Frosted Card";
 
         // Adjust text colours for light / dark theme
         var primary   = isLight ? "#CC000000" : "#FFFFFFFF";
-        var secondary = isLight ? "#88000000" : "#88FFFFFF";
-        var tertiary  = isLight ? "#66000000" : "#66FFFFFF";
+        var secondary = isLight ? "#99000000" : "#DDFFFFFF";
+        var tertiary  = isLight ? "#88000000" : "#B0FFFFFF";
         var brushConv = new BrushConverter();
 
         TempText.Foreground      = brushConv.ConvertFromString(primary)   as Brush;

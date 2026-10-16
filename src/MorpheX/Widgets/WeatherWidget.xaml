@@ -15,11 +15,10 @@
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem Header="Refresh Now" Click="RefreshNow_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
-            <MenuItem Header="📍 Set Location..." Click="SetLocation_Click" Foreground="#38BDF8"/>
-            <MenuItem Header="📍 Auto-Detect Location" Click="AutoDetectLocation_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Set Location..." Click="SetLocation_Click" Foreground="#38BDF8"/>
+            <MenuItem Header="Auto-Detect Location" Click="AutoDetectLocation_Click" Foreground="#FFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem x:Name="UnitsMenuItem" Header="Switch to °F" Click="ToggleUnits_Click" Foreground="#FFFFFF"/>
-            <MenuItem x:Name="ThemeMenuItem" Header="Light Theme" Click="ToggleTheme_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="CardBgMenuItem" Header="Disable Frosted Card" Click="ToggleCardBg_Click" Foreground="#FFFFFF"/>
             <MenuItem Header="Show / Hide Details" Foreground="#FFFFFF">
                 <MenuItem x:Name="HiLoMenuItem" Header="High / Low Temp" IsCheckable="True" Click="ToggleHiLo_Click"/>

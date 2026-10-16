@@ -29,6 +29,8 @@
                 <MenuItem Header="Emerald Mint" Click="ColorPreset_Click" Tag="2"/>
                 <MenuItem Header="Cyber Violet" Click="ColorPreset_Click" Tag="3"/>
                 <MenuItem Header="Sunset Amber" Click="ColorPreset_Click" Tag="4"/>
+                <MenuItem Header="Soft Lavender" Click="ColorPreset_Click" Tag="5"/>
+                <MenuItem Header="Rose Pink" Click="ColorPreset_Click" Tag="6"/>
             </MenuItem>
             <MenuItem Header="Layout">
                 <MenuItem Header="Horizontal Row" Click="LayoutPreset_Click" Tag="0"/>

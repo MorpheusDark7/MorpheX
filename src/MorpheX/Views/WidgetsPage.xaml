@@ -200,6 +200,42 @@
                                         </StackPanel>
                                     </ComboBoxItem>
 
+                                    <ComboBoxItem Tag="7">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#C4B5FD" Offset="0"/><GradientStop Color="#A78BFA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Soft Lavender" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="8">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FDA4AF" Offset="0"/><GradientStop Color="#FB7185" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Rose Pink" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="9">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#B4BEFE" Offset="0"/><GradientStop Color="#89B4FA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Frost Sky" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="10">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FB7185" Offset="0"/><GradientStop Color="#F43F5E" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Crimson Red" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -382,6 +418,24 @@
                                                 <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FF4040" Offset="0"/><GradientStop Color="#A00000" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
                                             </Ellipse>
                                             <TextBlock Text="Crimson Red" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="9">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#C4B5FD" Offset="0"/><GradientStop Color="#A78BFA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Soft Lavender" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="10">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#B4BEFE" Offset="0"/><GradientStop Color="#89B4FA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Frost Sky" VerticalAlignment="Center"/>
                                         </StackPanel>
                                     </ComboBoxItem>
 
@@ -610,6 +664,24 @@
                                         </StackPanel>
                                     </ComboBoxItem>
 
+                                    <ComboBoxItem Tag="5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#C4B5FD" Offset="0"/><GradientStop Color="#A78BFA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Soft Lavender" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FDA4AF" Offset="0"/><GradientStop Color="#FB7185" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Rose Pink" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -796,6 +868,24 @@
                                         </StackPanel>
                                     </ComboBoxItem>
 
+                                    <ComboBoxItem Tag="5">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#C4B5FD" Offset="0"/><GradientStop Color="#A78BFA" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Soft Lavender" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
+                                    <ComboBoxItem Tag="6">
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Ellipse Width="12" Height="12" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                <Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#FDA4AF" Offset="0"/><GradientStop Color="#FB7185" Offset="1"/></LinearGradientBrush></Ellipse.Fill>
+                                            </Ellipse>
+                                            <TextBlock Text="Rose Pink" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ComboBoxItem>
+
                                 </ComboBox>
                             </StackPanel>
 
@@ -870,7 +960,16 @@
                     <Grid>
                         <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                            <TextBlock Text="Weather Widget" Style="{StaticResource SettingLabelStyle}"/>
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="Weather Widget" Style="{StaticResource SettingLabelStyle}"/>
+                                <Border Background="#22EF4444" BorderBrush="#70EF4444" BorderThickness="1"
+                                        CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <ui:SymbolIcon Symbol="Globe24" FontSize="11" Foreground="#F87171" Margin="0,0,4,0"/>
+                                        <TextBlock Text="Requires Internet" FontSize="10.5" FontWeight="SemiBold" Foreground="#F87171"/>
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
                             <TextBlock Text="Live temperature, conditions, humidity, and wind. Powered by free Open-Meteo. Refreshes every 30 min." Style="{StaticResource SettingDescriptionStyle}"/>
                         </StackPanel>
                         <ui:ToggleSwitch x:Name="WeatherToggle" Grid.Column="1" VerticalAlignment="Center"
