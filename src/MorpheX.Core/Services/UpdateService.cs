@@ -169,12 +169,6 @@ public sealed class UpdateService : IUpdateService
                 return null;
             }
 
-            if (sha256SidecarUrl == null)
-            {
-                Log.Warning("New release {Tag}: installer found but no .sha256 sidecar asset. Update blocked for security.", rawTag);
-                return null;
-            }
-
             string title = root.TryGetProperty("name", out var titleProp) && !string.IsNullOrEmpty(titleProp.GetString())
                 ? titleProp.GetString()!
                 : $"MorpheX Live {rawTag}";
@@ -182,6 +176,26 @@ public sealed class UpdateService : IUpdateService
             string? changelog = root.TryGetProperty("body", out var bodyProp)
                 ? bodyProp.GetString()
                 : null;
+
+            string? expectedSha256 = null;
+            if (sha256SidecarUrl == null && !string.IsNullOrWhiteSpace(changelog))
+            {
+                var match = Regex.Match(changelog, @"(?:sha-?256|hash|checksum)[\s:]+([a-fA-F0-9]{64})", RegexOptions.IgnoreCase);
+                if (!match.Success)
+                {
+                    match = Regex.Match(changelog, @"\b([a-fA-F0-9]{64})\b");
+                }
+                if (match.Success)
+                {
+                    expectedSha256 = match.Groups[1].Value.ToLowerInvariant();
+                }
+            }
+
+            if (sha256SidecarUrl == null && expectedSha256 == null)
+            {
+                Log.Warning("New release {Tag}: installer found but no .sha256 sidecar asset or release hash. Update blocked for security.", rawTag);
+                return null;
+            }
 
             DateTimeOffset publishedAt = root.TryGetProperty("published_at", out var pubProp) && pubProp.TryGetDateTimeOffset(out var dto)
                 ? dto
@@ -201,7 +215,7 @@ public sealed class UpdateService : IUpdateService
                 FileSizeBytes = fileSize,
                 PublishedAt = publishedAt,
                 Sha256SidecarUrl = sha256SidecarUrl,
-                ExpectedSha256 = null   // resolved in DownloadInstallerAsync after fetching sidecar
+                ExpectedSha256 = expectedSha256
             };
         }
         catch (Exception ex)
@@ -228,22 +242,32 @@ public sealed class UpdateService : IUpdateService
         if (!IsValidDownloadUrl(update.DownloadUrl))
             throw new InvalidOperationException($"Untrusted download URL: {update.DownloadUrl}");
 
-        if (string.IsNullOrEmpty(update.Sha256SidecarUrl))
-            throw new InvalidOperationException("No SHA-256 sidecar URL available. Cannot verify installer integrity.");
+        string expectedHash;
+        if (!string.IsNullOrEmpty(update.Sha256SidecarUrl))
+        {
+            // ── Step 1: Fetch the .sha256 sidecar first ───────────────────────────
+            Log.Information("Fetching SHA-256 sidecar from {Url}", update.Sha256SidecarUrl);
+            using var sidecarResp = await _httpClient.GetAsync(update.Sha256SidecarUrl, ct);
+            sidecarResp.EnsureSuccessStatusCode();
+            var sidecarText = (await sidecarResp.Content.ReadAsStringAsync(ct)).Trim();
 
-        // ── Step 1: Fetch the .sha256 sidecar first ───────────────────────────
-        Log.Information("Fetching SHA-256 sidecar from {Url}", update.Sha256SidecarUrl);
-        using var sidecarResp = await _httpClient.GetAsync(update.Sha256SidecarUrl, ct);
-        sidecarResp.EnsureSuccessStatusCode();
-        var sidecarText = (await sidecarResp.Content.ReadAsStringAsync(ct)).Trim();
+            // Sidecar may be "<hex>  filename" (sha256sum format) or just the bare hex
+            var hexMatch = Regex.Match(sidecarText, @"[a-fA-F0-9]{64}");
+            if (!hexMatch.Success)
+                throw new InvalidDataException($"SHA-256 sidecar did not contain a valid 64-char hex hash: '{sidecarText}'");
 
-        // Sidecar may be "<hex>  filename" (sha256sum format) or just the bare hex
-        var hexMatch = Regex.Match(sidecarText, @"[a-fA-F0-9]{64}");
-        if (!hexMatch.Success)
-            throw new InvalidDataException($"SHA-256 sidecar did not contain a valid 64-char hex hash: '{sidecarText}'");
-
-        var expectedHash = hexMatch.Value.ToLowerInvariant();
-        Log.Information("Expected SHA-256 from sidecar: {Hash}", expectedHash);
+            expectedHash = hexMatch.Value.ToLowerInvariant();
+            Log.Information("Expected SHA-256 from sidecar: {Hash}", expectedHash);
+        }
+        else if (!string.IsNullOrEmpty(update.ExpectedSha256))
+        {
+            expectedHash = update.ExpectedSha256.ToLowerInvariant();
+            Log.Information("Expected SHA-256 from release notes: {Hash}", expectedHash);
+        }
+        else
+        {
+            throw new InvalidOperationException("No SHA-256 checksum available (neither sidecar asset nor release hash). Cannot verify installer integrity.");
+        }
 
         // ── Step 2: Download installer while computing its hash inline ─────────
         var tempDir = Path.Combine(Path.GetTempPath(), "MorpheX", "Updates");

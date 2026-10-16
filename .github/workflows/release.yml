@@ -55,11 +55,23 @@ jobs:
           if (-not $ver) { $ver = "0.1.9" }
           & "C:\Program Files (x86)\Inno Setup 6\iscc.exe" "/DMyAppVersion=$ver" installer.iss
 
+      - name: Generate SHA-256 Checksums
+        shell: pwsh
+        run: |
+          Get-ChildItem -Path dist/*.exe | ForEach-Object {
+            $hash = (Get-FileHash -Path $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            $sidecarPath = "$($_.FullName).sha256"
+            Set-Content -Path $sidecarPath -Value "$hash  $($_.Name)" -NoNewline
+            Write-Host "Generated SHA-256 for $($_.Name): $hash"
+          }
+
       - name: Upload Installer Artifact
         uses: actions/upload-artifact@v4
         with:
           name: MorpheX-Installer
-          path: dist/*.exe
+          path: |
+            dist/*.exe
+            dist/*.sha256
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -67,7 +79,9 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}
           name: MorpheX Live ${{ github.event.inputs.tag_name || github.ref_name }}
-          files: dist/*.exe
+          files: |
+            dist/*.exe
+            dist/*.sha256
           generate_release_notes: true
           draft: false
           prerelease: false
