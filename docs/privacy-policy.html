@@ -159,25 +159,39 @@
             <li>Names or contact information</li>
             <li>Account credentials</li>
             <li>Personal documents or wallpaper files</li>
-            <li>Precise location information</li>
             <li>Browsing history</li>
             <li>Personal usage profiles</li>
         </ul>
 
+        <h2>Desktop Widgets & Location Data</h2>
+        <p>MorpheX Live includes optional desktop widgets. Most widgets operate strictly on local system data (e.g., CPU, RAM, GPU, audio levels, time, notes).</p>
+        <p><strong>Weather Widget:</strong></p>
+        <ul>
+            <li>When the Weather widget is active, MorpheX fetches forecast data from <strong>Open-Meteo</strong> (<code>api.open-meteo.com</code>) using geographic coordinates.</li>
+            <li>If the user clicks <strong>Auto-detect Location</strong>, the application queries <strong>ipapi.co</strong> to determine approximate location (city name and approximate latitude/longitude based on public IP).</li>
+            <li>Latitude, longitude, and city name are cached exclusively in the user's local <code>settings.json</code> file on their own computer.</li>
+            <li>MorpheX does <strong>not</strong> collect, store, or transmit your location to any MorpheX servers or third-party advertisers. Users can manually specify custom coordinates or disable the Weather widget at any time.</li>
+        </ul>
+
         <h2>Telemetry and Analytics</h2>
-        <p>MorpheX Live does not intentionally include background telemetry or behavioral tracking.</p>
-        <p>The application does not intentionally send wallpaper content or personal files to us.</p>
+        <p>MorpheX Live does not include background telemetry, analytics, or behavioral tracking.</p>
+        <p>The application does not send wallpaper content or personal files to us or any external servers.</p>
 
         <h2>Wallpaper Files</h2>
         <p>Wallpaper files selected by the user are processed locally by the application for playback and thumbnail generation.</p>
-        <p>MorpheX does not intentionally upload users' wallpaper files to our servers.</p>
+        <p>MorpheX does not upload users' wallpaper files to our servers.</p>
 
         <h2>Updates</h2>
-        <p>MorpheX may check for application updates. Update-related requests may connect to services required to determine whether a newer version is available.</p>
+        <p>MorpheX checks for updates via the public <strong>GitHub API</strong> (<code>api.github.com/repos/MorpheusDark7/MorpheX/releases</code>). These requests transmit standard HTTP client headers (e.g. User-Agent) to GitHub's servers to determine whether a newer release is available.</p>
 
         <h2>Third-Party Services</h2>
-        <p>MorpheX uses third-party software libraries required for application functionality. These libraries may have their own terms and privacy practices.</p>
-        <p>MorpheX does not intentionally provide third parties with users' personal information for advertising or profiling.</p>
+        <p>MorpheX interacts only with specific external services required for optional features:</p>
+        <ul>
+            <li><strong>GitHub</strong> (<code>api.github.com</code>, <code>github.com</code>): Application release checking and installer updates.</li>
+            <li><strong>ipapi.co</strong>: Approximate IP-based geolocation, queried only when the user explicitly triggers "Auto-detect Location" in the Weather widget.</li>
+            <li><strong>Open-Meteo</strong> (<code>open-meteo.com</code>): Free, public weather forecasts, queried on a periodic schedule only while the Weather widget is enabled.</li>
+        </ul>
+        <p>These third-party providers operate under their own privacy policies. MorpheX does not provide users' personal information to any third parties for advertising or profiling.</p>
 
         <h2>Children's Privacy</h2>
         <p>MorpheX Live is not directed specifically at children and does not knowingly collect personal information from children.</p>

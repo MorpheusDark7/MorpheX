@@ -1,0 +1,38 @@
+{
+  "title": "MorpheX Live Default Wallpapers Manifest",
+  "license": "CC0 1.0 Universal (Public Domain Dedication)",
+  "wallpapers": [
+    {
+      "filename": "fluid-ribbon.jpg",
+      "title": "MorpheX Fluid Ribbon",
+      "type": "Image",
+      "category": "Abstract / Identity",
+      "license": "CC0 1.0 Universal",
+      "creator": "MorpheX Creative Suite"
+    },
+    {
+      "filename": "cyber-horizon.jpg",
+      "title": "Cyber Horizon",
+      "type": "Image",
+      "category": "Synthwave / Cyberpunk",
+      "license": "CC0 1.0 Universal",
+      "creator": "MorpheX Creative Suite"
+    },
+    {
+      "filename": "celestial-nebula.jpg",
+      "title": "Celestial Nebula",
+      "type": "Image",
+      "category": "Space / Cosmos",
+      "license": "CC0 1.0 Universal",
+      "creator": "MorpheX Creative Suite"
+    },
+    {
+      "filename": "emerald-peaks.jpg",
+      "title": "Emerald Peaks",
+      "type": "Image",
+      "category": "Nature / Atmosphere",
+      "license": "CC0 1.0 Universal",
+      "creator": "MorpheX Creative Suite"
+    }
+  ]
+}

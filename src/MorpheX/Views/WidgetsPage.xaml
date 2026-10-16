@@ -15,6 +15,75 @@
                 Style="{StaticResource PageSubtitleStyle}"
                 Margin="0,4,0,0"/>
 
+            <!-- Desktop Profiles ─────────────────────────────────── -->
+            <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="#3038BDF8"
+                    BorderThickness="1" CornerRadius="10" Padding="16,14" Margin="0,16,0,0">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Text="🎛️  Desktop Profiles" Style="{StaticResource SettingLabelStyle}"/>
+                                <Border x:Name="ActiveProfileBadge" Background="#1E3A5F" BorderBrush="#38BDF8" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="10,0,0,0" VerticalAlignment="Center">
+                                    <TextBlock x:Name="ActiveProfileBadgeText" Text="Default Setup" FontSize="10" FontWeight="SemiBold" Foreground="#38BDF8"/>
+                                </Border>
+                            </StackPanel>
+                            <TextBlock Text="Save your widget positions, styling, and desktop mood as presets to switch between in one click."
+                                       Style="{StaticResource SettingDescriptionStyle}" Margin="0,2,0,0"/>
+                        </StackPanel>
+
+                        <Button x:Name="AddProfileButton"
+                                Grid.Column="1"
+                                Content="➕  New Profile"
+                                Height="32"
+                                Padding="12,0"
+                                FontSize="12"
+                                FontWeight="SemiBold"
+                                Background="#1A38BDF8"
+                                Foreground="#38BDF8"
+                                BorderBrush="#4038BDF8"
+                                BorderThickness="1"
+                                Cursor="Hand"
+                                Click="AddProfileButton_Click"/>
+                    </Grid>
+
+                    <WrapPanel x:Name="ProfilesPanel" Margin="0,12,0,0" Orientation="Horizontal"/>
+
+                    <Grid x:Name="ProfileActionsBar" Margin="0,8,0,0" Visibility="Collapsed">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="UpdateProfileButton"
+                                    Content="💾 Save Current Setup"
+                                    Height="28" Padding="10,0" Margin="0,0,8,0"
+                                    FontSize="11" FontWeight="Medium"
+                                    Background="#1A10B981" Foreground="#10B981"
+                                    BorderBrush="#3010B981" BorderThickness="1"
+                                    Cursor="Hand"
+                                    Click="UpdateProfileButton_Click"/>
+                            <Button x:Name="RenameProfileButton"
+                                    Content="✏️ Rename"
+                                    Height="28" Padding="10,0" Margin="0,0,8,0"
+                                    FontSize="11" FontWeight="Medium"
+                                    Background="#14FFFFFF" Foreground="#CBD5E1"
+                                    BorderBrush="#25FFFFFF" BorderThickness="1"
+                                    Cursor="Hand"
+                                    Click="RenameProfileButton_Click"/>
+                            <Button x:Name="DeleteProfileButton"
+                                    Content="🗑️ Delete"
+                                    Height="28" Padding="10,0"
+                                    FontSize="11" FontWeight="Medium"
+                                    Background="#1AF43F5E" Foreground="#F43F5E"
+                                    BorderBrush="#30F43F5E" BorderThickness="1"
+                                    Cursor="Hand"
+                                    Click="DeleteProfileButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
             <!-- Lock All Widgets ─────────────────────────────────── -->
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="#40FFD700"

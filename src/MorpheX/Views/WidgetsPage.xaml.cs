@@ -32,70 +32,240 @@ public partial class WidgetsPage : Page
             app.SettingsService.SettingsChanged += OnSettingsChanged;
         }
 
-        _isInitializing = true;
+        if (app?.ProfileService != null)
+        {
+            app.ProfileService.ProfilesChanged -= OnProfilesChanged;
+            app.ProfileService.ProfilesChanged += OnProfilesChanged;
+        }
 
         var w = app?.SettingsService?.Settings?.Widgets;
-        if (w == null) return;
+        if (w != null)
+        {
+            PopulateControlsFromSettings(w);
+        }
 
-        LockWidgetsToggle.IsChecked = w.WidgetsLocked;
-        SelectComboItem(WidgetThemeCombo, w.WidgetTheme);
+        RenderProfiles();
+    }
 
-        // Clock
-        ClockToggle.IsChecked       = w.ClockEnabled;
-        ClockFormatCheck.IsChecked  = w.ClockIs24Hour;
-        ClockDateCheck.IsChecked    = w.ClockShowDate;
-        ClockCardCheck.IsChecked    = w.ClockShowBackground;
-        SelectComboItem(ClockSizeCombo,  w.ClockFontSize);
-        SelectComboItem(ClockColorCombo, w.ClockColorMode);
-        SelectComboItem(ClockFontCombo,  w.ClockFontMode);
+    private void OnProfilesChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.InvokeAsync(RenderProfiles);
+    }
 
-        // Day Name
-        DayToggle.IsChecked     = w.DayEnabled;
-        DayCardCheck.IsChecked  = w.DayShowBackground;
-        SelectComboItem(DaySizeCombo,    w.DayFontSize);
-        SelectComboItem(DayColorCombo,   w.DayColorMode);
-        SelectComboItem(DayFontCombo,    w.DayFontMode);
-        SelectComboItem(DayCaseCombo,    w.DayCaseMode);
-        SelectComboItem(DaySpacingCombo, w.DaySpacingMode);
-        DayCustomTextCheck.IsChecked = w.DayUseCustomText;
-        DayCustomTextBox.Text        = w.DayCustomText ?? string.Empty;
-        DayCustomTextPanel.Visibility = w.DayUseCustomText ? Visibility.Visible : Visibility.Collapsed;
-        UpdateDayCustomCounter(w.DayCustomText?.Length ?? 0);
+    private void PopulateControlsFromSettings(WidgetSettings w)
+    {
+        _isInitializing = true;
+        try
+        {
+            LockWidgetsToggle.IsChecked = w.WidgetsLocked;
+            SelectComboItem(WidgetThemeCombo, w.WidgetTheme);
 
-        // System Monitor (Simplicity Circles)
-        SysMonToggle.IsChecked    = w.SystemMonitorEnabled;
-        SysMonCardCheck.IsChecked = w.SysMonShowBackground;
-        SysMonCpuCheck.IsChecked  = w.SysMonShowCpu;
-        SysMonRamCheck.IsChecked  = w.SysMonShowRam;
-        SysMonGpuCheck.IsChecked  = w.SysMonShowGpu;
-        SysMonDiskCheck.IsChecked = w.SysMonShowDisk;
-        SelectComboItem(SysMonSizeCombo,   w.SysMonSize);
-        SelectComboItem(SysMonColorCombo,  w.SysMonColorMode);
-        SelectComboItem(SysMonLayoutCombo, w.SysMonOrientation);
+            // Clock
+            ClockToggle.IsChecked       = w.ClockEnabled;
+            ClockFormatCheck.IsChecked  = w.ClockIs24Hour;
+            ClockDateCheck.IsChecked    = w.ClockShowDate;
+            ClockCardCheck.IsChecked    = w.ClockShowBackground;
+            SelectComboItem(ClockSizeCombo,  w.ClockFontSize);
+            SelectComboItem(ClockColorCombo, w.ClockColorMode);
+            SelectComboItem(ClockFontCombo,  w.ClockFontMode);
 
-        // Media & Visualizer
-        MediaToggle.IsChecked       = w.MediaEnabled;
-        MediaCardCheck.IsChecked    = w.MediaShowBackground;
-        MediaDetailsCheck.IsChecked = w.MediaShowTrackDetails;
-        MediaGlowCheck.IsChecked    = w.VisualizerGlow;
-        SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
-        SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
+            // Day Name
+            DayToggle.IsChecked     = w.DayEnabled;
+            DayCardCheck.IsChecked  = w.DayShowBackground;
+            SelectComboItem(DaySizeCombo,    w.DayFontSize);
+            SelectComboItem(DayColorCombo,   w.DayColorMode);
+            SelectComboItem(DayFontCombo,    w.DayFontMode);
+            SelectComboItem(DayCaseCombo,    w.DayCaseMode);
+            SelectComboItem(DaySpacingCombo, w.DaySpacingMode);
+            DayCustomTextCheck.IsChecked = w.DayUseCustomText;
+            DayCustomTextBox.Text        = w.DayCustomText ?? string.Empty;
+            DayCustomTextPanel.Visibility = w.DayUseCustomText ? Visibility.Visible : Visibility.Collapsed;
+            UpdateDayCustomCounter(w.DayCustomText?.Length ?? 0);
 
-        // Other widgets
-        CalendarToggle.IsChecked = w.CalendarEnabled;
-        NotesToggle.IsChecked    = w.NotesEnabled;
-        QuoteToggle.IsChecked    = w.QuoteEnabled;
-        WeatherToggle.IsChecked  = w.WeatherEnabled;
-        WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
-        SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
-        SelectComboItem(WeatherScaleCombo, w.WeatherScale);
-        WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
-        WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
-        WeatherWindCheck.IsChecked = w.WeatherShowWind;
-        WeatherCardBgCheck.IsChecked = w.WeatherShowBackground;
-        UpdateWeatherLocationStatusText(w);
+            // System Monitor (Simplicity Circles)
+            SysMonToggle.IsChecked    = w.SystemMonitorEnabled;
+            SysMonCardCheck.IsChecked = w.SysMonShowBackground;
+            SysMonCpuCheck.IsChecked  = w.SysMonShowCpu;
+            SysMonRamCheck.IsChecked  = w.SysMonShowRam;
+            SysMonGpuCheck.IsChecked  = w.SysMonShowGpu;
+            SysMonDiskCheck.IsChecked = w.SysMonShowDisk;
+            SelectComboItem(SysMonSizeCombo,   w.SysMonSize);
+            SelectComboItem(SysMonColorCombo,  w.SysMonColorMode);
+            SelectComboItem(SysMonLayoutCombo, w.SysMonOrientation);
 
-        _isInitializing = false;
+            // Media & Visualizer
+            MediaToggle.IsChecked       = w.MediaEnabled;
+            MediaCardCheck.IsChecked    = w.MediaShowBackground;
+            MediaDetailsCheck.IsChecked = w.MediaShowTrackDetails;
+            MediaGlowCheck.IsChecked    = w.VisualizerGlow;
+            SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
+            SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
+
+            // Other widgets
+            CalendarToggle.IsChecked = w.CalendarEnabled;
+            NotesToggle.IsChecked    = w.NotesEnabled;
+            QuoteToggle.IsChecked    = w.QuoteEnabled;
+            WeatherToggle.IsChecked  = w.WeatherEnabled;
+            WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
+            SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
+            SelectComboItem(WeatherScaleCombo, w.WeatherScale);
+            WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
+            WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
+            WeatherWindCheck.IsChecked = w.WeatherShowWind;
+            WeatherCardBgCheck.IsChecked = w.WeatherShowBackground;
+            UpdateWeatherLocationStatusText(w);
+        }
+        finally
+        {
+            _isInitializing = false;
+        }
+    }
+
+    private void RenderProfiles()
+    {
+        var app = (App)Application.Current;
+        if (app?.ProfileService == null) return;
+
+        ProfilesPanel.Children.Clear();
+        var profiles = app.ProfileService.Profiles;
+        var activeId = app.ProfileService.ActiveProfileId;
+
+        var activeProfile = profiles.FirstOrDefault(p => p.Id == activeId) ?? profiles.FirstOrDefault();
+        if (activeProfile != null)
+        {
+            ActiveProfileBadgeText.Text = activeProfile.Name;
+            ProfileActionsBar.Visibility = Visibility.Visible;
+            DeleteProfileButton.IsEnabled = profiles.Count > 1;
+        }
+        else
+        {
+            ProfileActionsBar.Visibility = Visibility.Collapsed;
+        }
+
+        foreach (var p in profiles)
+        {
+            bool isActive = (p.Id == activeId);
+
+            var btn = new System.Windows.Controls.Button
+            {
+                Content = (isActive ? "★  " : "") + p.Name,
+                Height = 32,
+                Margin = new Thickness(0, 0, 8, 8),
+                Padding = new Thickness(14, 0, 14, 0),
+                FontSize = 12,
+                FontWeight = isActive ? FontWeights.SemiBold : FontWeights.Normal,
+                Background = isActive
+                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(255, 30, 58, 95))
+                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(20, 255, 255, 255)),
+                Foreground = isActive
+                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248))
+                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(203, 213, 225)),
+                BorderBrush = isActive
+                    ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248))
+                    : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(35, 255, 255, 255)),
+                BorderThickness = new Thickness(1),
+                Cursor = System.Windows.Input.Cursors.Hand,
+                Tag = p.Id
+            };
+
+            btn.Click += async (s, e) =>
+            {
+                if (p.Id == app.ProfileService.ActiveProfileId) return;
+
+                await app.ProfileService.ApplyProfileAsync(
+                    p.Id,
+                    app.WallpaperService,
+                    app.LibraryService,
+                    app.WidgetService,
+                    notice =>
+                    {
+                        MorpheX.Views.ModernDialogWindow.Information("Profile Notice", p.Name, notice);
+                    });
+
+                var updatedSettings = app.SettingsService.Settings.Widgets;
+                PopulateControlsFromSettings(updatedSettings);
+                RenderProfiles();
+            };
+
+            ProfilesPanel.Children.Add(btn);
+        }
+    }
+
+    private async void AddProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var dialog = new Views.ProfileNameDialog(title: "New Desktop Profile", heading: "Name your new profile")
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            await app.ProfileService.CreateProfileAsync(dialog.ProfileName, dialog.IncludeWallpaper);
+            RenderProfiles();
+        }
+    }
+
+    private async void UpdateProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var activeId = app.ProfileService.ActiveProfileId;
+        if (string.IsNullOrEmpty(activeId)) return;
+
+        bool ok = await app.ProfileService.UpdateProfileWithCurrentSetupAsync(activeId);
+        if (ok)
+        {
+            var originalContent = UpdateProfileButton.Content;
+            UpdateProfileButton.Content = "✓ Saved!";
+            await Task.Delay(1400);
+            UpdateProfileButton.Content = originalContent;
+        }
+    }
+
+    private async void RenameProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var activeId = app.ProfileService.ActiveProfileId;
+        if (string.IsNullOrEmpty(activeId)) return;
+
+        var profile = app.ProfileService.Profiles.FirstOrDefault(p => p.Id == activeId);
+        if (profile == null) return;
+
+        var dialog = new Views.ProfileNameDialog(currentName: profile.Name, title: "Rename Profile", heading: "Enter new profile name", showWallpaperCheck: false)
+        {
+            Owner = Window.GetWindow(this)
+        };
+
+        if (dialog.ShowDialog() == true)
+        {
+            await app.ProfileService.RenameProfileAsync(activeId, dialog.ProfileName);
+            RenderProfiles();
+        }
+    }
+
+    private async void DeleteProfileButton_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        var activeId = app.ProfileService.ActiveProfileId;
+        if (string.IsNullOrEmpty(activeId)) return;
+
+        if (app.ProfileService.Profiles.Count <= 1)
+        {
+            Views.ModernDialogWindow.Information("Desktop Profiles", "Cannot delete", "You must keep at least one desktop profile.");
+            return;
+        }
+
+        bool ok = await app.ProfileService.DeleteProfileAsync(activeId);
+        if (ok)
+        {
+            var next = app.ProfileService.Profiles.FirstOrDefault();
+            if (next != null)
+            {
+                await app.ProfileService.ApplyProfileAsync(next.Id, app.WallpaperService, app.LibraryService, app.WidgetService);
+                PopulateControlsFromSettings(app.SettingsService.Settings.Widgets);
+            }
+            RenderProfiles();
+        }
     }
 
     private static void SelectComboItem(ComboBox combo, int value)
@@ -377,6 +547,10 @@ public partial class WidgetsPage : Page
         if (app?.SettingsService != null)
         {
             app.SettingsService.SettingsChanged -= OnSettingsChanged;
+        }
+        if (app?.ProfileService != null)
+        {
+            app.ProfileService.ProfilesChanged -= OnProfilesChanged;
         }
     }
 

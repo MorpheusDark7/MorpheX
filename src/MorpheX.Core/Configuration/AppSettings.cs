@@ -19,6 +19,8 @@ public sealed class AppSettings
     public Dictionary<string, MonitorAssignment> MonitorAssignments { get; set; } = new();
     public WidgetSettings Widgets { get; set; } = new();
     public TaskbarSettings Taskbar { get; set; } = new();
+    public List<DesktopProfile> Profiles { get; set; } = new();
+    public string? ActiveProfileId { get; set; }
 }
 
 /// <summary>

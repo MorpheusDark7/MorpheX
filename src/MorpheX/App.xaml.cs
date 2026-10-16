@@ -31,6 +31,7 @@ public partial class App : Application
     public SystemMetricsService SystemMetricsService { get; } = new();
     public UpdateService UpdateService { get; } = new();
     public WidgetService WidgetService { get; private set; } = null!;
+    public ProfileService ProfileService { get; private set; } = null!;
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -102,6 +103,7 @@ public partial class App : Application
         _splash?.SetStatus("Loading settings...");
         _splash?.SetProgress(0.10);
         await SettingsService.LoadAsync();
+        ProfileService = new ProfileService(SettingsService);
 
         _splash?.SetStatus("Loading wallpaper library...");
         _splash?.SetProgress(0.30);
@@ -580,6 +582,8 @@ public partial class App : Application
         };
         menu.Items.Add(muteItem);
 
+        var profilesSubMenu = new System.Windows.Forms.ToolStripMenuItem("Desktop Profiles");
+
         menu.Opening += (_, _) =>
         {
             pauseResumeItem.Text = PlaybackService.IsManuallyPaused ? "Resume Wallpaper" : "Pause Wallpaper";
@@ -598,6 +602,25 @@ public partial class App : Application
                 : "MorpheX Live";
             if (_trayIcon != null)
                 _trayIcon.Text = tooltip.Length > 63 ? tooltip[..63] : tooltip;
+
+            // Populate profiles submenu
+            profilesSubMenu.DropDownItems.Clear();
+            if (ProfileService?.Profiles != null)
+            {
+                foreach (var p in ProfileService.Profiles)
+                {
+                    var profileItem = new System.Windows.Forms.ToolStripMenuItem(p.Name);
+                    profileItem.Checked = (p.Id == ProfileService.ActiveProfileId);
+                    profileItem.Click += (_, _) =>
+                    {
+                        Dispatcher.InvokeAsync(async () =>
+                        {
+                            await ProfileService.ApplyProfileAsync(p.Id, WallpaperService, LibraryService, WidgetService);
+                        });
+                    };
+                    profilesSubMenu.DropDownItems.Add(profileItem);
+                }
+            }
         };
 
         var nextItem = new System.Windows.Forms.ToolStripMenuItem("Next Wallpaper");
@@ -610,6 +633,8 @@ public partial class App : Application
             });
         };
         menu.Items.Add(nextItem);
+
+        menu.Items.Add(profilesSubMenu);
 
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 

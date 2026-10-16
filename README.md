@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.50-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.51-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -31,6 +31,8 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 
 ## Features
 
+- **Built-in Master CC0 Wallpapers**: Ships with a curated collection of stunning high-resolution CC0 wallpapers out-of-the-box so your desktop looks incredible immediately upon installation.
+- **Custom Desktop Profiles**: Create, rename, update, and switch between customized desktop profiles (e.g., *Productivity*, *Cyberpunk Setup*, *Late Night Chill*) in a single click from the UI or right from the system tray. Safely restores widget configurations, styling, taskbar effects, and wallpaper pairings with graceful fallback if a wallpaper was removed.
 - **Direct3D 11 Hardware Acceleration**: Powered by LibVLC with native GPU decoding (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`).
 - **Smart Pause Detection**: Automatically freezes video playback when running fullscreen games or applications so your frame rates never take a hit.
 - **Multi-Monitor Support**: Assign different wallpapers to each display, adjust volume independently per monitor, or mute individual screens.
@@ -43,7 +45,7 @@ I built **MorpheX** to have something clean, minimal, and resource-friendly:
 - **Taskbar Styling**: Apply Clear, Blur (Aero Glass), or Acrylic (Frosted Glass) effects to your taskbar — including secondary monitor taskbars. Resets automatically when MorpheX exits.
 - **Custom Global Hotkeys**: Set keyboard shortcuts to pause/resume, mute/unmute, or skip wallpapers from anywhere in Windows.
 - **Native Windows Shell Integration**: Embeds cleanly behind your desktop icons using the `WorkerW` layer without interfering with desktop clicks.
-- **1-Click Built-in Updates**: Check for and install updates directly inside the app.
+- **Secure 1-Click Built-in Updates**: Check for and install updates directly inside the app with URL origin validation, SHA-256 integrity verification, and safe executable staging.
 - **Fast Startup**: Optimized desktop integration initialization — typically under 1 second on most systems.
 
 ---

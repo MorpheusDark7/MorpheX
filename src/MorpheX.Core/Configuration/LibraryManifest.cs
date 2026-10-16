@@ -9,4 +9,6 @@ public sealed class LibraryManifest
     public List<Models.WallpaperInfo> Wallpapers { get; set; } = new();
 
     public List<WallpaperCollection> Collections { get; set; } = new();
+
+    public List<string> DismissedDefaultWallpapers { get; set; } = new();
 }

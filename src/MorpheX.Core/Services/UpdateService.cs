@@ -3,8 +3,10 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Serilog;
 
 namespace MorpheX.Core.Services;
@@ -19,6 +21,7 @@ public sealed class UpdateInfo
     public required string FileName { get; init; }
     public long FileSizeBytes { get; init; }
     public DateTimeOffset PublishedAt { get; init; }
+    public string? ExpectedSha256 { get; init; }
 
     public string FormattedSize => FileSizeBytes > 0
         ? $"{FileSizeBytes / (1024.0 * 1024.0):F1} MB"
@@ -105,28 +108,39 @@ public sealed class UpdateService : IUpdateService
             string? downloadUrl = null;
             string? fileName = null;
             long fileSize = 0;
+            string? expectedSha256 = null;
 
             if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
             {
                 foreach (var asset in assetsProp.EnumerateArray())
                 {
                     var name = asset.GetProperty("name").GetString() ?? "";
-                    if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+
+                    // Security check: Match genuine installer executable naming
+                    if (name.EndsWith(".exe", StringComparison.OrdinalIgnoreCase) &&
+                        (name.StartsWith("MorpheX", StringComparison.OrdinalIgnoreCase) || name.Contains("Setup", StringComparison.OrdinalIgnoreCase)))
                     {
-                        downloadUrl = asset.GetProperty("browser_download_url").GetString();
-                        fileName = name;
-                        if (asset.TryGetProperty("size", out var sizeProp))
+                        var rawUrl = asset.GetProperty("browser_download_url").GetString();
+                        if (IsValidDownloadUrl(rawUrl))
                         {
-                            fileSize = sizeProp.GetInt64();
+                            downloadUrl = rawUrl;
+                            fileName = name;
+                            if (asset.TryGetProperty("size", out var sizeProp))
+                            {
+                                fileSize = sizeProp.GetInt64();
+                            }
                         }
-                        break;
+                        else
+                        {
+                            Log.Warning("Rejected installer download URL from untrusted domain: {Url}", rawUrl);
+                        }
                     }
                 }
             }
 
             if (string.IsNullOrEmpty(downloadUrl) || string.IsNullOrEmpty(fileName))
             {
-                Log.Warning("New release {Tag} found, but no setup .exe asset attached", rawTag);
+                Log.Warning("New release {Tag} found, but no verified setup .exe asset found", rawTag);
                 return null;
             }
 
@@ -137,6 +151,16 @@ public sealed class UpdateService : IUpdateService
             string? changelog = root.TryGetProperty("body", out var bodyProp)
                 ? bodyProp.GetString()
                 : null;
+
+            // Optional SHA-256 detection from release notes body (e.g. "SHA256: 7f83b...")
+            if (!string.IsNullOrEmpty(changelog))
+            {
+                var match = Regex.Match(changelog, @"SHA-?256\s*[:=]\s*([a-fA-F0-9]{64})", RegexOptions.IgnoreCase);
+                if (match.Success)
+                {
+                    expectedSha256 = match.Groups[1].Value.ToLowerInvariant();
+                }
+            }
 
             DateTimeOffset publishedAt = root.TryGetProperty("published_at", out var pubProp) && pubProp.TryGetDateTimeOffset(out var dto)
                 ? dto
@@ -154,7 +178,8 @@ public sealed class UpdateService : IUpdateService
                 DownloadUrl = downloadUrl,
                 FileName = fileName,
                 FileSizeBytes = fileSize,
-                PublishedAt = publishedAt
+                PublishedAt = publishedAt,
+                ExpectedSha256 = expectedSha256
             };
         }
         catch (Exception ex)
@@ -164,8 +189,25 @@ public sealed class UpdateService : IUpdateService
         }
     }
 
+    private static bool IsValidDownloadUrl(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return false;
+        if (!Uri.TryCreate(url, UriKind.Absolute, out var uri)) return false;
+        if (uri.Scheme != Uri.UriSchemeHttps) return false;
+
+        // Ensure host is either github.com or official GitHub release asset CDN
+        return uri.Host.Equals("github.com", StringComparison.OrdinalIgnoreCase) ||
+               uri.Host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase) ||
+               uri.Host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+    }
+
     public async Task<string> DownloadInstallerAsync(UpdateInfo update, IProgress<double>? progress = null, CancellationToken ct = default)
     {
+        if (!IsValidDownloadUrl(update.DownloadUrl))
+        {
+            throw new InvalidOperationException($"Untrusted download URL: {update.DownloadUrl}");
+        }
+
         var tempDir = Path.Combine(Path.GetTempPath(), "MorpheX", "Updates");
         Directory.CreateDirectory(tempDir);
         var targetFile = Path.Combine(tempDir, update.FileName);
@@ -185,6 +227,7 @@ public sealed class UpdateService : IUpdateService
         await using var contentStream = await response.Content.ReadAsStreamAsync(ct);
         await using var fileStream = new FileStream(targetFile, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true);
 
+        using var sha256 = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         var buffer = new byte[81920];
         long totalRead = 0;
         int bytesRead;
@@ -192,6 +235,7 @@ public sealed class UpdateService : IUpdateService
         while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length, ct)) > 0)
         {
             await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), ct);
+            sha256.AppendData(buffer, 0, bytesRead);
             totalRead += bytesRead;
 
             if (totalBytes > 0 && progress != null)
@@ -201,8 +245,32 @@ public sealed class UpdateService : IUpdateService
             }
         }
 
+        await fileStream.FlushAsync(ct);
+        fileStream.Close();
+
+        // Integrity sanity check: installer package should never be trivial or truncated
+        if (totalRead < 500_000)
+        {
+            try { File.Delete(targetFile); } catch { }
+            throw new InvalidDataException("Downloaded installer file is suspiciously small or incomplete.");
+        }
+
+        // Verify SHA256 if available
+        var actualHash = Convert.ToHexString(sha256.GetHashAndReset()).ToLowerInvariant();
+        Log.Information("Downloaded update installer ({Size:F1} MB). SHA256: {Hash}",
+            totalRead / (1024.0 * 1024.0), actualHash);
+
+        if (!string.IsNullOrEmpty(update.ExpectedSha256))
+        {
+            if (!string.Equals(actualHash, update.ExpectedSha256, StringComparison.OrdinalIgnoreCase))
+            {
+                try { File.Delete(targetFile); } catch { }
+                throw new InvalidDataException($"SHA-256 mismatch! Expected: {update.ExpectedSha256}, Got: {actualHash}");
+            }
+            Log.Information("SHA-256 integrity verified successfully.");
+        }
+
         progress?.Report(100.0);
-        Log.Information("Downloaded update installer ({Size:F1} MB)", totalRead / (1024.0 * 1024.0));
         return targetFile;
     }
 
@@ -211,6 +279,16 @@ public sealed class UpdateService : IUpdateService
         if (!File.Exists(installerPath))
         {
             throw new FileNotFoundException("Installer file not found", installerPath);
+        }
+
+        var fullPath = Path.GetFullPath(installerPath);
+        var expectedDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "MorpheX", "Updates"));
+
+        // Security check: installer must reside within the designated update directory and have .exe extension
+        if (!fullPath.StartsWith(expectedDir, StringComparison.OrdinalIgnoreCase) ||
+            !fullPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new UnauthorizedAccessException($"Attempted to launch untrusted executable: {installerPath}");
         }
 
         var args = silent

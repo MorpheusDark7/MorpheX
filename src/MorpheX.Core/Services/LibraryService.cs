@@ -172,6 +172,7 @@ public sealed class LibraryService : ILibraryService
                     {
                         _manifest = loaded;
                         _manifest.Collections ??= new List<WallpaperCollection>();
+                        _manifest.DismissedDefaultWallpapers ??= new List<string>();
                         foreach (var wallpaper in _manifest.Wallpapers)
                         {
                             wallpaper.Tags ??= new List<string>();
@@ -181,6 +182,8 @@ public sealed class LibraryService : ILibraryService
                             collection.WallpaperIds ??= new List<string>();
                         }
                         Log.Information("Loaded library with {Count} wallpaper(s)", _manifest.Wallpapers.Count);
+
+                        await SeedDefaultWallpapersInternalAsync(ct);
 
                         // Generate any missing thumbnails in the background so startup
                         // is not blocked by slow shell probing (especially for videos).
@@ -221,6 +224,7 @@ public sealed class LibraryService : ILibraryService
             }
 
             _manifest = new LibraryManifest();
+            await SeedDefaultWallpapersInternalAsync(ct);
             await SaveInternalAsync(ct);
             Log.Information("Created new library manifest");
         }
@@ -365,6 +369,16 @@ public sealed class LibraryService : ILibraryService
 
             _manifest.Wallpapers.Remove(wallpaper);
 
+            var fileName = Path.GetFileName(wallpaper.EffectivePath);
+            if (!string.IsNullOrEmpty(fileName) && wallpaper.Tags.Contains("Default"))
+            {
+                _manifest.DismissedDefaultWallpapers ??= new List<string>();
+                if (!_manifest.DismissedDefaultWallpapers.Contains(fileName, StringComparer.OrdinalIgnoreCase))
+                {
+                    _manifest.DismissedDefaultWallpapers.Add(fileName);
+                }
+            }
+
             foreach (var collection in _manifest.Collections)
             {
                 collection.WallpaperIds.RemoveAll(id => id == wallpaperId);
@@ -398,6 +412,19 @@ public sealed class LibraryService : ILibraryService
         await _lock.WaitAsync(ct);
         try
         {
+            _manifest.DismissedDefaultWallpapers ??= new List<string>();
+            foreach (var wallpaper in _manifest.Wallpapers)
+            {
+                var fn = Path.GetFileName(wallpaper.EffectivePath);
+                if (!string.IsNullOrEmpty(fn) && wallpaper.Tags.Contains("Default"))
+                {
+                    if (!_manifest.DismissedDefaultWallpapers.Contains(fn, StringComparer.OrdinalIgnoreCase))
+                    {
+                        _manifest.DismissedDefaultWallpapers.Add(fn);
+                    }
+                }
+            }
+
             if (deleteFiles)
             {
                 foreach (var wallpaper in _manifest.Wallpapers)
@@ -767,6 +794,100 @@ public sealed class LibraryService : ILibraryService
         }
 
         return await AddSceneFromFolderAsync(sceneFolder, ct);
+    }
+
+    private async Task SeedDefaultWallpapersInternalAsync(CancellationToken ct)
+    {
+        try
+        {
+            var defaultDirs = new[]
+            {
+                Path.Combine(AppContext.BaseDirectory, "Assets", "DefaultWallpapers"),
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "DefaultWallpapers")
+            };
+
+            string? defaultDir = defaultDirs.FirstOrDefault(d => Directory.Exists(d));
+            if (defaultDir == null) return;
+
+            var files = Directory.EnumerateFiles(defaultDir, "*.*")
+                .Where(f => IsSupportedExtension(Path.GetExtension(f)) && !f.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (files.Count == 0) return;
+
+            _manifest.DismissedDefaultWallpapers ??= new List<string>();
+
+            bool addedAny = false;
+            foreach (var filePath in files)
+            {
+                var fileName = Path.GetFileName(filePath);
+                if (_manifest.DismissedDefaultWallpapers.Contains(fileName, StringComparer.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                var normalizedPath = Path.GetFullPath(filePath);
+                bool exists = _manifest.Wallpapers.Any(w =>
+                    PathsMatch(w.SourcePath, normalizedPath) ||
+                    PathsMatch(w.ImportedPath, normalizedPath) ||
+                    string.Equals(Path.GetFileName(w.EffectivePath), fileName, StringComparison.OrdinalIgnoreCase));
+
+                if (exists) continue;
+
+                var extension = Path.GetExtension(filePath);
+                if (!ExtensionMap.TryGetValue(extension, out var type)) continue;
+
+                var fileInfo = new FileInfo(filePath);
+                string cleanName = Path.GetFileNameWithoutExtension(filePath)
+                    .Replace('-', ' ')
+                    .Replace('_', ' ');
+                cleanName = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(cleanName);
+
+                var wallpaper = new WallpaperInfo
+                {
+                    Name = cleanName,
+                    Type = type,
+                    SourcePath = normalizedPath,
+                    FileSize = fileInfo.Length,
+                    DateAdded = DateTimeOffset.UtcNow,
+                    Tags = new List<string> { "Default", "Official" }
+                };
+
+                var thumbDir = Path.Combine(_libraryDir, "thumbnails");
+                var thumb = Utilities.ShellThumbnailHelper.GenerateThumbnail(filePath, thumbDir, wallpaper.Id);
+                if (thumb != null)
+                {
+                    wallpaper.ThumbnailPath = thumb;
+                }
+
+                if (type == WallpaperType.Image)
+                {
+                    try
+                    {
+                        using var img = System.Drawing.Image.FromFile(filePath);
+                        wallpaper.Width = img.Width;
+                        wallpaper.Height = img.Height;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Debug(ex, "Could not extract image metadata for {Path}", filePath);
+                    }
+                }
+
+                _manifest.Wallpapers.Add(wallpaper);
+                addedAny = true;
+                Log.Information("Seeded default wallpaper: {Name}", wallpaper.Name);
+            }
+
+            if (addedAny)
+            {
+                LibraryChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to seed default wallpapers");
+        }
     }
 
     private async Task SaveInternalAsync(CancellationToken ct)
