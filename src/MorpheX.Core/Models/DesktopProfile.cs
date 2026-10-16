@@ -16,9 +16,10 @@ public sealed class DesktopProfile
     public WidgetSettings Widgets { get; set; } = new();
 
     /// <summary>
-    /// Taskbar effect (0 = Default, 1 = Clear, 2 = Blur, 3 = Acrylic)
+    /// Legacy taskbar effect (Obsolete: feature removed)
     /// </summary>
-    public int TaskbarStyle { get; set; } = 1;
+    [Obsolete("Taskbar styling feature removed.")]
+    public int TaskbarStyle { get; set; } = 0;
 
     /// <summary>
     /// Whether activating this profile should also attempt to restore saved wallpapers.

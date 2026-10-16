@@ -29,7 +29,7 @@
                             <ui:SymbolIcon Symbol="FolderOpen24" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
                             <TextBlock Text="Desktop Profiles" Style="{StaticResource SettingLabelStyle}"/>
                         </StackPanel>
-                        <TextBlock Text="Save and switch between complete wallpaper, widget, and taskbar presets." Style="{StaticResource SettingDescriptionStyle}"/>
+                        <TextBlock Text="Save and switch between complete wallpaper and widget presets." Style="{StaticResource SettingDescriptionStyle}"/>
                     </StackPanel>
                     <ui:Button Grid.Column="1" Content="Manage Profiles" Icon="{ui:SymbolIcon Layer24}" Appearance="Secondary" Click="OpenProfiles_Click" VerticalAlignment="Center"/>
                 </Grid>
@@ -37,7 +37,7 @@
 
             <!-- Lock All Widgets ─────────────────────────────────── -->
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                    BorderBrush="#40FFD700"
+                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,16,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -46,7 +46,7 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel Grid.Column="0" Margin="0,0,12,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:SymbolIcon Symbol="LockClosed24" Margin="0,0,8,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                            <ui:SymbolIcon Symbol="LockClosed24" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"/>
                             <TextBlock Text="Lock Widget Positions" Style="{StaticResource SettingLabelStyle}"/>
                         </StackPanel>
                         <TextBlock Text="Pin all widgets in place so they cannot be accidentally moved." Style="{StaticResource SettingDescriptionStyle}"/>

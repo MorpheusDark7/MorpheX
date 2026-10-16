@@ -13,7 +13,7 @@
                 Style="{StaticResource PageTitleStyle}"
                 Margin="0,0,0,2" />
             <TextBlock
-                Text="Fine-tune wallpaper color grading, audio &amp; playback, ambient dimming, and taskbar styling."
+                Text="Fine-tune wallpaper color grading, audio &amp; playback, and ambient dimming."
                 Style="{StaticResource PageSubtitleStyle}"
                 Margin="0,0,0,24" />
 
@@ -86,24 +86,6 @@
                     </StackPanel>
                 </ui:CardControl.Header>
                 <ui:Button x:Name="ResetEffectsBtn" Content="Reset" Icon="{ui:SymbolIcon ArrowReset24}" Click="ResetEffectsBtn_Click" Width="110" />
-            </ui:CardControl>
-
-            <!-- ── Windows Taskbar ─────────────────────────────── -->
-            <TextBlock Text="WINDOWS TASKBAR STYLING" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,6" />
-
-            <ui:CardControl Margin="0,0,0,16">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="Taskbar appearance" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Choose how Windows taskbar blends into your live wallpaper" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ComboBox x:Name="TaskbarStyleCombo" Width="180" SelectionChanged="TaskbarStyleCombo_SelectionChanged">
-                    <ComboBoxItem Content="Default (System)" Tag="Default" />
-                    <ComboBoxItem Content="✨ Transparent / Clear" Tag="Clear" />
-                    <ComboBoxItem Content="🌫️ Frosted Blur" Tag="Blur" />
-                    <ComboBoxItem Content="💎 Fluent Acrylic" Tag="Acrylic" />
-                </ComboBox>
             </ui:CardControl>
 
             <!-- ── Playback & Audio ────────────────────────────── -->

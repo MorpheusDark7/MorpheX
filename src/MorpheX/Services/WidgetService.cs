@@ -124,6 +124,28 @@ public sealed class WidgetService : IDisposable
         SetWidget(ref _notes,    _settings.NotesEnabled,           () => new NotesWidget(_settings));
         SetWidget(ref _quote,    _settings.QuoteEnabled,           () => new QuoteWidget(_settings));
         SetWidget(ref _weather,  _settings.WeatherEnabled,         () => new WeatherWidget(_settings));
+
+        RepositionAllCore();
+    }
+
+    public void RepositionAll()
+    {
+        if (Application.Current?.Dispatcher?.CheckAccess() == true)
+            RepositionAllCore();
+        else
+            Application.Current?.Dispatcher?.Invoke(RepositionAllCore);
+    }
+
+    private void RepositionAllCore()
+    {
+        _clock?.Reposition();
+        _sysmon?.Reposition();
+        _media?.Reposition();
+        _day?.Reposition();
+        _calendar?.Reposition();
+        _notes?.Reposition();
+        _quote?.Reposition();
+        _weather?.Reposition();
     }
 
     private void SetWidget<T>(ref T? field, bool enabled, Func<T> factory)

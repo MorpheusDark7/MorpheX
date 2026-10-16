@@ -440,6 +440,7 @@ public partial class WeatherWidget : Window
     {
         if (_settings.WidgetsLocked) return;
         DragMove();
+        Save();
     }
 
     private async void RefreshNow_Click(object sender, RoutedEventArgs e)
@@ -550,6 +551,15 @@ public partial class WeatherWidget : Window
     }
 
     // ── Appearance & Customization ─────────────────────────────────────────
+    public void Reposition()
+    {
+        Left = _settings.WeatherX;
+        Top = _settings.WeatherY;
+        ApplyCustomizations();
+        _ = FetchWeatherAsync();
+        UpdateLockState();
+    }
+
     public void UpdateLockState()
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);

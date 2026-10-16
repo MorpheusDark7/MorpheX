@@ -32,7 +32,6 @@ public partial class App : Application
     public UpdateService UpdateService { get; } = new();
     public WidgetService WidgetService { get; private set; } = null!;
     public ProfileService ProfileService { get; private set; } = null!;
-    public TaskbarStyleService TaskbarStyleService { get; } = new();
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -251,16 +250,6 @@ public partial class App : Application
         catch (Exception ex)
         {
             Log.Error(ex, "Failed to initialize WidgetService");
-        }
-
-        // Apply taskbar appearance style
-        try
-        {
-            TaskbarStyleService.Apply((TaskbarStyleService.TaskbarStyle)SettingsService.Settings.Taskbar.Style);
-        }
-        catch (Exception ex)
-        {
-            Log.Warning(ex, "Failed to apply initial taskbar style");
         }
 
         if (!_startMinimized)
@@ -738,7 +727,6 @@ public partial class App : Application
         SystemMetricsService?.Dispose();
         PlaybackService?.Dispose();
         _ambientDimService?.Dispose();
-        TaskbarStyleService?.Dispose();
         WidgetService?.Dispose();
         WallpaperService?.Dispose();
         MonitorService?.Dispose();

@@ -242,6 +242,7 @@ public partial class SystemMonitorWidget : Window
     {
         if (_settings.WidgetsLocked) return;
         DragMove();
+        Save();
     }
 
     private void SizePreset_Click(object sender, RoutedEventArgs e)
@@ -315,6 +316,14 @@ public partial class SystemMonitorWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.SystemMonitorX;
+        Top = _settings.SystemMonitorY;
+        ApplyStylingAndLayout();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

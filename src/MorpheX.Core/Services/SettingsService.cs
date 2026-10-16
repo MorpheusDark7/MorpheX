@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using MorpheX.Core.Configuration;
+using MorpheX.Core.Models;
 using Serilog;
 
 namespace MorpheX.Core.Services;
@@ -102,6 +103,17 @@ public sealed class SettingsService : ISettingsService
 
     private async Task SaveInternalAsync(CancellationToken ct)
     {
+        // Keep active desktop profile's widgets in sync with live settings
+        if (!string.IsNullOrEmpty(Settings.ActiveProfileId) && Settings.Profiles != null)
+        {
+            var active = Settings.Profiles.FirstOrDefault(p => p.Id == Settings.ActiveProfileId);
+            if (active != null)
+            {
+                active.Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets);
+                active.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
+
         var json = JsonSerializer.Serialize(Settings, JsonOptions);
         var tempPath = _settingsPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, ct);

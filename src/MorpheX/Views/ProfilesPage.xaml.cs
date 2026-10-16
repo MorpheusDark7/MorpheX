@@ -64,8 +64,7 @@ public partial class ProfilesPage : Page
             string wpSummary = activeProfile.IncludeWallpaper
                 ? $"{activeProfile.MonitorWallpapers.Count} monitor wallpaper(s)"
                 : "No wallpapers locked";
-            string tbSummary = $"Taskbar: {GetTaskbarStyleName(activeProfile.TaskbarStyle)}";
-            ActiveProfileSummaryText.Text = $"{wpSummary}  •  {tbSummary}  •  Updated {activeProfile.UpdatedAt:MMM d, yyyy h:mm tt}";
+            ActiveProfileSummaryText.Text = $"{wpSummary}  •  Updated {activeProfile.UpdatedAt:MMM d, yyyy h:mm tt}";
         }
 
         ProfileCountText.Text = profiles.Count == 1 ? "1 saved profile" : $"{profiles.Count} saved profiles";
@@ -142,8 +141,6 @@ public partial class ProfilesPage : Page
             ? $"{profile.MonitorWallpapers.Count} monitor(s)"
             : "No wallpapers";
         tagsRow.Children.Add(CreateTag(wpTag));
-
-        tagsRow.Children.Add(CreateTag($"Taskbar: {GetTaskbarStyleName(profile.TaskbarStyle)}"));
 
         var dateBlock = new System.Windows.Controls.TextBlock
         {
@@ -357,12 +354,4 @@ public partial class ProfilesPage : Page
             await SaveProfile(activeId);
         }
     }
-
-    private static string GetTaskbarStyleName(int style) => style switch
-    {
-        1 => "Clear",
-        2 => "Blur",
-        3 => "Acrylic",
-        _ => "Default"
-    };
 }

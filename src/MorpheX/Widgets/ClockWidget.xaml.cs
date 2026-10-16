@@ -158,6 +158,7 @@ public partial class ClockWidget : Window
         }
 
         DragMove();
+        Save();
     }
 
     private void ToggleFormat_Click(object sender, RoutedEventArgs e)
@@ -218,6 +219,15 @@ public partial class ClockWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.ClockX;
+        Top = _settings.ClockY;
+        ApplyAppearance();
+        Tick();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

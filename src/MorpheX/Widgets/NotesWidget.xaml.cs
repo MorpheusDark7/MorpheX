@@ -68,7 +68,10 @@ public partial class NotesWidget : Window
         if (_settings.WidgetsLocked) return;
         // Only drag if not clicking the text area
         if (e.Source is not System.Windows.Controls.TextBox)
+        {
             DragMove();
+            Save();
+        }
     }
 
     private void NoteArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -90,6 +93,17 @@ public partial class NotesWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.NotesX;
+        Top = _settings.NotesY;
+        if (_settings.NotesWidth > 50) Width = _settings.NotesWidth;
+        if (_settings.NotesHeight > 50) Height = _settings.NotesHeight;
+        NoteText.Text = _settings.NotesText ?? string.Empty;
+        ApplyTheme();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

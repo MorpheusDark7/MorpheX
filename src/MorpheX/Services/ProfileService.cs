@@ -31,7 +31,6 @@ public sealed class ProfileService
             {
                 Name = "Default Setup",
                 Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets),
-                TaskbarStyle = Settings.Taskbar.Style,
                 IncludeWallpaper = true
             };
 
@@ -57,7 +56,6 @@ public sealed class ProfileService
         {
             Name = string.IsNullOrWhiteSpace(name) ? $"Profile {Settings.Profiles.Count + 1}" : name.Trim(),
             Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets),
-            TaskbarStyle = Settings.Taskbar.Style,
             IncludeWallpaper = includeWallpaper,
             CreatedAt = DateTimeOffset.UtcNow,
             UpdatedAt = DateTimeOffset.UtcNow
@@ -89,7 +87,6 @@ public sealed class ProfileService
         if (profile == null) return false;
 
         profile.Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets);
-        profile.TaskbarStyle = Settings.Taskbar.Style;
         profile.UpdatedAt = DateTimeOffset.UtcNow;
 
         if (profile.IncludeWallpaper)
@@ -161,8 +158,19 @@ public sealed class ProfileService
 
         Log.Information("Applying desktop profile: {Name} ({Id})", profile.Name, profile.Id);
 
-        // 1. Copy widget settings snapshot into active settings
-        Settings.Widgets = DesktopProfile.CloneWidgetSettings(profile.Widgets);
+        // Snapshot outgoing active profile before switching away
+        if (!string.IsNullOrEmpty(Settings.ActiveProfileId) && Settings.ActiveProfileId != profileId && Settings.Profiles != null)
+        {
+            var currentActive = Settings.Profiles.FirstOrDefault(p => p.Id == Settings.ActiveProfileId);
+            if (currentActive != null)
+            {
+                currentActive.Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets);
+                currentActive.UpdatedAt = DateTimeOffset.UtcNow;
+            }
+        }
+
+        // 1. Copy target profile widget snapshot into active settings in-place
+        Settings.Widgets.CopyFrom(profile.Widgets);
 
         // 2. Re-apply widget window lifecycle and properties
         widgetService.ApplySettings();
@@ -174,14 +182,7 @@ public sealed class ProfileService
         widgetService.RefreshSysMon();
         widgetService.RefreshWeather();
 
-        // 3. Update taskbar visual style
-        Settings.Taskbar.Style = profile.TaskbarStyle;
-        if (System.Windows.Application.Current is App appInst)
-        {
-            appInst.TaskbarStyleService?.Apply((TaskbarStyleService.TaskbarStyle)profile.TaskbarStyle);
-        }
-
-        // 4. Optionally restore saved wallpapers (with deleted-wallpaper safety!)
+        // 3. Optionally restore saved wallpapers (with deleted-wallpaper safety!)
         if (profile.IncludeWallpaper && profile.MonitorWallpapers != null && profile.MonitorWallpapers.Count > 0)
         {
             bool anyMissing = false;

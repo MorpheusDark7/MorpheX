@@ -161,6 +161,7 @@ public partial class DayWidget : Window
     {
         if (_settings.WidgetsLocked) return;
         DragMove();
+        Save();
     }
 
     private void ToggleCard_Click(object sender, RoutedEventArgs e)
@@ -249,6 +250,14 @@ public partial class DayWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.DayX;
+        Top = _settings.DayY;
+        UpdateDayDisplay();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

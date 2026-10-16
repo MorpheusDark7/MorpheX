@@ -67,7 +67,7 @@ public sealed class WallpaperInfo
     public bool IsActive { get; set; }
 
     [JsonIgnore]
-    public string FavoriteBrush => IsFavorite ? "#FFFF2D55" : "#88FFFFFF";
+    public string FavoriteBrush => IsFavorite ? "#10B981" : "#88FFFFFF";
 
     [JsonIgnore]
     public string TagsText => Tags is { Count: > 0 } ? string.Join(" • ", Tags) : string.Empty;

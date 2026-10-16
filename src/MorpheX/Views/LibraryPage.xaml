@@ -17,13 +17,8 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <StackPanel Grid.Column="0" VerticalAlignment="Bottom">
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel Margin="0,0,0,12">
                 <TextBlock
                     Text="Library"
                     Style="{StaticResource PageTitleStyle}" />
@@ -33,13 +28,13 @@
                     Style="{StaticResource PageSubtitleStyle}" />
             </StackPanel>
 
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <ComboBox
                     x:Name="FilterCombo"
                     Width="108"
                     SelectedIndex="0"
                     SelectionChanged="FilterCombo_SelectionChanged"
-                    Margin="0,0,8,0">
+                    Margin="0,0,8,6">
                     <ComboBoxItem Content="All types" Tag="All" />
                     <ComboBoxItem Content="Images" Tag="Image" />
                     <ComboBoxItem Content="Videos" Tag="Video" />
@@ -49,7 +44,7 @@
                     Width="96"
                     SelectedIndex="0"
                     SelectionChanged="SortCombo_SelectionChanged"
-                    Margin="0,0,8,0">
+                    Margin="0,0,8,6">
                     <ComboBoxItem Content="Newest" Tag="Newest" />
                     <ComboBoxItem Content="Name" Tag="Name" />
                 </ComboBox>
@@ -62,20 +57,20 @@
                     TextChanged="SearchBox_TextChanged"
                     ClearButtonEnabled="True"
                     VerticalAlignment="Center"
-                    Margin="0,0,8,0" />
+                    Margin="0,0,8,6" />
                 <ui:Button
                     x:Name="AddWallpaperButton"
                     Content="Add Wallpaper"
                     Icon="{ui:SymbolIcon Add24}"
                     Appearance="Primary"
                     Click="AddWallpaperButton_Click"
-                    Margin="0,0,8,0" />
+                    Margin="0,0,8,6" />
                 <ui:Button
                     Content="Import Folder"
                     Icon="{ui:SymbolIcon FolderAdd24}"
                     Appearance="Secondary"
                     Click="ImportFolderButton_Click"
-                    Margin="0,0,8,0" />
+                    Margin="0,0,8,6" />
                 <ui:Button
                     x:Name="DeleteAllButton"
                     Content="Delete All"
@@ -84,14 +79,15 @@
                     Foreground="#FF8888"
                     ToolTip="Delete all wallpapers from library"
                     Click="DeleteAllButton_Click"
-                    Margin="0,0,8,0" />
+                    Margin="0,0,8,6" />
                 <ui:Button
                     x:Name="RefreshButton"
                     Icon="{ui:SymbolIcon ArrowSync24}"
                     ToolTip="Refresh library"
-                    Click="RefreshButton_Click" />
-            </StackPanel>
-        </Grid>
+                    Click="RefreshButton_Click"
+                    Margin="0,0,0,6" />
+            </WrapPanel>
+        </StackPanel>
 
         <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,0,0,20" />
 

@@ -133,7 +133,7 @@ public partial class CalendarWidget : Window
     }
 
     private void Widget_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    { if (_settings.WidgetsLocked) return; DragMove(); }
+    { if (_settings.WidgetsLocked) return; DragMove(); Save(); }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
     {
@@ -141,6 +141,14 @@ public partial class CalendarWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.CalendarX;
+        Top = _settings.CalendarY;
+        ApplyTheme();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

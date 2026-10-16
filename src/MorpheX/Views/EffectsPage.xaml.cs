@@ -30,18 +30,6 @@ public partial class EffectsPage : Page
         ColorTempSlider.Value  = settings.Effects.ColorTemperature;
         UpdateEffectsLabels();
 
-        // Taskbar Style
-        string currentTbStyle = settings.Taskbar.Style.ToString();
-        foreach (ComboBoxItem item in TaskbarStyleCombo.Items)
-        {
-            if ((string)item.Tag == currentTbStyle)
-            {
-                TaskbarStyleCombo.SelectedItem = item;
-                break;
-            }
-        }
-        if (TaskbarStyleCombo.SelectedItem == null) TaskbarStyleCombo.SelectedIndex = 0;
-
         // Playback
         FadeInToggle.IsChecked = settings.Playback.FadeInOnLoad;
         string rateTag = settings.Playback.PlaybackRate.ToString("G", System.Globalization.CultureInfo.InvariantCulture);
@@ -140,24 +128,6 @@ public partial class EffectsPage : Page
         UpdateEffectsLabels();
         app.WallpaperService.ApplyEffectsToAll();
         await app.SettingsService.SaveAsync();
-    }
-
-    #endregion
-
-    #region Taskbar
-
-    private async void TaskbarStyleCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (_isInitializing) return;
-        if (TaskbarStyleCombo.SelectedItem is not ComboBoxItem item || item.Tag is not string tag) return;
-
-        if (Enum.TryParse<TaskbarStyleService.TaskbarStyle>(tag, out var style))
-        {
-            var app = (App)Application.Current;
-            app.SettingsService.Settings.Taskbar.Style = (int)style;
-            app.TaskbarStyleService.Apply(style);
-            await app.SettingsService.SaveAsync();
-        }
     }
 
     #endregion

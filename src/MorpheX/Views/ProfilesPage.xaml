@@ -20,7 +20,7 @@
                         Style="{StaticResource PageTitleStyle}"
                         Margin="0,0,0,2" />
                     <TextBlock
-                        Text="Save and switch between your favorite wallpaper, widget, and taskbar layouts in one click."
+                        Text="Save and switch between your favorite wallpaper and widget layouts in one click."
                         Style="{StaticResource PageSubtitleStyle}" />
                 </StackPanel>
 
@@ -69,7 +69,7 @@
                         </StackPanel>
                         <TextBlock
                             x:Name="ActiveProfileSummaryText"
-                            Text="Includes wallpapers, widgets snapshot, and taskbar styling."
+                            Text="Includes wallpapers and widgets snapshot."
                             FontSize="12"
                             Opacity="0.7"
                             Foreground="{DynamicResource TextFillColorSecondaryBrush}" />

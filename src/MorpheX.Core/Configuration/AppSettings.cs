@@ -18,6 +18,7 @@ public sealed class AppSettings
 
     public Dictionary<string, MonitorAssignment> MonitorAssignments { get; set; } = new();
     public WidgetSettings Widgets { get; set; } = new();
+    [Obsolete("Taskbar styling feature removed.")]
     public TaskbarSettings Taskbar { get; set; } = new();
     public List<DesktopProfile> Profiles { get; set; } = new();
     public string? ActiveProfileId { get; set; }
@@ -148,6 +149,99 @@ public sealed class WidgetSettings
     public bool WeatherShowWind { get; set; } = true;
     public bool WeatherShowBackground { get; set; } = true;
     public int WeatherScale { get; set; } = 1; // 0=Small (85%), 1=Normal (100%), 2=Large (120%)
+
+    /// <summary>
+    /// Copies all widget preferences, configurations, and positions in-place from another instance.
+    /// </summary>
+    public void CopyFrom(WidgetSettings? source)
+    {
+        if (source == null) return;
+
+        WidgetTheme = source.WidgetTheme;
+        WidgetsLocked = source.WidgetsLocked;
+
+        // Clock
+        ClockEnabled = source.ClockEnabled;
+        ClockIs24Hour = source.ClockIs24Hour;
+        ClockShowDate = source.ClockShowDate;
+        ClockShowBackground = source.ClockShowBackground;
+        ClockFontSize = source.ClockFontSize;
+        ClockColorMode = source.ClockColorMode;
+        ClockFontMode = source.ClockFontMode;
+        ClockX = source.ClockX;
+        ClockY = source.ClockY;
+
+        // System Monitor
+        SystemMonitorEnabled = source.SystemMonitorEnabled;
+        SysMonSize = source.SysMonSize;
+        SysMonColorMode = source.SysMonColorMode;
+        SysMonOrientation = source.SysMonOrientation;
+        SysMonShowBackground = source.SysMonShowBackground;
+        SysMonShowCpu = source.SysMonShowCpu;
+        SysMonShowRam = source.SysMonShowRam;
+        SysMonShowGpu = source.SysMonShowGpu;
+        SysMonShowDisk = source.SysMonShowDisk;
+        SystemMonitorX = source.SystemMonitorX;
+        SystemMonitorY = source.SystemMonitorY;
+
+        // Media
+        MediaEnabled = source.MediaEnabled;
+        VisualizerStyle = source.VisualizerStyle;
+        VisualizerColorMode = source.VisualizerColorMode;
+        MediaShowBackground = source.MediaShowBackground;
+        MediaShowTrackDetails = source.MediaShowTrackDetails;
+        VisualizerGlow = source.VisualizerGlow;
+        MediaX = source.MediaX;
+        MediaY = source.MediaY;
+        MediaWidth = source.MediaWidth;
+        MediaHeight = source.MediaHeight;
+
+        // Day
+        DayEnabled = source.DayEnabled;
+        DayFontSize = source.DayFontSize;
+        DayColorMode = source.DayColorMode;
+        DayFontMode = source.DayFontMode;
+        DayCaseMode = source.DayCaseMode;
+        DaySpacingMode = source.DaySpacingMode;
+        DayShowBackground = source.DayShowBackground;
+        DayUseCustomText = source.DayUseCustomText;
+        DayCustomText = source.DayCustomText;
+        DayX = source.DayX;
+        DayY = source.DayY;
+
+        // Calendar
+        CalendarEnabled = source.CalendarEnabled;
+        CalendarX = source.CalendarX;
+        CalendarY = source.CalendarY;
+
+        // Notes
+        NotesEnabled = source.NotesEnabled;
+        NotesX = source.NotesX;
+        NotesY = source.NotesY;
+        NotesWidth = source.NotesWidth;
+        NotesHeight = source.NotesHeight;
+        NotesText = source.NotesText;
+
+        // Quote
+        QuoteEnabled = source.QuoteEnabled;
+        QuoteX = source.QuoteX;
+        QuoteY = source.QuoteY;
+        QuoteIndex = source.QuoteIndex;
+
+        // Weather
+        WeatherEnabled = source.WeatherEnabled;
+        WeatherX = source.WeatherX;
+        WeatherY = source.WeatherY;
+        WeatherLat = source.WeatherLat;
+        WeatherLon = source.WeatherLon;
+        WeatherLocationName = source.WeatherLocationName;
+        WeatherUseFahrenheit = source.WeatherUseFahrenheit;
+        WeatherShowHiLo = source.WeatherShowHiLo;
+        WeatherShowHumidity = source.WeatherShowHumidity;
+        WeatherShowWind = source.WeatherShowWind;
+        WeatherShowBackground = source.WeatherShowBackground;
+        WeatherScale = source.WeatherScale;
+    }
 }
 
 public sealed class GeneralSettings

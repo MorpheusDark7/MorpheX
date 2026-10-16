@@ -404,24 +404,10 @@ public partial class WidgetsPage : Page
         {
             if (_isInitializing) return;
             var app = (App)Application.Current;
-            var w = app.SettingsService.Settings.Widgets;
-
-            _isInitializing = true;
-            try
+            var w = app?.SettingsService?.Settings?.Widgets;
+            if (w != null)
             {
-                WeatherToggle.IsChecked = w.WeatherEnabled;
-                WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
-                SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
-                SelectComboItem(WeatherScaleCombo, w.WeatherScale);
-                if (WeatherHiLoCheck != null) WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
-                if (WeatherHumidityCheck != null) WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
-                if (WeatherWindCheck != null) WeatherWindCheck.IsChecked = w.WeatherShowWind;
-                if (WeatherCardBgCheck != null) WeatherCardBgCheck.IsChecked = w.WeatherShowBackground;
-                UpdateWeatherLocationStatusText(w);
-            }
-            finally
-            {
-                _isInitializing = false;
+                PopulateControlsFromSettings(w);
             }
         });
     }

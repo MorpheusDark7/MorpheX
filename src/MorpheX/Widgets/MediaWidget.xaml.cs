@@ -359,6 +359,7 @@ public partial class MediaWidget : Window
     {
         if (_settings.WidgetsLocked) return;
         DragMove();
+        ScheduleDebouncedSave();
     }
 
     private void StyleBars_Click(object sender, RoutedEventArgs e)
@@ -445,6 +446,16 @@ public partial class MediaWidget : Window
         var app = (App)Application.Current;
         _ = app.SettingsService.SaveAsync();
         app.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.MediaX;
+        Top = _settings.MediaY;
+        if (_settings.MediaWidth > 50) Width = _settings.MediaWidth;
+        if (_settings.MediaHeight > 50) Height = _settings.MediaHeight;
+        RefreshVisualizerStyle();
+        UpdateLockState();
     }
 
     public void UpdateLockState()

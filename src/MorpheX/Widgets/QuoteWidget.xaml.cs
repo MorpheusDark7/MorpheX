@@ -103,6 +103,7 @@ public partial class QuoteWidget : Window
         if (_settings.WidgetsLocked) return;
         if (e.ClickCount == 2) { ShowQuote(_settings.QuoteIndex + 1); Save(); return; }
         DragMove();
+        Save();
     }
 
     private void LockPosition_Click(object sender, RoutedEventArgs e)
@@ -111,6 +112,14 @@ public partial class QuoteWidget : Window
         UpdateLockState();
         Save();
         (Application.Current as App)?.WidgetService.RefreshLockState();
+    }
+
+    public void Reposition()
+    {
+        Left = _settings.QuoteX;
+        Top = _settings.QuoteY;
+        ApplyTheme();
+        UpdateLockState();
     }
 
     public void UpdateLockState()
