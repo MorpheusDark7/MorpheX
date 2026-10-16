@@ -21,6 +21,12 @@ public sealed class UpdateInfo
     public required string FileName { get; init; }
     public long FileSizeBytes { get; init; }
     public DateTimeOffset PublishedAt { get; init; }
+    /// <summary>
+    /// URL of the .sha256 sidecar asset published alongside the installer.
+    /// Presence is required — download is aborted if the asset is missing.
+    /// </summary>
+    public string? Sha256SidecarUrl { get; init; }
+    /// <summary>Hex hash parsed from the .sha256 sidecar (set after fetch, not during check).</summary>
     public string? ExpectedSha256 { get; init; }
 
     public string FormattedSize => FileSizeBytes > 0
@@ -108,11 +114,13 @@ public sealed class UpdateService : IUpdateService
             string? downloadUrl = null;
             string? fileName = null;
             long fileSize = 0;
-            string? expectedSha256 = null;
+            string? sha256SidecarUrl = null;
 
             if (root.TryGetProperty("assets", out var assetsProp) && assetsProp.ValueKind == JsonValueKind.Array)
             {
-                foreach (var asset in assetsProp.EnumerateArray())
+                var assets = assetsProp.EnumerateArray().ToList();
+
+                foreach (var asset in assets)
                 {
                     var name = asset.GetProperty("name").GetString() ?? "";
 
@@ -136,11 +144,34 @@ public sealed class UpdateService : IUpdateService
                         }
                     }
                 }
+
+                // Look for a .sha256 sidecar asset that matches the chosen installer file
+                if (fileName != null)
+                {
+                    var sidecarName = fileName + ".sha256";
+                    foreach (var asset in assets)
+                    {
+                        var name = asset.GetProperty("name").GetString() ?? "";
+                        if (string.Equals(name, sidecarName, StringComparison.OrdinalIgnoreCase))
+                        {
+                            var rawUrl = asset.GetProperty("browser_download_url").GetString();
+                            if (IsValidDownloadUrl(rawUrl))
+                                sha256SidecarUrl = rawUrl;
+                            break;
+                        }
+                    }
+                }
             }
 
             if (string.IsNullOrEmpty(downloadUrl) || string.IsNullOrEmpty(fileName))
             {
                 Log.Warning("New release {Tag} found, but no verified setup .exe asset found", rawTag);
+                return null;
+            }
+
+            if (sha256SidecarUrl == null)
+            {
+                Log.Warning("New release {Tag}: installer found but no .sha256 sidecar asset. Update blocked for security.", rawTag);
                 return null;
             }
 
@@ -151,16 +182,6 @@ public sealed class UpdateService : IUpdateService
             string? changelog = root.TryGetProperty("body", out var bodyProp)
                 ? bodyProp.GetString()
                 : null;
-
-            // Optional SHA-256 detection from release notes body (e.g. "SHA256: 7f83b...")
-            if (!string.IsNullOrEmpty(changelog))
-            {
-                var match = Regex.Match(changelog, @"SHA-?256\s*[:=]\s*([a-fA-F0-9]{64})", RegexOptions.IgnoreCase);
-                if (match.Success)
-                {
-                    expectedSha256 = match.Groups[1].Value.ToLowerInvariant();
-                }
-            }
 
             DateTimeOffset publishedAt = root.TryGetProperty("published_at", out var pubProp) && pubProp.TryGetDateTimeOffset(out var dto)
                 ? dto
@@ -179,7 +200,8 @@ public sealed class UpdateService : IUpdateService
                 FileName = fileName,
                 FileSizeBytes = fileSize,
                 PublishedAt = publishedAt,
-                ExpectedSha256 = expectedSha256
+                Sha256SidecarUrl = sha256SidecarUrl,
+                ExpectedSha256 = null   // resolved in DownloadInstallerAsync after fetching sidecar
             };
         }
         catch (Exception ex)
@@ -204,10 +226,26 @@ public sealed class UpdateService : IUpdateService
     public async Task<string> DownloadInstallerAsync(UpdateInfo update, IProgress<double>? progress = null, CancellationToken ct = default)
     {
         if (!IsValidDownloadUrl(update.DownloadUrl))
-        {
             throw new InvalidOperationException($"Untrusted download URL: {update.DownloadUrl}");
-        }
 
+        if (string.IsNullOrEmpty(update.Sha256SidecarUrl))
+            throw new InvalidOperationException("No SHA-256 sidecar URL available. Cannot verify installer integrity.");
+
+        // ── Step 1: Fetch the .sha256 sidecar first ───────────────────────────
+        Log.Information("Fetching SHA-256 sidecar from {Url}", update.Sha256SidecarUrl);
+        using var sidecarResp = await _httpClient.GetAsync(update.Sha256SidecarUrl, ct);
+        sidecarResp.EnsureSuccessStatusCode();
+        var sidecarText = (await sidecarResp.Content.ReadAsStringAsync(ct)).Trim();
+
+        // Sidecar may be "<hex>  filename" (sha256sum format) or just the bare hex
+        var hexMatch = Regex.Match(sidecarText, @"[a-fA-F0-9]{64}");
+        if (!hexMatch.Success)
+            throw new InvalidDataException($"SHA-256 sidecar did not contain a valid 64-char hex hash: '{sidecarText}'");
+
+        var expectedHash = hexMatch.Value.ToLowerInvariant();
+        Log.Information("Expected SHA-256 from sidecar: {Hash}", expectedHash);
+
+        // ── Step 2: Download installer while computing its hash inline ─────────
         var tempDir = Path.Combine(Path.GetTempPath(), "MorpheX", "Updates");
         Directory.CreateDirectory(tempDir);
         var targetFile = Path.Combine(tempDir, update.FileName);
@@ -217,7 +255,7 @@ public sealed class UpdateService : IUpdateService
             try { File.Delete(targetFile); } catch { }
         }
 
-        Log.Information("Downloading update from {Url} to {Path}", update.DownloadUrl, targetFile);
+        Log.Information("Downloading installer from {Url} to {Path}", update.DownloadUrl, targetFile);
 
         using var response = await _httpClient.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, ct);
         response.EnsureSuccessStatusCode();
@@ -248,28 +286,26 @@ public sealed class UpdateService : IUpdateService
         await fileStream.FlushAsync(ct);
         fileStream.Close();
 
-        // Integrity sanity check: installer package should never be trivial or truncated
+        // ── Step 3: Sanity-check minimum size ─────────────────────────────────
         if (totalRead < 500_000)
         {
             try { File.Delete(targetFile); } catch { }
-            throw new InvalidDataException("Downloaded installer file is suspiciously small or incomplete.");
+            throw new InvalidDataException("Downloaded installer is suspiciously small or incomplete.");
         }
 
-        // Verify SHA256 if available
+        // ── Step 4: Verify SHA-256 — mandatory, not optional ──────────────────
         var actualHash = Convert.ToHexString(sha256.GetHashAndReset()).ToLowerInvariant();
-        Log.Information("Downloaded update installer ({Size:F1} MB). SHA256: {Hash}",
+        Log.Information("Downloaded installer ({Size:F1} MB). SHA256: {Hash}",
             totalRead / (1024.0 * 1024.0), actualHash);
 
-        if (!string.IsNullOrEmpty(update.ExpectedSha256))
+        if (!string.Equals(actualHash, expectedHash, StringComparison.OrdinalIgnoreCase))
         {
-            if (!string.Equals(actualHash, update.ExpectedSha256, StringComparison.OrdinalIgnoreCase))
-            {
-                try { File.Delete(targetFile); } catch { }
-                throw new InvalidDataException($"SHA-256 mismatch! Expected: {update.ExpectedSha256}, Got: {actualHash}");
-            }
-            Log.Information("SHA-256 integrity verified successfully.");
+            try { File.Delete(targetFile); } catch { }
+            throw new InvalidDataException(
+                $"SHA-256 integrity check FAILED.\nExpected : {expectedHash}\nActual   : {actualHash}\nInstaller deleted.");
         }
 
+        Log.Information("SHA-256 integrity verified. Installer is authentic.");
         progress?.Report(100.0);
         return targetFile;
     }
@@ -282,9 +318,11 @@ public sealed class UpdateService : IUpdateService
         }
 
         var fullPath = Path.GetFullPath(installerPath);
-        var expectedDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "MorpheX", "Updates"));
+        // Append separator so "..\UpdatesEvil\" sibling paths can never pass the containment check
+        var expectedDir = Path.GetFullPath(Path.Combine(Path.GetTempPath(), "MorpheX", "Updates"))
+                          + Path.DirectorySeparatorChar;
 
-        // Security check: installer must reside within the designated update directory and have .exe extension
+        // Security check: installer must reside INSIDE the designated update directory and be an .exe
         if (!fullPath.StartsWith(expectedDir, StringComparison.OrdinalIgnoreCase) ||
             !fullPath.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
         {
