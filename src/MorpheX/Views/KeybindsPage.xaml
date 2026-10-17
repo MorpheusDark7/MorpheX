@@ -1,0 +1,267 @@
+<Page
+    x:Class="MorpheX.KeybindsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Keybinds"
+    Focusable="True"
+    PreviewKeyDown="Page_PreviewKeyDown">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="28,20,28,32">
+        <StackPanel MaxWidth="740">
+
+            <!-- ── Header ──────────────────────────────────────── -->
+            <TextBlock
+                Text="Global Keybinds"
+                Style="{StaticResource PageTitleStyle}"
+                Margin="0,0,0,2" />
+            <TextBlock
+                Text="Control wallpaper playback, jump straight to Library, Favorites, or Effects, toggle desktop widgets, and control MorpheX with system-wide hotkeys."
+                Style="{StaticResource PageSubtitleStyle}"
+                Margin="0,0,0,24" />
+
+            <!-- ── Category 1: Navigation & Quick Access ─────── -->
+            <TextBlock Text="NAVIGATION &amp; QUICK ACCESS" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,6" />
+            <TextBlock
+                Text="System-wide shortcuts to instantly summon MorpheX and jump directly into specific pages."
+                Style="{StaticResource SettingDescriptionStyle}"
+                Margin="0,0,0,10" />
+
+            <!-- Open Library -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Image24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Library" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Instantly summon MorpheX and open your Wallpaper Library" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyOpenLibraryBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="OpenLibrary" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyOpenLibraryClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="OpenLibrary" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Open Favorites -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Heart24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Favorites" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Quickly open your curated Favorite wallpapers collection" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyOpenFavoritesBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="OpenFavorites" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyOpenFavoritesClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="OpenFavorites" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Open Effects -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Color24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Open Effects" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Jump directly to post-processing visual effects and color filters" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyOpenEffectsBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="OpenEffects" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyOpenEffectsClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="OpenEffects" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Show / Hide MorpheX Window -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="AppGeneric24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Show / Hide MorpheX Window" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Summon MorpheX to front from anywhere or minimize it cleanly to the tray" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyToggleAppBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="ToggleAppWindow" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyToggleAppClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="ToggleAppWindow" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- ── Category 2: Wallpaper Playback & Audio ───────── -->
+            <TextBlock Text="WALLPAPER PLAYBACK &amp; AUDIO" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,6" />
+            <TextBlock
+                Text="Control your live wallpapers instantly from full-screen games, apps, or while on the desktop."
+                Style="{StaticResource SettingDescriptionStyle}"
+                Margin="0,0,0,10" />
+
+            <!-- Pause / Resume -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="PlayPause24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Play / Pause Wallpaper" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Instantly pause video rendering to free up 100% GPU resources, or resume playback" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyPauseBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="PauseResume" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyPauseClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="PauseResume" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Mute / Unmute Audio -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Speaker224" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Mute / Unmute Audio" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Toggle sound on active video wallpapers" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyMuteBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="MuteUnmute" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyMuteClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="MuteUnmute" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Next Wallpaper -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Next24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Next Wallpaper in Playlist" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Immediately advance to the next wallpaper in the active playlist rotation" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyNextBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="NextWallpaper" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyNextClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="NextWallpaper" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Previous Wallpaper -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Previous24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Previous Wallpaper in Playlist" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Step back to the previous wallpaper in the rotation" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyPrevBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="PrevWallpaper" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyPrevClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="PrevWallpaper" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Random Wallpaper -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="ArrowShuffle24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Random Wallpaper" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Pick and apply an unexpected random wallpaper from your library" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyRandomBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="RandomWallpaper" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyRandomClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="RandomWallpaper" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Favorite Current Wallpaper -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Heart24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Favorite Current Active Wallpaper" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Bookmark the currently playing wallpaper into your Favorites library with one keystroke" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyFavoriteBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="FavoriteCurrent" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyFavoriteClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="FavoriteCurrent" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- ── Category 3: Power User & Desktop Controls ─── -->
+            <TextBlock Text="POWER USER &amp; DESKTOP CONTROLS" Style="{StaticResource SectionHeaderStyle}" Margin="0,20,0,6" />
+            <TextBlock
+                Text="High-utility controls for privacy, clean displays, and quick visual adjustments."
+                Style="{StaticResource SettingDescriptionStyle}"
+                Margin="0,0,0,10" />
+
+            <!-- Boss Key -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Shield24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Boss Key (Hide, Pause &amp; Mute)" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Immediately hide MorpheX window, pause video wallpaper playback, and mute all audio" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyBossKeyBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="BossKey" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyBossKeyClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="BossKey" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Toggle Desktop Widgets -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="Grid24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Toggle Desktop Widgets" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Hide all desktop widgets when you need a completely clean screen, or restore them instantly" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyToggleWidgetsBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="ToggleWidgets" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyToggleWidgetsClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="ToggleWidgets" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+            <!-- Reset Visual Effects -->
+            <ui:CardControl Margin="0,0,0,4">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                            <ui:SymbolIcon Symbol="ArrowCounterclockwise24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Reset Visual Effects" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <TextBlock Text="Instantly restore wallpaper brightness, contrast, and color temperature back to default" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <StackPanel Orientation="Horizontal">
+                    <Button x:Name="HotkeyResetEffectsBtn" Content="Not Assigned" Width="160" Height="34" Click="HotkeyBtn_Click" Tag="ResetEffects" Margin="0,0,6,0" Cursor="Hand" />
+                    <Button x:Name="HotkeyResetEffectsClearBtn" Content="✕" Width="34" Height="34" Click="HotkeyClearBtn_Click" Tag="ResetEffects" ToolTip="Clear shortcut" Cursor="Hand" />
+                </StackPanel>
+            </ui:CardControl>
+
+        </StackPanel>
+    </ScrollViewer>
+</Page>

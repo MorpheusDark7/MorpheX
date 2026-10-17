@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.56-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.57-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,14 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.57
+- **Dedicated Global Keybinds Page** — Added a dedicated Keybinds navigation page (`KeybindsPage`) with separate spaces for Quick Navigation (Open Library, Open Favorites, Open Effects, Show/Hide Window), Wallpaper Playback & Audio (Play/Pause, Mute, Next, Previous, Random, Favorite Current), and Power User Controls (Boss Key panic button, Toggle Desktop Widgets, Reset Visual Effects).
+- **Video Scaling Modes for Live Wallpaper** — Added distinct video scaling options across Displays and Settings: "Crop to Center" (Center Crop filling the screen while preserving aspect ratio), "Fit to Screen" (Letterbox with clean black bars), and "Stretch" (Fill entire display grid) with instant live re-rendering.
+- **Main Window Titlebar Theme Switcher** — Added a sleek Sun/Moon toggle button to the main window title bar for 1-click theme switching on the fly.
+- **Light Mode Visibility & Contrast Fixes** — Replaced hardcoded white color values in Widgets configuration with dynamic theme brushes (`TextFillColorPrimaryBrush`, `TextFillColorSecondaryBrush`, `DividerStrokeColorDefaultBrush`), ensuring 100% crisp readability in Light Mode.
+- **Card & Header Clean-up** — Perfectly centered the `ACTIVE` checkmark badge and top action tags across Library and Favorites cards; removed the redundant heart icon from the Favorites page header to maintain clean visual consistency with the Library.
+- **System Resource Monitor Fully Removed** — Cleanly stripped all remaining metrics pills, polling routines, and toggle settings for a clean and lightweight experience.
 
 ### v0.1.56
 - **Startup Crash Fix** — Eliminated LibVLC background parse access violation (`ntdll.dll 0xc0000005`) by migrating video resolution & duration probing to native Windows Media Properties (WinRT).

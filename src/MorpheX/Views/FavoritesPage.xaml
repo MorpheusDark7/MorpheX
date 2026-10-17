@@ -18,27 +18,13 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,18">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <ui:SymbolIcon
-                    Symbol="Heart24"
-                    FontSize="22"
-                    Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
-                    VerticalAlignment="Center"
-                    Margin="0,0,10,0" />
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Favorites" Style="{StaticResource PageTitleStyle}" />
-                    <TextBlock
-                        x:Name="FavoriteCountText"
-                        Text="0 favorites"
-                        Style="{StaticResource PageSubtitleStyle}" />
-                </StackPanel>
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Row="0" Margin="0,0,0,18">
+            <TextBlock Text="Favorites" Style="{StaticResource PageTitleStyle}" />
+            <TextBlock
+                x:Name="FavoriteCountText"
+                Text="0 favorites"
+                Style="{StaticResource PageSubtitleStyle}" />
+        </StackPanel>
 
         <Border Grid.Row="1" Height="1" Background="{DynamicResource DividerStrokeColorDefaultBrush}" Margin="0,0,0,20" />
 
@@ -98,42 +84,47 @@
                                 </Border>
 
                                 <!-- Top Badges & Controls -->
-                                <Grid VerticalAlignment="Top" Margin="8,8,8,0">
+                                <Grid VerticalAlignment="Top" Margin="8,8,8,0" Height="24">
                                     <Border
                                         HorizontalAlignment="Left"
-                                        Padding="7,3"
+                                        VerticalAlignment="Center"
+                                        Height="24"
+                                        Padding="7,0"
                                         CornerRadius="4"
                                         Background="{StaticResource MxActiveBadgeBrush}"
                                         Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <ui:SymbolIcon Symbol="Checkmark12" Foreground="White" FontSize="10" Margin="0,0,4,0" />
-                                            <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                            <ui:SymbolIcon Symbol="Checkmark12" Foreground="White" FontSize="10" Margin="0,0,4,0" VerticalAlignment="Center" />
+                                            <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Border>
 
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                                         <Button
-                                            Width="26" Height="26"
+                                            Width="24" Height="24"
                                             Margin="0,0,6,0"
                                             Cursor="Hand"
+                                            VerticalAlignment="Center"
                                             PreviewMouseLeftButtonDown="FavoriteButton_PreviewMouseLeftButtonDown"
                                             Click="FavoriteButton_Click"
                                             ToolTip="Remove from Favorites">
                                             <Button.Template>
                                                 <ControlTemplate TargetType="Button">
-                                                    <Border Background="#99000000" CornerRadius="13" Width="26" Height="26">
+                                                    <Border Background="#99000000" CornerRadius="12" Width="24" Height="24">
                                                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                                                     </Border>
                                                 </ControlTemplate>
                                             </Button.Template>
-                                            <ui:SymbolIcon Symbol="Heart24" FontSize="12" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                            <ui:SymbolIcon Symbol="Heart24" FontSize="11" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                                         </Button>
 
                                         <Border
-                                            Padding="6,3"
+                                            Height="24"
+                                            Padding="7,0"
                                             CornerRadius="4"
+                                            VerticalAlignment="Center"
                                             Background="#99000000">
-                                            <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" />
+                                            <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center" />
                                         </Border>
                                     </StackPanel>
                                 </Grid>

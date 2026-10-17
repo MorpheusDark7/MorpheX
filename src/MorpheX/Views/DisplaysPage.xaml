@@ -132,6 +132,86 @@
                     </StackPanel>
                 </ui:Card>
 
+                <!-- Video Scaling Modes Card -->
+                <ui:Card Margin="0,0,0,20" Padding="18,16">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Video Scaling Modes for Live Wallpaper" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Distinct scaling options to ensure custom video wallpapers render correctly across various screen aspect ratios without visual distortion."
+                                           FontSize="12" Opacity="0.65" Margin="0,2,0,0" TextWrapping="Wrap"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                            <Border Grid.Column="1" VerticalAlignment="Center" Padding="10,4" CornerRadius="6"
+                                    Background="{DynamicResource MxAccentSubtleBrush}">
+                                <TextBlock x:Name="ActiveScalingBadgeText" Text="Crop to Center" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource MxAccentBrush}" />
+                            </Border>
+                        </Grid>
+
+                        <!-- 3 Segmented Scaling Mode Options -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Option 1: Crop to Center (Fill) -->
+                            <Border x:Name="ScalingCropCard" Grid.Column="0"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="ScalingMode_Click" Tag="Fill">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="Crop24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Crop to Center" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Zooms in uniformly to fill the entire screen while maintaining original aspect ratio, clipping excess outer edges without distortion." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option 2: Fit to Screen (Fit) -->
+                            <Border x:Name="ScalingFitCard" Grid.Column="2"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="ScalingMode_Click" Tag="Fit">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="ScaleFill24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Fit to Screen" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Preserves the entire uncropped video frame by scaling down to fit, leaving neutral black bars in the empty display areas." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option 3: Stretch (Stretch) -->
+                            <Border x:Name="ScalingStretchCard" Grid.Column="4"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="ScalingMode_Click" Tag="Stretch">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="ArrowMaximize24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Stretch (Fill Grid)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Forces the video to expand or contract to fill the display grid, which may cause horizontal or vertical aspect warping." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </ui:Card>
+
                 <TextBlock Text="CONNECTED MONITORS" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,10" />
 
                 <ItemsControl x:Name="DisplaysList">

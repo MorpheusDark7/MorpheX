@@ -57,7 +57,73 @@ public partial class DisplaysPage : Page
     {
         var app = (App)Application.Current;
         UpdatePlacementModeUI(app.SettingsService.Settings.Display.PlacementMode);
+        UpdateScalingModeUI(app.SettingsService.Settings.Display.DefaultScalingMode);
         RefreshDisplays();
+    }
+
+    private void UpdateScalingModeUI(ScalingMode mode)
+    {
+        var accentBrush = (System.Windows.Media.Brush)FindResource("MxAccentBrush");
+        var subtleAccentBrush = (System.Windows.Media.Brush)FindResource("MxAccentSubtleBrush");
+        var defaultBorderBrush = (System.Windows.Media.Brush)FindResource("CardStrokeColorDefaultBrush");
+        var defaultBgBrush = (System.Windows.Media.Brush)FindResource("CardBackgroundFillColorDefaultBrush");
+
+        ScalingCropCard.BorderBrush = defaultBorderBrush;
+        ScalingCropCard.Background = defaultBgBrush;
+        ScalingFitCard.BorderBrush = defaultBorderBrush;
+        ScalingFitCard.Background = defaultBgBrush;
+        ScalingStretchCard.BorderBrush = defaultBorderBrush;
+        ScalingStretchCard.Background = defaultBgBrush;
+
+        switch (mode)
+        {
+            case ScalingMode.Fit:
+                ScalingFitCard.BorderBrush = accentBrush;
+                ScalingFitCard.Background = subtleAccentBrush;
+                ActiveScalingBadgeText.Text = "Fit to Screen";
+                break;
+            case ScalingMode.Stretch:
+                ScalingStretchCard.BorderBrush = accentBrush;
+                ScalingStretchCard.Background = subtleAccentBrush;
+                ActiveScalingBadgeText.Text = "Stretch";
+                break;
+            case ScalingMode.Fill:
+            default:
+                ScalingCropCard.BorderBrush = accentBrush;
+                ScalingCropCard.Background = subtleAccentBrush;
+                ActiveScalingBadgeText.Text = "Crop to Center";
+                break;
+        }
+    }
+
+    private async void ScalingMode_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement card && card.Tag is string modeStr)
+        {
+            var app = (App)Application.Current;
+            var mode = modeStr switch
+            {
+                "Fit" => ScalingMode.Fit,
+                "Stretch" => ScalingMode.Stretch,
+                _ => ScalingMode.Fill
+            };
+
+            app.SettingsService.Settings.Display.DefaultScalingMode = mode;
+            await app.SettingsService.SaveAsync();
+
+            UpdateScalingModeUI(mode);
+            Log.Information("User switched default video scaling mode to: {Mode}", mode);
+
+            // Re-apply scaling to all active wallpapers immediately
+            foreach (var m in app.MonitorService.Monitors)
+            {
+                var active = app.WallpaperService.GetActiveWallpaper(m.DeviceId);
+                if (active != null)
+                {
+                    await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
+                }
+            }
+        }
     }
 
     private void UpdatePlacementModeUI(string mode)

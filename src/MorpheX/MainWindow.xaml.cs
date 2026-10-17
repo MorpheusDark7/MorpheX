@@ -25,14 +25,12 @@ public partial class MainWindow : FluentWindow
         NavWidgets.Click += (_, _) => NavigateTo(typeof(WidgetsPage));
         NavProfiles.Click += (_, _) => NavigateTo(typeof(ProfilesPage));
         NavEffects.Click += (_, _) => NavigateTo(typeof(EffectsPage));
+        NavKeybinds.Click += (_, _) => NavigateTo(typeof(KeybindsPage));
         NavSettings.Click += (_, _) => NavigateTo(typeof(SettingsPage));
 
         Loaded += MainWindow_Loaded;
 
         StateChanged += MainWindow_StateChanged;
-
-        var app = (App)System.Windows.Application.Current;
-        app.SystemMetricsService.MetricsUpdated += OnMetricsUpdated;
 
         NavigateTo(typeof(LibraryPage));
     }
@@ -51,7 +49,7 @@ public partial class MainWindow : FluentWindow
         }
         else if (WindowState == WindowState.Normal || WindowState == WindowState.Maximized)
         {
-            if (app.SettingsService.Settings.Appearance.ShowSystemStats || app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
+            if (app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
             {
                 app.SystemMetricsService.Start();
             }
@@ -61,33 +59,35 @@ public partial class MainWindow : FluentWindow
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ClampToWorkArea();
-        UpdateStatsBarVisibility();
+        UpdateThemeToggleIcon();
     }
 
-    public void UpdateStatsBarVisibility()
+    private async void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
     {
         var app = (App)System.Windows.Application.Current;
-        bool show = app.SettingsService.Settings.Appearance.ShowSystemStats;
-        SystemStatsBar.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        var effective = Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme();
+        string newMode = (effective == Wpf.Ui.Appearance.ApplicationTheme.Light) ? "Dark" : "Light";
 
-        if ((show && IsVisible && WindowState != WindowState.Minimized) || app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
+        app.SettingsService.Settings.Appearance.Theme = newMode;
+        await app.SettingsService.SaveAsync();
+
+        Services.ThemeService.ApplyTheme(newMode);
+        UpdateThemeToggleIcon(newMode);
+    }
+
+    public void UpdateThemeToggleIcon(string? themeMode = null)
+    {
+        var effective = Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme();
+        if (effective == Wpf.Ui.Appearance.ApplicationTheme.Light)
         {
-            app.SystemMetricsService.Start();
+            ThemeToggleIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.WeatherMoon24;
+            ThemeToggleButton.ToolTip = "Switch to Dark Theme";
         }
         else
         {
-            app.SystemMetricsService.Stop();
+            ThemeToggleIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.WeatherSunny24;
+            ThemeToggleButton.ToolTip = "Switch to Light Theme";
         }
-    }
-
-    private void OnMetricsUpdated(object? sender, MorpheX.Core.Services.SystemMetrics metrics)
-    {
-        Dispatcher.InvokeAsync(() =>
-        {
-            StatsCpuText.Text = $"{metrics.CpuPercent:0.0}%";
-            StatsGpuText.Text = $"{metrics.GpuPercent:0.0}%";
-            StatsRamText.Text = $"{metrics.RamUsedGb:0.0} / {metrics.RamTotalGb:0.0} GB ({metrics.RamPercent:0}%)";
-        });
     }
 
     private void ClampToWorkArea()
@@ -192,6 +192,7 @@ public partial class MainWindow : FluentWindow
         NavWidgets.IsActive = (pageType == typeof(WidgetsPage));
         NavProfiles.IsActive = (pageType == typeof(ProfilesPage));
         NavEffects.IsActive = (pageType == typeof(EffectsPage));
+        NavKeybinds.IsActive = (pageType == typeof(KeybindsPage));
         NavSettings.IsActive = (pageType == typeof(SettingsPage));
     }
 
@@ -242,8 +243,6 @@ public partial class MainWindow : FluentWindow
 
         Activate();
         Focus();
-
-        UpdateStatsBarVisibility();
     }
 
     protected override void OnStateChanged(EventArgs e)
@@ -288,7 +287,11 @@ public partial class MainWindow : FluentWindow
         const int WM_SETTINGCHANGE = 0x001A;
         if (msg is WM_DWMCOLORIZATIONCOLORCHANGED or WM_SETTINGCHANGE)
         {
-            Dispatcher.InvokeAsync(() => Services.ThemeService.ApplyTheme());
+            Dispatcher.InvokeAsync(() =>
+            {
+                Services.ThemeService.ApplyTheme();
+                UpdateThemeToggleIcon();
+            });
         }
         return IntPtr.Zero;
     }

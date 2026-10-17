@@ -40,16 +40,6 @@
                               Checked="StartMinimizedToggle_Toggled" Unchecked="StartMinimizedToggle_Toggled" />
             </ui:CardControl>
 
-            <ui:CardControl Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="System resource monitor" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Show live CPU, GPU, and RAM usage in the status bar" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <ui:ToggleSwitch x:Name="ShowSystemStatsToggle"
-                              Checked="ShowSystemStatsToggle_Toggled" Unchecked="ShowSystemStatsToggle_Toggled" />
-            </ui:CardControl>
 
             <ui:CardControl Margin="0,0,0,3">
                 <ui:CardControl.Header>
@@ -77,6 +67,22 @@
                     <ComboBoxItem Content="System Default (Match Windows)" Tag="System" />
                     <ComboBoxItem Content="Dark Mode" Tag="Dark" />
                     <ComboBoxItem Content="Light Mode" Tag="Light" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="Video Scaling Mode" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="How video wallpapers adapt to display aspect ratios (Crop to Center, Fit, or Stretch)" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="ScalingModeCombo"
+                          Width="230"
+                          SelectionChanged="ScalingModeCombo_SelectionChanged">
+                    <ComboBoxItem Content="Crop to Center (No Distortion)" Tag="Fill" />
+                    <ComboBoxItem Content="Fit to Screen (Letterbox Bars)" Tag="Fit" />
+                    <ComboBoxItem Content="Stretch (Fill Entire Display)" Tag="Stretch" />
                 </ComboBox>
             </ui:CardControl>
 
@@ -238,53 +244,11 @@
             <ui:CardControl Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel>
-                        <TextBlock Text="Pause / Resume" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Toggle wallpaper playback on or off" Style="{StaticResource SettingDescriptionStyle}" />
+                        <TextBlock Text="Configure Global Keybinds" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Customize system-wide shortcuts for playback, skipping wallpapers, widgets, and summoning MorpheX" Style="{StaticResource SettingDescriptionStyle}" />
                     </StackPanel>
                 </ui:CardControl.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="HotkeyPauseBtn" Content="Not Assigned" Width="160" Click="HotkeyPauseBtn_Click" Margin="0,0,6,0" />
-                    <Button x:Name="HotkeyPauseClearBtn" Content="✕" Width="34" Click="HotkeyPauseClearBtn_Click" ToolTip="Clear shortcut" />
-                </StackPanel>
-            </ui:CardControl>
-
-            <ui:CardControl Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="Mute / Unmute" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Toggle wallpaper audio output" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="HotkeyMuteBtn" Content="Not Assigned" Width="160" Click="HotkeyMuteBtn_Click" Margin="0,0,6,0" />
-                    <Button x:Name="HotkeyMuteClearBtn" Content="✕" Width="34" Click="HotkeyMuteClearBtn_Click" ToolTip="Clear shortcut" />
-                </StackPanel>
-            </ui:CardControl>
-
-            <ui:CardControl Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="Next Wallpaper" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Skip to the next wallpaper in the playlist" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="HotkeyNextBtn" Content="Not Assigned" Width="160" Click="HotkeyNextBtn_Click" Margin="0,0,6,0" />
-                    <Button x:Name="HotkeyNextClearBtn" Content="✕" Width="34" Click="HotkeyNextClearBtn_Click" ToolTip="Clear shortcut" />
-                </StackPanel>
-            </ui:CardControl>
-
-            <ui:CardControl Margin="0,0,0,3">
-                <ui:CardControl.Header>
-                    <StackPanel>
-                        <TextBlock Text="Random Wallpaper" Style="{StaticResource SettingLabelStyle}" />
-                        <TextBlock Text="Pick a random wallpaper from your library" Style="{StaticResource SettingDescriptionStyle}" />
-                    </StackPanel>
-                </ui:CardControl.Header>
-                <StackPanel Orientation="Horizontal">
-                    <Button x:Name="HotkeyRandomBtn" Content="Not Assigned" Width="160" Click="HotkeyRandomBtn_Click" Margin="0,0,6,0" />
-                    <Button x:Name="HotkeyRandomClearBtn" Content="✕" Width="34" Click="HotkeyRandomClearBtn_Click" ToolTip="Clear shortcut" />
-                </StackPanel>
+                <ui:Button Content="Open Keybinds" Icon="{ui:SymbolIcon Keyboard24}" Appearance="Secondary" Click="OpenKeybinds_Click" />
             </ui:CardControl>
 
             <TextBlock Text="ABOUT" Style="{StaticResource SectionHeaderStyle}" />
@@ -332,7 +296,7 @@
                                        FontSize="12" Opacity="0.6" Margin="0,2,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="VersionText"
-                                       Text="Version 0.1.56"
+                                       Text="Version 0.1.57"
                                        FontSize="11" Opacity="0.4" Margin="0,3,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>

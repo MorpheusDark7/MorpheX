@@ -522,7 +522,7 @@ public partial class App : Application
         };
 
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.56";
+        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.57";
         var header = new System.Windows.Forms.ToolStripMenuItem($"MorpheX Live  •  {verStr}")
         {
             Enabled = false,
@@ -675,6 +675,101 @@ public partial class App : Application
         {
             Log.Error(ex, "Failed to open or focus MainWindow");
             _mainWindow = null;
+        }
+    }
+
+    public void ToggleMainWindow()
+    {
+        try
+        {
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+                _mainWindow.BringToFront();
+                return;
+            }
+
+            if (_mainWindow.IsVisible && _mainWindow.WindowState != WindowState.Minimized && _mainWindow.IsActive)
+            {
+                _mainWindow.Hide();
+            }
+            else
+            {
+                _mainWindow.BringToFront();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to toggle MainWindow");
+        }
+    }
+
+    public void HideMainWindow()
+    {
+        try
+        {
+            if (_mainWindow != null && _mainWindow.IsVisible)
+            {
+                _mainWindow.Hide();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to hide MainWindow");
+        }
+    }
+
+    public void OpenLibraryPage()
+    {
+        try
+        {
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+            }
+
+            _mainWindow.NavigateTo(typeof(LibraryPage));
+            _mainWindow.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to navigate to LibraryPage");
+        }
+    }
+
+    public void OpenFavoritesPage()
+    {
+        try
+        {
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+            }
+
+            _mainWindow.NavigateTo(typeof(FavoritesPage));
+            _mainWindow.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to navigate to FavoritesPage");
+        }
+    }
+
+    public void OpenEffectsPage()
+    {
+        try
+        {
+            if (_mainWindow == null)
+            {
+                _mainWindow = new MainWindow();
+            }
+
+            _mainWindow.NavigateTo(typeof(EffectsPage));
+            _mainWindow.BringToFront();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to navigate to EffectsPage");
         }
     }
 

@@ -19,13 +19,11 @@ namespace MorpheX;
 public partial class SettingsPage : Page
 {
     private bool _isInitializing = true;
-    private string? _recordingTarget;
 
     public SettingsPage()
     {
         InitializeComponent();
         Loaded += OnLoaded;
-        PreviewKeyDown += Page_PreviewKeyDown;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -37,8 +35,21 @@ public partial class SettingsPage : Page
 
         StartWithWindowsToggle.IsChecked = app.StartupService.IsRegistered;
         StartMinimizedToggle.IsChecked = settings.General.StartMinimized;
-        ShowSystemStatsToggle.IsChecked = settings.Appearance.ShowSystemStats;
         CheckForUpdatesToggle.IsChecked = settings.General.CheckForUpdates;
+
+        string currentScaling = settings.Display.DefaultScalingMode.ToString();
+        foreach (ComboBoxItem item in ScalingModeCombo.Items)
+        {
+            if ((string)item.Tag == currentScaling)
+            {
+                ScalingModeCombo.SelectedItem = item;
+                break;
+            }
+        }
+        if (ScalingModeCombo.SelectedItem == null && ScalingModeCombo.Items.Count > 0)
+        {
+            ScalingModeCombo.SelectedIndex = 0;
+        }
 
         string currentTheme = settings.Appearance.Theme ?? "System";
         foreach (ComboBoxItem item in ThemeModeCombo.Items)
@@ -111,8 +122,6 @@ public partial class SettingsPage : Page
         PlaylistStartupToggle.IsChecked = settings.Playlist.ChangeOnStartup;
         PlaylistSkipPausedToggle.IsChecked = settings.Playlist.SkipWhenPaused;
 
-        UpdateHotkeyButtons();
-
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.2"}";
 
@@ -147,16 +156,24 @@ public partial class SettingsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
-    private async void ShowSystemStatsToggle_Toggled(object sender, RoutedEventArgs e)
+    private async void ScalingModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
-        var app = (App)Application.Current;
-        app.SettingsService.Settings.Appearance.ShowSystemStats = ShowSystemStatsToggle.IsChecked == true;
-        await app.SettingsService.SaveAsync();
-
-        if (Application.Current.MainWindow is MainWindow mw)
+        if (ScalingModeCombo.SelectedItem is ComboBoxItem item &&
+            Enum.TryParse<ScalingMode>((string)item.Tag, out var mode))
         {
-            mw.UpdateStatsBarVisibility();
+            var app = (App)Application.Current;
+            app.SettingsService.Settings.Display.DefaultScalingMode = mode;
+            await app.SettingsService.SaveAsync();
+
+            foreach (var m in app.MonitorService.Monitors)
+            {
+                var active = app.WallpaperService.GetActiveWallpaper(m.DeviceId);
+                if (active != null)
+                {
+                    await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
+                }
+            }
         }
     }
 
@@ -303,150 +320,14 @@ public partial class SettingsPage : Page
     }
     #endregion
 
-    #region Global Hotkeys
-    private void UpdateHotkeyButtons()
+    #region Global Keybinds
+    private void OpenKeybinds_Click(object sender, RoutedEventArgs e)
     {
-        var hotkeys = ((App)Application.Current).SettingsService.Settings.Hotkeys;
-        HotkeyPauseBtn.Content  = _recordingTarget == "PauseResume"    ? "Press shortcut..." : hotkeys.PauseResume.DisplayText;
-        HotkeyMuteBtn.Content   = _recordingTarget == "MuteUnmute"     ? "Press shortcut..." : hotkeys.MuteUnmute.DisplayText;
-        HotkeyNextBtn.Content   = _recordingTarget == "NextWallpaper"  ? "Press shortcut..." : hotkeys.NextWallpaper.DisplayText;
-        HotkeyRandomBtn.Content = _recordingTarget == "RandomWallpaper"? "Press shortcut..." : hotkeys.RandomWallpaper.DisplayText;
-    }
-
-    private void HotkeyPauseBtn_Click(object sender, RoutedEventArgs e)
-    {
-        _recordingTarget = "PauseResume";
-        UpdateHotkeyButtons();
-    }
-
-    private async void HotkeyPauseClearBtn_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var binding = app.SettingsService.Settings.Hotkeys.PauseResume;
-        binding.Key = "None";
-        binding.Modifiers = "None";
-        binding.Enabled = false;
-
-        app.HotkeyService.UpdateBindings();
-        await app.SettingsService.SaveAsync();
-        UpdateHotkeyButtons();
-    }
-
-    private void HotkeyMuteBtn_Click(object sender, RoutedEventArgs e)
-    {
-        _recordingTarget = "MuteUnmute";
-        UpdateHotkeyButtons();
-    }
-
-    private async void HotkeyMuteClearBtn_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var binding = app.SettingsService.Settings.Hotkeys.MuteUnmute;
-        binding.Key = "None";
-        binding.Modifiers = "None";
-        binding.Enabled = false;
-
-        app.HotkeyService.UpdateBindings();
-        await app.SettingsService.SaveAsync();
-        UpdateHotkeyButtons();
-    }
-
-    private void HotkeyNextBtn_Click(object sender, RoutedEventArgs e)
-    {
-        _recordingTarget = "NextWallpaper";
-        UpdateHotkeyButtons();
-    }
-
-    private async void HotkeyNextClearBtn_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var binding = app.SettingsService.Settings.Hotkeys.NextWallpaper;
-        binding.Key = "None";
-        binding.Modifiers = "None";
-        binding.Enabled = false;
-
-        app.HotkeyService.UpdateBindings();
-        await app.SettingsService.SaveAsync();
-        UpdateHotkeyButtons();
-    }
-
-    private void Page_PreviewKeyDown(object sender, System.Windows.Input.KeyEventArgs e)
-    {
-        if (_recordingTarget == null) return;
-
-        if (e.Key == Key.Escape)
+        if (Application.Current.MainWindow is MainWindow mw)
         {
-            _recordingTarget = null;
-            UpdateHotkeyButtons();
-            e.Handled = true;
-            return;
+            mw.NavigateTo(typeof(KeybindsPage));
         }
-
-        if (e.Key is Key.LeftCtrl or Key.RightCtrl or
-            Key.LeftAlt or Key.RightAlt or
-            Key.LeftShift or Key.RightShift or
-            Key.LWin or Key.RWin or
-            Key.System)
-        {
-            return;
-        }
-
-        var key = e.Key == Key.System ? e.SystemKey : e.Key;
-        var modifiers = Keyboard.Modifiers;
-
-        var modList = new List<string>();
-        if (modifiers.HasFlag(ModifierKeys.Control)) modList.Add("Ctrl");
-        if (modifiers.HasFlag(ModifierKeys.Alt)) modList.Add("Alt");
-        if (modifiers.HasFlag(ModifierKeys.Shift)) modList.Add("Shift");
-        if (modifiers.HasFlag(ModifierKeys.Windows)) modList.Add("Win");
-        string modStr = modList.Count > 0 ? string.Join("+", modList) : "None";
-
-        var app = (App)Application.Current;
-        var hotkeys = app.SettingsService.Settings.Hotkeys;
-
-        HotkeyBinding? targetBinding = _recordingTarget switch
-        {
-            "PauseResume"    => hotkeys.PauseResume,
-            "MuteUnmute"     => hotkeys.MuteUnmute,
-            "NextWallpaper"  => hotkeys.NextWallpaper,
-            "RandomWallpaper" => hotkeys.RandomWallpaper,
-            _ => null
-        };
-
-        if (targetBinding != null)
-        {
-            targetBinding.Key = key.ToString();
-            targetBinding.Modifiers = modStr;
-            targetBinding.Enabled = true;
-
-            app.HotkeyService.UpdateBindings();
-            _ = app.SettingsService.SaveAsync();
-            Log.Information("Mapped hotkey for '{Action}': {Binding}", _recordingTarget, targetBinding.DisplayText);
-        }
-
-        _recordingTarget = null;
-        UpdateHotkeyButtons();
-        e.Handled = true;
     }
-
-    private void HotkeyRandomBtn_Click(object sender, RoutedEventArgs e)
-    {
-        _recordingTarget = "RandomWallpaper";
-        UpdateHotkeyButtons();
-    }
-
-    private async void HotkeyRandomClearBtn_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)Application.Current;
-        var binding = app.SettingsService.Settings.Hotkeys.RandomWallpaper;
-        binding.Key = "None";
-        binding.Modifiers = "None";
-        binding.Enabled = false;
-        app.HotkeyService.UpdateBindings();
-        await app.SettingsService.SaveAsync();
-        UpdateHotkeyButtons();
-    }
-
     #endregion
 
 

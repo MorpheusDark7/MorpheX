@@ -86,13 +86,26 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
                 Mute = !AudioEnabled
             };
 
-            if (scaling is ScalingMode.Fill or ScalingMode.Stretch && width > 0 && height > 0)
+            switch (scaling)
             {
-                _mediaPlayer.AspectRatio = $"{width}:{height}";
-            }
-            else
-            {
-                _mediaPlayer.AspectRatio = null;
+                case ScalingMode.Stretch:
+                    // Stretch (Fill): Forces video to fill display grid, which may warp aspect ratio
+                    _mediaPlayer.CropGeometry = null;
+                    _mediaPlayer.AspectRatio = (width > 0 && height > 0) ? $"{width}:{height}" : null;
+                    break;
+
+                case ScalingMode.Fit:
+                    // Fit to Screen (Letterbox/Contain): Preserves uncropped frame with neutral bars
+                    _mediaPlayer.CropGeometry = null;
+                    _mediaPlayer.AspectRatio = null;
+                    break;
+
+                case ScalingMode.Fill:
+                default:
+                    // Crop to Center (Center Crop): Zooms in uniformly to fill screen without distortion, cropping outer edges
+                    _mediaPlayer.CropGeometry = (width > 0 && height > 0) ? $"{width}:{height}" : null;
+                    _mediaPlayer.AspectRatio = null;
+                    break;
             }
 
             _mediaPlayer.EncounteredError += (_, _) =>

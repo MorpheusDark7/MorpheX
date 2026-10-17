@@ -22,6 +22,15 @@ public sealed class HotkeyService : IHotkeyService
     private const int HOTKEY_ID_MUTE_UNMUTE = 9002;
     private const int HOTKEY_ID_NEXT_WALLPAPER = 9003;
     private const int HOTKEY_ID_RANDOM_WALLPAPER = 9004;
+    private const int HOTKEY_ID_PREV_WALLPAPER = 9005;
+    private const int HOTKEY_ID_TOGGLE_APP = 9006;
+    private const int HOTKEY_ID_TOGGLE_WIDGETS = 9007;
+    private const int HOTKEY_ID_FAVORITE_CURRENT = 9008;
+    private const int HOTKEY_ID_OPEN_LIBRARY = 9009;
+    private const int HOTKEY_ID_OPEN_FAVORITES = 9010;
+    private const int HOTKEY_ID_OPEN_EFFECTS = 9011;
+    private const int HOTKEY_ID_BOSS_KEY = 9012;
+    private const int HOTKEY_ID_RESET_EFFECTS = 9013;
 
     private const uint MOD_ALT = 0x0001;
     private const uint MOD_CONTROL = 0x0002;
@@ -76,10 +85,24 @@ public sealed class HotkeyService : IHotkeyService
 
         var hotkeys = _settingsService.Settings.Hotkeys;
 
+        // Playback & Wallpapers
         RegisterSingleBinding(HOTKEY_ID_PAUSE_RESUME, hotkeys.PauseResume, "Pause/Resume");
         RegisterSingleBinding(HOTKEY_ID_MUTE_UNMUTE, hotkeys.MuteUnmute, "Mute/Unmute");
         RegisterSingleBinding(HOTKEY_ID_NEXT_WALLPAPER, hotkeys.NextWallpaper, "Next Wallpaper");
+        RegisterSingleBinding(HOTKEY_ID_PREV_WALLPAPER, hotkeys.PrevWallpaper, "Previous Wallpaper");
         RegisterSingleBinding(HOTKEY_ID_RANDOM_WALLPAPER, hotkeys.RandomWallpaper, "Random Wallpaper");
+        RegisterSingleBinding(HOTKEY_ID_FAVORITE_CURRENT, hotkeys.FavoriteCurrent, "Favorite Current Wallpaper");
+
+        // Navigation & Quick Access
+        RegisterSingleBinding(HOTKEY_ID_OPEN_LIBRARY, hotkeys.OpenLibrary, "Open Library");
+        RegisterSingleBinding(HOTKEY_ID_OPEN_FAVORITES, hotkeys.OpenFavorites, "Open Favorites");
+        RegisterSingleBinding(HOTKEY_ID_OPEN_EFFECTS, hotkeys.OpenEffects, "Open Effects");
+        RegisterSingleBinding(HOTKEY_ID_TOGGLE_APP, hotkeys.ToggleAppWindow, "Toggle MorpheX Window");
+
+        // Power User & Desktop Controls
+        RegisterSingleBinding(HOTKEY_ID_BOSS_KEY, hotkeys.BossKey, "Boss Key");
+        RegisterSingleBinding(HOTKEY_ID_TOGGLE_WIDGETS, hotkeys.ToggleWidgets, "Toggle Desktop Widgets");
+        RegisterSingleBinding(HOTKEY_ID_RESET_EFFECTS, hotkeys.ResetEffects, "Reset Visual Effects");
     }
 
     private void RegisterSingleBinding(int id, HotkeyBinding binding, string actionName)
@@ -155,16 +178,107 @@ public sealed class HotkeyService : IHotkeyService
                     _ = _playlistService.TriggerNextWallpaperAsync();
                     break;
 
-                case HOTKEY_ID_RANDOM_WALLPAPER:
-                    Log.Information("Global Hotkey: Random Wallpaper");
-                    // Apply to all monitors
-                    var monitors = _wallpaperService.GetAllActiveWallpapers();
-                    foreach (var w in monitors)
-                    {
-                        // Find which monitor has this wallpaper and set random on it
-                    }
-                    // Simpler: trigger on all monitors by delegating to playlist if available
+                case HOTKEY_ID_PREV_WALLPAPER:
+                    Log.Information("Global Hotkey: Previous Wallpaper");
                     _ = _playlistService.TriggerNextWallpaperAsync();
+                    break;
+
+                case HOTKEY_ID_TOGGLE_APP:
+                    Log.Information("Global Hotkey: Toggle MorpheX Window");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app)
+                        {
+                            app.ToggleMainWindow();
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_TOGGLE_WIDGETS:
+                    Log.Information("Global Hotkey: Toggle Desktop Widgets");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app && app.WidgetService != null)
+                        {
+                            app.WidgetService.ToggleAllWidgets();
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_FAVORITE_CURRENT:
+                    Log.Information("Global Hotkey: Favorite Current Wallpaper");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(async () =>
+                    {
+                        if (System.Windows.Application.Current is App app && app.LibraryService != null)
+                        {
+                            var active = app.WallpaperService.GetAllActiveWallpapers().FirstOrDefault();
+                            if (active != null)
+                            {
+                                app.LibraryService.SetFavorite(active.Id, !active.IsFavorite);
+                                await app.LibraryService.SaveAsync();
+                            }
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_OPEN_LIBRARY:
+                    Log.Information("Global Hotkey: Open Library");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app)
+                        {
+                            app.OpenLibraryPage();
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_OPEN_FAVORITES:
+                    Log.Information("Global Hotkey: Open Favorites");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app)
+                        {
+                            app.OpenFavoritesPage();
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_OPEN_EFFECTS:
+                    Log.Information("Global Hotkey: Open Effects");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app)
+                        {
+                            app.OpenEffectsPage();
+                        }
+                    });
+                    break;
+
+                case HOTKEY_ID_BOSS_KEY:
+                    Log.Information("Global Hotkey: Boss Key (Hide MorpheX, Pause & Mute)");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(() =>
+                    {
+                        if (System.Windows.Application.Current is App app)
+                        {
+                            app.HideMainWindow();
+                        }
+                        _playbackService.Pause();
+                        _wallpaperService.SetVolume(-1);
+                    });
+                    break;
+
+                case HOTKEY_ID_RESET_EFFECTS:
+                    Log.Information("Global Hotkey: Reset Visual Effects");
+                    System.Windows.Application.Current?.Dispatcher.InvokeAsync(async () =>
+                    {
+                        var eff = _settingsService.Settings.Effects;
+                        eff.Brightness = 1.0f;
+                        eff.Contrast = 1.0f;
+                        eff.Saturation = 1.0f;
+                        eff.ColorTemperature = 0;
+                        await _settingsService.SaveAsync();
+                        _wallpaperService.ApplyEffectsToAll();
+                    });
                     break;
             }
         }

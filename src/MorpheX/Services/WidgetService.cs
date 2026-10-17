@@ -58,6 +58,32 @@ public sealed class WidgetService : IDisposable
         _clock?.Dispatcher.InvokeAsync(() => _clock.RefreshFormat());
     }
 
+    private bool _widgetsTemporarilyHidden;
+
+    public void ToggleAllWidgets()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (_widgetsTemporarilyHidden)
+            {
+                _widgetsTemporarilyHidden = false;
+                ApplySettingsCore();
+            }
+            else
+            {
+                _widgetsTemporarilyHidden = true;
+                CloseWidget(ref _clock);
+                CloseWidget(ref _sysmon);
+                CloseWidget(ref _media);
+                CloseWidget(ref _day);
+                CloseWidget(ref _calendar);
+                CloseWidget(ref _notes);
+                CloseWidget(ref _quote);
+                CloseWidget(ref _weather);
+            }
+        });
+    }
+
     public void RefreshMedia()
     {
         _media?.Dispatcher.InvokeAsync(() => _media.RefreshVisualizerStyle());

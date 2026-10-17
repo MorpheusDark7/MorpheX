@@ -392,10 +392,24 @@ public sealed class PlaylistSettings
 
 public sealed class HotkeySettings
 {
+    // Playback & Wallpapers
     public HotkeyBinding PauseResume { get; set; } = new();
     public HotkeyBinding MuteUnmute { get; set; } = new();
     public HotkeyBinding NextWallpaper { get; set; } = new();
+    public HotkeyBinding PrevWallpaper { get; set; } = new();
     public HotkeyBinding RandomWallpaper { get; set; } = new();
+    public HotkeyBinding FavoriteCurrent { get; set; } = new();
+
+    // Navigation & Quick Access
+    public HotkeyBinding OpenLibrary { get; set; } = new();
+    public HotkeyBinding OpenFavorites { get; set; } = new();
+    public HotkeyBinding OpenEffects { get; set; } = new();
+    public HotkeyBinding ToggleAppWindow { get; set; } = new();
+
+    // Power User & Desktop Controls
+    public HotkeyBinding BossKey { get; set; } = new();
+    public HotkeyBinding ToggleWidgets { get; set; } = new();
+    public HotkeyBinding ResetEffects { get; set; } = new();
 }
 
 public sealed class HotkeyBinding
