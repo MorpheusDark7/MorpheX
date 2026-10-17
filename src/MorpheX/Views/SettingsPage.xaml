@@ -62,6 +62,24 @@
                               Checked="CheckForUpdatesToggle_Toggled" Unchecked="CheckForUpdatesToggle_Toggled" />
             </ui:CardControl>
 
+            <TextBlock Text="APPEARANCE" Style="{StaticResource SectionHeaderStyle}" />
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
+                        <TextBlock Text="App Theme" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Choose between Light, Dark, or automatically match your Windows system theme" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="ThemeModeCombo"
+                          Width="230"
+                          SelectionChanged="ThemeModeCombo_SelectionChanged">
+                    <ComboBoxItem Content="System Default (Match Windows)" Tag="System" />
+                    <ComboBoxItem Content="Dark Mode" Tag="Dark" />
+                    <ComboBoxItem Content="Light Mode" Tag="Light" />
+                </ComboBox>
+            </ui:CardControl>
+
             <TextBlock Text="PERFORMANCE" Style="{StaticResource SectionHeaderStyle}" />
 
             <ui:CardControl Margin="0,0,0,3">
@@ -314,7 +332,7 @@
                                        FontSize="12" Opacity="0.6" Margin="0,2,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="VersionText"
-                                       Text="Version 0.1.55"
+                                       Text="Version 0.1.56"
                                        FontSize="11" Opacity="0.4" Margin="0,3,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>

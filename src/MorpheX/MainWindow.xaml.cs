@@ -288,7 +288,7 @@ public partial class MainWindow : FluentWindow
         const int WM_SETTINGCHANGE = 0x001A;
         if (msg is WM_DWMCOLORIZATIONCOLORCHANGED or WM_SETTINGCHANGE)
         {
-            Services.ThemeService.ApplySystemThemeAndAccent();
+            Dispatcher.InvokeAsync(() => Services.ThemeService.ApplyTheme());
         }
         return IntPtr.Zero;
     }

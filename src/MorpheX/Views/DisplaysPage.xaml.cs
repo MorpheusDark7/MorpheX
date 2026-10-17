@@ -55,7 +55,70 @@ public partial class DisplaysPage : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        var app = (App)Application.Current;
+        UpdatePlacementModeUI(app.SettingsService.Settings.Display.PlacementMode);
         RefreshDisplays();
+    }
+
+    private void UpdatePlacementModeUI(string mode)
+    {
+        var accentBrush = (System.Windows.Media.Brush)FindResource("MxAccentBrush");
+        var subtleAccentBrush = (System.Windows.Media.Brush)FindResource("MxAccentSubtleBrush");
+        var defaultBorderBrush = (System.Windows.Media.Brush)FindResource("CardStrokeColorDefaultBrush");
+        var defaultBgBrush = (System.Windows.Media.Brush)FindResource("CardBackgroundFillColorDefaultBrush");
+
+        ModePerDisplayCard.BorderBrush = defaultBorderBrush;
+        ModePerDisplayCard.Background = defaultBgBrush;
+        ModeDuplicateCard.BorderBrush = defaultBorderBrush;
+        ModeDuplicateCard.Background = defaultBgBrush;
+        ModeSpanCard.BorderBrush = defaultBorderBrush;
+        ModeSpanCard.Background = defaultBgBrush;
+
+        if (string.Equals(mode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+        {
+            ModeDuplicateCard.BorderBrush = accentBrush;
+            ModeDuplicateCard.Background = subtleAccentBrush;
+            ActiveModeBadgeText.Text = "Duplicate / Mirror";
+        }
+        else if (string.Equals(mode, "Span", StringComparison.OrdinalIgnoreCase))
+        {
+            ModeSpanCard.BorderBrush = accentBrush;
+            ModeSpanCard.Background = subtleAccentBrush;
+            ActiveModeBadgeText.Text = "Span Screen";
+        }
+        else
+        {
+            ModePerDisplayCard.BorderBrush = accentBrush;
+            ModePerDisplayCard.Background = subtleAccentBrush;
+            ActiveModeBadgeText.Text = "Per-Display";
+        }
+    }
+
+    private async void PlacementMode_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (sender is FrameworkElement card && card.Tag is string mode)
+        {
+            var app = (App)Application.Current;
+            app.SettingsService.Settings.Display.PlacementMode = mode;
+            await app.SettingsService.SaveAsync();
+
+            UpdatePlacementModeUI(mode);
+            Log.Information("User switched wallpaper placement mode to: {Mode}", mode);
+
+            // If Duplicate is selected, duplicate active wallpaper across all monitors
+            if (string.Equals(mode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+            {
+                var active = app.WallpaperService.GetAllActiveWallpapers().FirstOrDefault();
+                if (active != null)
+                {
+                    foreach (var m in app.MonitorService.Monitors)
+                    {
+                        await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
+                    }
+                    RefreshDisplays();
+                }
+            }
+        }
     }
 
     private void RefreshButton_Click(object sender, RoutedEventArgs e)

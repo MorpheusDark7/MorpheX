@@ -40,6 +40,20 @@ public partial class SettingsPage : Page
         ShowSystemStatsToggle.IsChecked = settings.Appearance.ShowSystemStats;
         CheckForUpdatesToggle.IsChecked = settings.General.CheckForUpdates;
 
+        string currentTheme = settings.Appearance.Theme ?? "System";
+        foreach (ComboBoxItem item in ThemeModeCombo.Items)
+        {
+            if (string.Equals((string)item.Tag, currentTheme, StringComparison.OrdinalIgnoreCase))
+            {
+                ThemeModeCombo.SelectedItem = item;
+                break;
+            }
+        }
+        if (ThemeModeCombo.SelectedItem == null && ThemeModeCombo.Items.Count > 0)
+        {
+            ThemeModeCombo.SelectedIndex = 0;
+        }
+
         if (app.AvailableUpdate != null)
         {
             ShowUpdateCard(app.AvailableUpdate);
@@ -152,6 +166,18 @@ public partial class SettingsPage : Page
         var app = (App)Application.Current;
         app.SettingsService.Settings.General.CheckForUpdates = CheckForUpdatesToggle.IsChecked == true;
         await app.SettingsService.SaveAsync();
+    }
+
+    private async void ThemeModeCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (ThemeModeCombo.SelectedItem is ComboBoxItem item && item.Tag is string mode)
+        {
+            var app = (App)Application.Current;
+            app.SettingsService.Settings.Appearance.Theme = mode;
+            await app.SettingsService.SaveAsync();
+            Services.ThemeService.ApplyTheme(mode);
+        }
     }
     #endregion
 

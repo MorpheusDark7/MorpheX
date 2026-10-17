@@ -78,14 +78,9 @@
                             </ui:CardAction.ContextMenu>
 
                             <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="148" />
-                                    <RowDefinition Height="62" />
-                                </Grid.RowDefinitions>
-
+                                <!-- Background Image Thumbnail filling entire 16:9 card -->
                                 <Border
-                                    Grid.Row="0"
-                                    CornerRadius="6,6,0,0"
+                                    CornerRadius="10"
                                     ClipToBounds="True"
                                     Background="#111118">
                                     <Grid>
@@ -99,82 +94,103 @@
                                             Source="{Binding PreviewImagePath, Converter={StaticResource ThumbnailConverter}}"
                                             Stretch="UniformToFill"
                                             RenderOptions.BitmapScalingMode="HighQuality" />
-                                        <Border VerticalAlignment="Bottom" Height="48">
-                                            <Border.Background>
-                                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                                    <GradientStop Color="#00000000" Offset="0" />
-                                                    <GradientStop Color="#99000000" Offset="1" />
-                                                </LinearGradientBrush>
-                                            </Border.Background>
-                                        </Border>
                                     </Grid>
                                 </Border>
 
-                                <Border
-                                    Grid.Row="0"
-                                    HorizontalAlignment="Left"
-                                    VerticalAlignment="Top"
-                                    Margin="8,8,0,0"
-                                    Padding="7,3"
-                                    CornerRadius="4"
-                                    Background="{StaticResource MxActiveBadgeBrush}"
-                                    Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <ui:SymbolIcon Symbol="Checkmark12" Foreground="White" FontSize="10" Margin="0,0,4,0" />
-                                        <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                <!-- Top Badges & Controls -->
+                                <Grid VerticalAlignment="Top" Margin="8,8,8,0">
+                                    <Border
+                                        HorizontalAlignment="Left"
+                                        Padding="7,3"
+                                        CornerRadius="4"
+                                        Background="{StaticResource MxActiveBadgeBrush}"
+                                        Visibility="{Binding IsActive, Converter={StaticResource BoolToVis}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <ui:SymbolIcon Symbol="Checkmark12" Foreground="White" FontSize="10" Margin="0,0,4,0" />
+                                            <TextBlock Text="ACTIVE" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button
+                                            Width="26" Height="26"
+                                            Margin="0,0,6,0"
+                                            Cursor="Hand"
+                                            PreviewMouseLeftButtonDown="FavoriteButton_PreviewMouseLeftButtonDown"
+                                            Click="FavoriteButton_Click"
+                                            ToolTip="Remove from Favorites">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border Background="#99000000" CornerRadius="13" Width="26" Height="26">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <ui:SymbolIcon Symbol="Heart24" FontSize="12" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+                                        </Button>
+
+                                        <Border
+                                            Padding="6,3"
+                                            CornerRadius="4"
+                                            Background="#99000000">
+                                            <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" />
+                                        </Border>
                                     </StackPanel>
-                                </Border>
+                                </Grid>
 
+                                <!-- Bottom Smoked-Glass Gradient Overlay with Title, Resolution, and ••• Menu Button -->
                                 <Border
-                                    Grid.Row="0"
-                                    HorizontalAlignment="Right"
-                                    VerticalAlignment="Top"
-                                    Margin="0,8,8,0"
-                                    Padding="7,3"
-                                    CornerRadius="4"
-                                    Background="#BB000000">
-                                    <TextBlock Text="{Binding Type}" FontSize="9" FontWeight="SemiBold" Foreground="White" />
-                                </Border>
-
-                                <Button
-                                    Grid.Row="0"
-                                    HorizontalAlignment="Right"
                                     VerticalAlignment="Bottom"
-                                    Margin="0,0,8,8"
-                                    Width="28" Height="28"
-                                    Cursor="Hand"
-                                    PreviewMouseLeftButtonDown="FavoriteButton_PreviewMouseLeftButtonDown"
-                                    Click="FavoriteButton_Click"
-                                    ToolTip="Remove from Favorites">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="#AA000000" CornerRadius="14" Width="28" Height="28">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <ui:SymbolIcon Symbol="Heart24" FontSize="13" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
-                                </Button>
-
-                                <Border Grid.Row="1" Padding="12,10,12,10">
+                                    Padding="10,14,8,8"
+                                    CornerRadius="0,0,10,10">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#00000000" Offset="0" />
+                                            <GradientStop Color="#CC09090D" Offset="0.38" />
+                                            <GradientStop Color="#F009090D" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
                                     <Grid>
-                                        <Grid.RowDefinitions>
-                                            <RowDefinition Height="Auto" />
-                                            <RowDefinition Height="Auto" />
-                                        </Grid.RowDefinitions>
-                                        <TextBlock
-                                            Grid.Row="0"
-                                            Text="{Binding Name}"
-                                            FontSize="13"
-                                            FontWeight="Medium"
-                                            TextTrimming="CharacterEllipsis"
-                                            Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                        <TextBlock Grid.Row="1" FontSize="11" Margin="0,3,0,0" Opacity="0.6"
-                                                   Foreground="{DynamicResource TextFillColorSecondaryBrush}">
-                                            <Run Text="{Binding Type, Mode=OneWay}" />
-                                            <Run Text=" · " />
-                                            <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='-'}" />
-                                        </TextBlock>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+
+                                        <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,6,0">
+                                            <TextBlock
+                                                Text="{Binding Name}"
+                                                FontSize="12"
+                                                FontWeight="SemiBold"
+                                                TextTrimming="CharacterEllipsis"
+                                                Foreground="#FFFFFF" />
+                                            <TextBlock FontSize="10" Margin="0,2,0,0" Opacity="0.75" Foreground="#CBD5E1">
+                                                <Run Text="{Binding Type, Mode=OneWay}" />
+                                                <Run Text=" · " />
+                                                <Run Text="{Binding ResolutionText, Mode=OneWay, TargetNullValue='Auto'}" />
+                                            </TextBlock>
+                                        </StackPanel>
+
+                                        <!-- ••• Card Context Menu Button -->
+                                        <Button
+                                            Grid.Column="1"
+                                            Width="26" Height="26"
+                                            Cursor="Hand"
+                                            ToolTip="More Options"
+                                            Click="CardMenuButton_Click">
+                                            <Button.Template>
+                                                <ControlTemplate TargetType="Button">
+                                                    <Border x:Name="btnBorder" Background="#55000000" CornerRadius="6" Width="26" Height="26">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                                    </Border>
+                                                    <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource MxAccentBrush}" />
+                                                        </Trigger>
+                                                    </ControlTemplate.Triggers>
+                                                </ControlTemplate>
+                                            </Button.Template>
+                                            <ui:SymbolIcon Symbol="MoreHorizontal24" FontSize="14" Foreground="#FFFFFF" />
+                                        </Button>
                                     </Grid>
                                 </Border>
                             </Grid>

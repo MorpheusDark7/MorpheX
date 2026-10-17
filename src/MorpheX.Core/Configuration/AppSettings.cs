@@ -287,11 +287,20 @@ public sealed class PerformanceSettings
 public sealed class DisplaySettings
 {
     public ScalingMode DefaultScalingMode { get; set; } = ScalingMode.Fill;
+
+    /// <summary>
+    /// Placement mode for multi-monitor setups:
+    /// "PerDisplay" = individual wallpaper per display,
+    /// "Duplicate" = clone same wallpaper across all displays,
+    /// "Span" = stretch single wallpaper across entire virtual screen span.
+    /// </summary>
+    public string PlacementMode { get; set; } = "PerDisplay";
 }
 
 public sealed class AppearanceSettings
 {
-    public string Theme { get; set; } = "Dark";
+    /// <summary>"System" (default), "Dark", or "Light"</summary>
+    public string Theme { get; set; } = "System";
     public string AccentColor { get; set; } = "System";
     public bool EnableAnimations { get; set; } = true;
     public bool ShowSystemStats { get; set; } = false;

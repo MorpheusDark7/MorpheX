@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>MorpheX.Core</RootNamespace>
     <AssemblyName>MorpheX.Core</AssemblyName>
-    <Version>0.1.55</Version>
+    <Version>0.1.56</Version>
     <Description>Core logic for MorpheX Live Wallpaper — models, services, providers, desktop integration</Description>
   </PropertyGroup>
 

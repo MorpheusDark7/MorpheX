@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Input;
 using Application = System.Windows.Application;
 using System.Windows.Controls;
@@ -342,6 +343,26 @@ public partial class LibraryPage : Page
     {
         e.Handled = true;
         ToggleFavorite(sender);
+    }
+
+    private void CardMenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is FrameworkElement btn)
+        {
+            DependencyObject? parent = btn;
+            while (parent != null && parent is not Wpf.Ui.Controls.CardAction)
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            if (parent is FrameworkElement card && card.ContextMenu != null)
+            {
+                card.ContextMenu.PlacementTarget = btn;
+                card.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                card.ContextMenu.IsOpen = true;
+            }
+        }
     }
 
     private void ToggleFavorite(object sender)

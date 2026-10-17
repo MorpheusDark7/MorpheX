@@ -365,7 +365,8 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     }
 
     /// <summary>
-    /// Probes a video file's tracks and duration using LibVLC asynchronously.
+    /// Probes a video file's dimensions and duration using native Windows Media Properties (WinRT).
+    /// Executes safely in microseconds without LibVLC native parse concurrency risks.
     /// Returns (width, height, durationSeconds) or null if unable to determine.
     /// </summary>
     public static async Task<(int width, int height, double? durationSeconds)?> ProbeVideoMetadataAsync(string filePath, CancellationToken ct = default)
@@ -375,24 +376,12 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
 
         try
         {
-            EnsureLibVLCInitialized();
-            if (_sharedLibVLC == null) return null;
-
-            using var media = new Media(_sharedLibVLC, filePath, FromType.FromPath);
-            await media.Parse(MediaParseOptions.ParseLocal, 5000, ct);
-
-            double? duration = media.Duration > 0 ? media.Duration / 1000.0 : null;
-
-            var tracks = media.Tracks;
-            if (tracks != null)
+            var file = await Windows.Storage.StorageFile.GetFileFromPathAsync(filePath);
+            var props = await file.Properties.GetVideoPropertiesAsync();
+            if (props.Width > 0 && props.Height > 0)
             {
-                foreach (var track in tracks)
-                {
-                    if (track.TrackType == TrackType.Video && track.Data.Video.Width > 0 && track.Data.Video.Height > 0)
-                    {
-                        return ((int)track.Data.Video.Width, (int)track.Data.Video.Height, duration);
-                    }
-                }
+                double? duration = props.Duration.TotalSeconds > 0 ? props.Duration.TotalSeconds : null;
+                return ((int)props.Width, (int)props.Height, duration);
             }
         }
         catch (Exception ex)
@@ -404,7 +393,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     }
 
     /// <summary>
-    /// Probes a video file's tracks using LibVLC to extract pixel width and height asynchronously.
+    /// Probes a video file's tracks to extract pixel width and height asynchronously.
     /// Returns (width, height) or null if unable to determine.
     /// </summary>
     public static async Task<(int width, int height)?> ProbeVideoDimensionsAsync(string filePath, CancellationToken ct = default)
@@ -414,7 +403,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     }
 
     /// <summary>
-    /// Probes a video file's tracks using LibVLC to extract pixel width and height.
+    /// Probes a video file to extract pixel width and height synchronously.
     /// Returns (width, height) or null if unable to determine.
     /// </summary>
     public static (int width, int height)? ProbeVideoDimensions(string filePath)

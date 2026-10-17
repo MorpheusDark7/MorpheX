@@ -51,7 +51,90 @@
             Grid.Row="2"
             VerticalScrollBarVisibility="Auto"
             HorizontalScrollBarVisibility="Disabled">
-            <ItemsControl x:Name="DisplaysList">
+            <StackPanel Margin="0,0,0,16">
+                <!-- Wallpaper Placement Mode Selector -->
+                <ui:Card Margin="0,0,0,20" Padding="18,16">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Wallpaper Placement Mode" FontSize="14" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                <TextBlock Text="Configure how wallpapers are distributed across your connected monitors"
+                                           FontSize="12" Opacity="0.65" Margin="0,2,0,0"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+                            <Border Grid.Column="1" VerticalAlignment="Center" Padding="10,4" CornerRadius="6"
+                                    Background="{DynamicResource MxAccentSubtleBrush}">
+                                <TextBlock x:Name="ActiveModeBadgeText" Text="Per-Display" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource MxAccentBrush}" />
+                            </Border>
+                        </Grid>
+
+                        <!-- 3 Segmented Placement Mode Options -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Option 1: Per-Display -->
+                            <Border x:Name="ModePerDisplayCard" Grid.Column="0"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="PlacementMode_Click" Tag="PerDisplay">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="Desktop24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Per-Display" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Individual wallpaper on each connected display." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option 2: Duplicate -->
+                            <Border x:Name="ModeDuplicateCard" Grid.Column="2"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="PlacementMode_Click" Tag="Duplicate">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="Copy24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Duplicate / Mirror" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Mirror active wallpaper across all connected displays." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Option 3: Span -->
+                            <Border x:Name="ModeSpanCard" Grid.Column="4"
+                                    Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                    BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1.5" CornerRadius="8" Padding="14,12" Cursor="Hand"
+                                    MouseLeftButtonUp="PlacementMode_Click" Tag="Span">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                        <ui:SymbolIcon Symbol="SlideGrid24" FontSize="18" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Margin="0,0,8,0" />
+                                        <TextBlock Text="Span Screen" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <TextBlock Text="Span a single widescreen wallpaper across all monitors." FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Opacity="0.7" TextWrapping="Wrap" LineHeight="16" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </StackPanel>
+                </ui:Card>
+
+                <TextBlock Text="CONNECTED MONITORS" Style="{StaticResource SectionHeaderStyle}" Margin="0,0,0,10" />
+
+                <ItemsControl x:Name="DisplaysList">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <ui:Card Margin="0,0,0,12" Padding="0">
@@ -287,6 +370,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </Page>

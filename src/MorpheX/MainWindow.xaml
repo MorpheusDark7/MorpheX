@@ -24,10 +24,25 @@
         <ui:TitleBar
             x:Name="TitleBar"
             Grid.Row="0"
-            Title="MorpheX Live"
-            Icon="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
             ShowMaximize="True"
-            ShowMinimize="True" />
+            ShowMinimize="True">
+            <ui:TitleBar.Header>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                    <Image
+                        Source="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
+                        Width="18" Height="18"
+                        RenderOptions.BitmapScalingMode="HighQuality"
+                        VerticalAlignment="Center"
+                        Margin="0,0,8,0" />
+                    <TextBlock
+                        Text="MorpheX Live"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        VerticalAlignment="Center" />
+                </StackPanel>
+            </ui:TitleBar.Header>
+        </ui:TitleBar>
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>

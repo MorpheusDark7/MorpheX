@@ -521,18 +521,14 @@ public partial class App : Application
             Padding = new System.Windows.Forms.Padding(4, 8, 4, 8),
         };
 
-        var header = new System.Windows.Forms.ToolStripMenuItem("MorpheX Live")
+        var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.56";
+        var header = new System.Windows.Forms.ToolStripMenuItem($"MorpheX Live  •  {verStr}")
         {
             Enabled = false,
-            Font = new System.Drawing.Font(menu.Font, System.Drawing.FontStyle.Bold)
-        };
-        var nowPlayingItem = new System.Windows.Forms.ToolStripMenuItem("")
-        {
-            Enabled = false,
-            ForeColor = System.Drawing.Color.FromArgb(160, 160, 160)
+            Font = new System.Drawing.Font(menu.Font.FontFamily, 9.25f, System.Drawing.FontStyle.Bold)
         };
         menu.Items.Add(header);
-        menu.Items.Add(nowPlayingItem);
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
 
         var pauseResumeItem = new System.Windows.Forms.ToolStripMenuItem(
@@ -591,12 +587,7 @@ public partial class App : Application
             pauseResumeItem.Text = PlaybackService.IsManuallyPaused ? "Resume Wallpaper" : "Pause Wallpaper";
             muteItem.Text = SettingsService.Settings.Audio.Enabled ? "Mute Audio" : "Unmute Audio";
 
-            // Update tray tooltip and now-playing label
             var activeWallpapers = WallpaperService.GetAllActiveWallpapers();
-            string nowPlaying = activeWallpapers.Count > 0
-                ? "♪ " + string.Join(" / ", activeWallpapers.Select(w => w.Name))
-                : "No wallpaper active";
-            nowPlayingItem.Text = nowPlaying.Length > 63 ? nowPlaying[..60] + "…" : nowPlaying;
 
             // Also update tray icon tooltip (max 63 chars for WinForms)
             string tooltip = activeWallpapers.Count > 0

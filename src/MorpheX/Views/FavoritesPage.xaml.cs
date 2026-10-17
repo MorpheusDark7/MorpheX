@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using System.Windows.Controls;
 using Application = System.Windows.Application;
 using MorpheX.Core.Models;
@@ -88,6 +89,26 @@ public partial class FavoritesPage : Page
     {
         e.Handled = true;
         RemoveFromFavorites(sender);
+    }
+
+    private void CardMenuButton_Click(object sender, RoutedEventArgs e)
+    {
+        e.Handled = true;
+        if (sender is FrameworkElement btn)
+        {
+            DependencyObject? parent = btn;
+            while (parent != null && parent is not Wpf.Ui.Controls.CardAction)
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            if (parent is FrameworkElement card && card.ContextMenu != null)
+            {
+                card.ContextMenu.PlacementTarget = btn;
+                card.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                card.ContextMenu.IsOpen = true;
+            }
+        }
     }
 
     private void RemoveFromFavorites(object sender)

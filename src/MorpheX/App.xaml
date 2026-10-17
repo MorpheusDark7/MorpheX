@@ -101,10 +101,14 @@
             </Style>
 
             <Style x:Key="WallpaperCardStyle" TargetType="ui:CardAction">
-                <Setter Property="Width" Value="240" />
-                <Setter Property="Margin" Value="0,0,14,14" />
+                <Setter Property="Width" Value="270" />
+                <Setter Property="Height" Value="152" />
+                <Setter Property="Margin" Value="0,0,16,16" />
                 <Setter Property="Padding" Value="0" />
                 <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="ClipToBounds" Value="True" />
                 <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
                 <Setter Property="RenderTransform">
                     <Setter.Value>

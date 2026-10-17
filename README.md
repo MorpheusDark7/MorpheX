@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.55-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.56-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,14 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.56
+- **Startup Crash Fix** — Eliminated LibVLC background parse access violation (`ntdll.dll 0xc0000005`) by migrating video resolution & duration probing to native Windows Media Properties (WinRT).
+- **Brand Identity on Title Bar** — Clean MorpheX Live branding with sleek 18×18 app icon and semi-bold typography on the top left.
+- **Full Light & Dark Theme Support** — Added comprehensive Light, Dark, and "System Default" (tracking Windows OS preferences) theme switching.
+- **Cinematic 16:9 Widescreen Cards** — Modern wallpaper cards with full-bleed thumbnail, smoked-glass gradient overlay, clean title + resolution typography, and integrated `•••` action button.
+- **Dedicated Placement Modes** — Segmented multi-monitor placement switcher (`Per-Display`, `Duplicate / Mirror`, `Span Screen`) on the Displays page.
+- **Compact Tray Context Menu** — Streamlined tray menu showing `MorpheX Live • v0.1.56`, keeping the tray popup sleek and compact.
 
 ### v0.1.55
 - **Dynamic System Accent Theme Adaptation** — Real-time Windows 11 system accent color synchronization (e.g. Razer Green `#44D62C`, Slate Blue, Purple) with automated WCAG contrast protection that dynamically flips button text to dark charcoal `#0F172A` on bright/neon accents and crisp white `#FFFFFF` on deep tones.
