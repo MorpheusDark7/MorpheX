@@ -87,7 +87,6 @@ public partial class MainWindow : FluentWindow
             StatsCpuText.Text = $"{metrics.CpuPercent:0.0}%";
             StatsGpuText.Text = $"{metrics.GpuPercent:0.0}%";
             StatsRamText.Text = $"{metrics.RamUsedGb:0.0} / {metrics.RamTotalGb:0.0} GB ({metrics.RamPercent:0}%)";
-            StatsAppRamText.Text = $"{metrics.AppWorkingSetMb} MB";
         });
     }
 
@@ -272,5 +271,25 @@ public partial class MainWindow : FluentWindow
         }
 
         base.OnClosing(e);
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        if (PresentationSource.FromVisual(this) is HwndSource source)
+        {
+            source.AddHook(WndProc);
+        }
+    }
+
+    private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    {
+        const int WM_DWMCOLORIZATIONCOLORCHANGED = 0x0320;
+        const int WM_SETTINGCHANGE = 0x001A;
+        if (msg is WM_DWMCOLORIZATIONCOLORCHANGED or WM_SETTINGCHANGE)
+        {
+            Services.ThemeService.ApplySystemThemeAndAccent();
+        }
+        return IntPtr.Zero;
     }
 }

@@ -94,6 +94,8 @@ public partial class App : Application
         Log.Information("MorpheX Live starting up");
         Log.Information("═══════════════════════════════════════");
 
+        ThemeService.Initialize();
+
         if (!_startMinimized)
         {
             _splash = new SplashWindow();

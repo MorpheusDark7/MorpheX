@@ -13,14 +13,59 @@
                 <ui:ControlsDictionary />
             </ResourceDictionary.MergedDictionaries>
 
+            <!-- Dynamic System Accent Brushes with Opacity & Contrast Variants -->
             <SolidColorBrush x:Key="MxAccentBrush" Color="#38BDF8" />
+            <SolidColorBrush x:Key="MxAccentLightBrush" Color="#7DD3FC" />
+            <SolidColorBrush x:Key="MxAccentDarkBrush" Color="#0284C7" />
             <SolidColorBrush x:Key="MxAccentSubtleBrush" Color="#1A38BDF8" />
+            <SolidColorBrush x:Key="MxAccentHoverBrush" Color="#3338BDF8" />
+            <SolidColorBrush x:Key="MxAccentBorderBrush" Color="#4D38BDF8" />
+            <SolidColorBrush x:Key="MxAccentForegroundBrush" Color="#FFFFFF" />
             <SolidColorBrush x:Key="MxActiveBadgeBrush" Color="#0D7A45" />
 
             <SolidColorBrush x:Key="MxStatusBarBrush" Color="#0F0F0F" />
             <SolidColorBrush x:Key="MxStatusBarBorderBrush" Color="#222222" />
             <SolidColorBrush x:Key="MxPillBackgroundBrush" Color="#1C1C1E" />
             <SolidColorBrush x:Key="MxPillBorderBrush" Color="#2C2C2E" />
+
+            <!-- Refined Subtle Accent Button Style (Opacity Layer + Accent Border) -->
+            <Style x:Key="MxSubtleAccentButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{DynamicResource MxAccentSubtleBrush}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource MxAccentBorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                <Setter Property="Padding" Value="14,6" />
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="6"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource MxAccentHoverBrush}" />
+                                    <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource MxAccentBrush}" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.8" />
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter TargetName="border" Property="Opacity" Value="0.45" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
 
             <Style x:Key="PageTitleStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="26" />

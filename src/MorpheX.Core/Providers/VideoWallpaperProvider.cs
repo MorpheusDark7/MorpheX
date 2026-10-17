@@ -365,10 +365,10 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     }
 
     /// <summary>
-    /// Probes a video file's tracks using LibVLC to extract pixel width and height.
-    /// Returns (width, height) or null if unable to determine.
+    /// Probes a video file's tracks and duration using LibVLC asynchronously.
+    /// Returns (width, height, durationSeconds) or null if unable to determine.
     /// </summary>
-    public static (int width, int height)? ProbeVideoDimensions(string filePath)
+    public static async Task<(int width, int height, double? durationSeconds)?> ProbeVideoMetadataAsync(string filePath, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(filePath) || !File.Exists(filePath))
             return null;
@@ -376,8 +376,13 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
         try
         {
             EnsureLibVLCInitialized();
-            using var media = new Media(_sharedLibVLC!, filePath, FromType.FromPath);
-            media.Parse(MediaParseOptions.ParseLocal);
+            if (_sharedLibVLC == null) return null;
+
+            using var media = new Media(_sharedLibVLC, filePath, FromType.FromPath);
+            await media.Parse(MediaParseOptions.ParseLocal, 5000, ct);
+
+            double? duration = media.Duration > 0 ? media.Duration / 1000.0 : null;
+
             var tracks = media.Tracks;
             if (tracks != null)
             {
@@ -385,17 +390,43 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
                 {
                     if (track.TrackType == TrackType.Video && track.Data.Video.Width > 0 && track.Data.Video.Height > 0)
                     {
-                        return ((int)track.Data.Video.Width, (int)track.Data.Video.Height);
+                        return ((int)track.Data.Video.Width, (int)track.Data.Video.Height, duration);
                     }
                 }
             }
         }
         catch (Exception ex)
         {
-            Log.Debug(ex, "Failed to probe video dimensions for {Path}", filePath);
+            Log.Debug(ex, "Failed to probe video metadata for {Path}", filePath);
         }
 
         return null;
+    }
+
+    /// <summary>
+    /// Probes a video file's tracks using LibVLC to extract pixel width and height asynchronously.
+    /// Returns (width, height) or null if unable to determine.
+    /// </summary>
+    public static async Task<(int width, int height)?> ProbeVideoDimensionsAsync(string filePath, CancellationToken ct = default)
+    {
+        var meta = await ProbeVideoMetadataAsync(filePath, ct);
+        return meta.HasValue ? (meta.Value.width, meta.Value.height) : null;
+    }
+
+    /// <summary>
+    /// Probes a video file's tracks using LibVLC to extract pixel width and height.
+    /// Returns (width, height) or null if unable to determine.
+    /// </summary>
+    public static (int width, int height)? ProbeVideoDimensions(string filePath)
+    {
+        try
+        {
+            return Task.Run(async () => await ProbeVideoDimensionsAsync(filePath)).GetAwaiter().GetResult();
+        }
+        catch
+        {
+            return null;
+        }
     }
 
 

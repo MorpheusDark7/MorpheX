@@ -192,7 +192,7 @@ public sealed class LibraryService : ILibraryService
                             .Where(w => string.IsNullOrEmpty(w.ThumbnailPath) || !File.Exists(w.ThumbnailPath))
                             .ToList();
                         var wallpapersMissingDims = _manifest.Wallpapers
-                            .Where(w => (w.Width == null || w.Height == null) && File.Exists(w.EffectivePath))
+                            .Where(w => (w.Width == null || w.Height == null || w.Width <= 0 || w.Height <= 0) && File.Exists(w.EffectivePath))
                             .ToList();
 
                         if (wallpapersMissingThumbs.Count > 0 || wallpapersMissingDims.Count > 0)
@@ -226,11 +226,15 @@ public sealed class LibraryService : ILibraryService
                                     }
                                     else if (w.Type == WallpaperType.Video)
                                     {
-                                        var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(w.EffectivePath);
-                                        if (dims.HasValue)
+                                        var meta = await Providers.VideoWallpaperProvider.ProbeVideoMetadataAsync(w.EffectivePath, ct);
+                                        if (meta.HasValue)
                                         {
-                                            w.Width = dims.Value.width;
-                                            w.Height = dims.Value.height;
+                                            w.Width = meta.Value.width;
+                                            w.Height = meta.Value.height;
+                                            if (meta.Value.durationSeconds.HasValue && (!w.Duration.HasValue || w.Duration <= 0))
+                                            {
+                                                w.Duration = meta.Value.durationSeconds;
+                                            }
                                             updated = true;
                                         }
                                     }
@@ -374,11 +378,15 @@ public sealed class LibraryService : ILibraryService
             }
             else if (type == WallpaperType.Video)
             {
-                var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(filePath);
-                if (dims.HasValue)
+                var meta = await Providers.VideoWallpaperProvider.ProbeVideoMetadataAsync(filePath, ct);
+                if (meta.HasValue)
                 {
-                    wallpaper.Width = dims.Value.width;
-                    wallpaper.Height = dims.Value.height;
+                    wallpaper.Width = meta.Value.width;
+                    wallpaper.Height = meta.Value.height;
+                    if (meta.Value.durationSeconds.HasValue)
+                    {
+                        wallpaper.Duration = meta.Value.durationSeconds;
+                    }
                 }
             }
 
@@ -913,11 +921,15 @@ public sealed class LibraryService : ILibraryService
                 }
                 else if (type == WallpaperType.Video)
                 {
-                    var dims = Providers.VideoWallpaperProvider.ProbeVideoDimensions(filePath);
-                    if (dims.HasValue)
+                    var meta = await Providers.VideoWallpaperProvider.ProbeVideoMetadataAsync(filePath, ct);
+                    if (meta.HasValue)
                     {
-                        wallpaper.Width = dims.Value.width;
-                        wallpaper.Height = dims.Value.height;
+                        wallpaper.Width = meta.Value.width;
+                        wallpaper.Height = meta.Value.height;
+                        if (meta.Value.durationSeconds.HasValue)
+                        {
+                            wallpaper.Duration = meta.Value.durationSeconds;
+                        }
                     }
                 }
 

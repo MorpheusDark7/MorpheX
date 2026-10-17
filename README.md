@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.54-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.55-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,12 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.55
+- **Dynamic System Accent Theme Adaptation** — Real-time Windows 11 system accent color synchronization (e.g. Razer Green `#44D62C`, Slate Blue, Purple) with automated WCAG contrast protection that dynamically flips button text to dark charcoal `#0F172A` on bright/neon accents and crisp white `#FFFFFF` on deep tones.
+- **Subtle Opacity Accent Styling** — Introduced refined translucent 15% opacity accent washes (`MxAccentSubtleBrush`) and 35% accent borders so vibrant accent themes never overpower dark desktop aesthetics.
+- **Video Resolution & Metadata Probing Fix** — Resolved an asynchronous LibVLC probing race condition so video wallpaper resolutions (4K, 1440p, 1080p) and durations reliably populate on Library and Favorites cards with reactive `INotifyPropertyChanged` UI updates.
+- **Clean System Status Bar** — Removed the application working set memory pill (`APP: 0 MB`) from the bottom status bar and set system metrics to disabled by default, keeping background resource usage minimal.
 
 ### v0.1.54
 - **Active Internet Connection Warning** — Added a distinct red warning badge (`[ 🌐 Requires Internet ]`) to the Weather Widget in Widgets settings so users immediately know network connectivity is required.

@@ -38,7 +38,7 @@
                 <TextBlock x:Name="HeadingLabel" Text="Name your profile" FontSize="15" FontWeight="SemiBold" Foreground="#FFFFFF" Margin="0,0,0,4"/>
                 <TextBlock x:Name="DescriptionLabel" Text="Save your current widget positions, styling, and desktop mood." FontSize="12" Foreground="#9099B0" TextWrapping="Wrap" LineHeight="18" Margin="0,0,0,12"/>
                 
-                <TextBox x:Name="InputBox" MaxLength="28" FontSize="15" FontFamily="Segoe UI, Bahnschrift" Foreground="#FFFFFF" Background="#11111A" BorderBrush="#3B3B52" BorderThickness="1" Padding="10,8" CaretBrush="#38BDF8" SelectionBrush="#38BDF8" TextChanged="InputBox_TextChanged" KeyDown="InputBox_KeyDown"/>
+                <TextBox x:Name="InputBox" MaxLength="28" FontSize="15" FontFamily="Segoe UI, Bahnschrift" Foreground="#FFFFFF" Background="#11111A" BorderBrush="#3B3B52" BorderThickness="1" Padding="10,8" CaretBrush="{DynamicResource MxAccentBrush}" SelectionBrush="{DynamicResource MxAccentBrush}" TextChanged="InputBox_TextChanged" KeyDown="InputBox_KeyDown"/>
                 <TextBlock x:Name="CharCounter" Text="0 / 28" FontSize="10" Foreground="#606080" HorizontalAlignment="Right" Margin="0,4,0,8"/>
 
                 <CheckBox x:Name="IncludeWallpaperCheck" Content="Include current wallpaper in this profile" IsChecked="True" Foreground="#CBD5E1" FontSize="12" Cursor="Hand"/>
@@ -48,7 +48,7 @@
             <Border Grid.Row="2" Background="#14141E" CornerRadius="0,0,11,11" BorderBrush="#242436" BorderThickness="0,1,0,0" Padding="20,12">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Cancel" Width="84" Height="32" Margin="0,0,10,0" FontSize="13" Foreground="#94A3B8" Background="#222230" BorderBrush="#333348" BorderThickness="1" Cursor="Hand" IsCancel="True" Click="Cancel_Click"/>
-                    <Button x:Name="OkButton" Content="Save Profile" Width="100" Height="32" FontSize="13" FontWeight="SemiBold" Foreground="#FFFFFF" Background="#38BDF8" BorderThickness="0" Cursor="Hand" IsDefault="True" Click="Ok_Click"/>
+                    <Button x:Name="OkButton" Content="Save Profile" Width="100" Height="32" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource MxAccentForegroundBrush}" Background="{DynamicResource MxAccentBrush}" BorderThickness="0" Cursor="Hand" IsDefault="True" Click="Ok_Click"/>
                 </StackPanel>
             </Border>
         </Grid>

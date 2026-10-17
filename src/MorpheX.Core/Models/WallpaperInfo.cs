@@ -1,37 +1,159 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 
 namespace MorpheX.Core.Models;
 
-public sealed class WallpaperInfo
+public sealed class WallpaperInfo : INotifyPropertyChanged
 {
-    public string Id { get; set; } = Guid.NewGuid().ToString("N");
+    private string _id = Guid.NewGuid().ToString("N");
+    private string _name = string.Empty;
+    private WallpaperType _type;
+    private string _sourcePath = string.Empty;
+    private string? _importedPath;
+    private string? _thumbnailPath;
+    private int? _width;
+    private int? _height;
+    private double? _duration;
+    private long _fileSize;
+    private bool _isFavorite;
+    private List<string> _tags = new();
+    private DateTimeOffset _dateAdded = DateTimeOffset.UtcNow;
+    private bool _isActive;
 
-    public string Name { get; set; } = string.Empty;
+    public string Id
+    {
+        get => _id;
+        set => SetField(ref _id, value);
+    }
 
-    public WallpaperType Type { get; set; }
+    public string Name
+    {
+        get => _name;
+        set => SetField(ref _name, value);
+    }
 
-    public string SourcePath { get; set; } = string.Empty;
+    public WallpaperType Type
+    {
+        get => _type;
+        set => SetField(ref _type, value);
+    }
 
-    public string? ImportedPath { get; set; }
+    public string SourcePath
+    {
+        get => _sourcePath;
+        set
+        {
+            if (SetField(ref _sourcePath, value))
+            {
+                OnPropertyChanged(nameof(EffectivePath));
+                OnPropertyChanged(nameof(PreviewImagePath));
+                OnPropertyChanged(nameof(HasPreviewImage));
+            }
+        }
+    }
 
-    public string? ThumbnailPath { get; set; }
+    public string? ImportedPath
+    {
+        get => _importedPath;
+        set
+        {
+            if (SetField(ref _importedPath, value))
+            {
+                OnPropertyChanged(nameof(EffectivePath));
+                OnPropertyChanged(nameof(PreviewImagePath));
+                OnPropertyChanged(nameof(HasPreviewImage));
+            }
+        }
+    }
 
-    public int? Width { get; set; }
+    public string? ThumbnailPath
+    {
+        get => _thumbnailPath;
+        set
+        {
+            if (SetField(ref _thumbnailPath, value))
+            {
+                OnPropertyChanged(nameof(PreviewImagePath));
+                OnPropertyChanged(nameof(HasPreviewImage));
+            }
+        }
+    }
 
-    public int? Height { get; set; }
+    public int? Width
+    {
+        get => _width;
+        set
+        {
+            if (SetField(ref _width, value))
+            {
+                OnPropertyChanged(nameof(ResolutionText));
+            }
+        }
+    }
 
-    public double? Duration { get; set; }
+    public int? Height
+    {
+        get => _height;
+        set
+        {
+            if (SetField(ref _height, value))
+            {
+                OnPropertyChanged(nameof(ResolutionText));
+            }
+        }
+    }
 
-    public long FileSize { get; set; }
+    public double? Duration
+    {
+        get => _duration;
+        set => SetField(ref _duration, value);
+    }
 
-    public bool IsFavorite { get; set; }
+    public long FileSize
+    {
+        get => _fileSize;
+        set
+        {
+            if (SetField(ref _fileSize, value))
+            {
+                OnPropertyChanged(nameof(FileSizeText));
+            }
+        }
+    }
+
+    public bool IsFavorite
+    {
+        get => _isFavorite;
+        set
+        {
+            if (SetField(ref _isFavorite, value))
+            {
+                OnPropertyChanged(nameof(FavoriteBrush));
+            }
+        }
+    }
 
     /// <summary>
     /// User-defined labels used for searching and organizing the local library.
     /// </summary>
-    public List<string> Tags { get; set; } = new();
+    public List<string> Tags
+    {
+        get => _tags;
+        set
+        {
+            if (SetField(ref _tags, value))
+            {
+                OnPropertyChanged(nameof(TagsText));
+            }
+        }
+    }
 
-    public DateTimeOffset DateAdded { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset DateAdded
+    {
+        get => _dateAdded;
+        set => SetField(ref _dateAdded, value);
+    }
 
     [JsonIgnore]
     public string EffectivePath => !string.IsNullOrEmpty(ImportedPath) ? ImportedPath : SourcePath;
@@ -64,7 +186,11 @@ public sealed class WallpaperInfo
     }
 
     [JsonIgnore]
-    public bool IsActive { get; set; }
+    public bool IsActive
+    {
+        get => _isActive;
+        set => SetField(ref _isActive, value);
+    }
 
     [JsonIgnore]
     public string FavoriteBrush => IsFavorite ? "#10B981" : "#88FFFFFF";
@@ -96,4 +222,19 @@ public sealed class WallpaperInfo
 
     [JsonIgnore]
     public bool HasPreviewImage => !string.IsNullOrEmpty(PreviewImagePath) && File.Exists(PreviewImagePath);
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        return true;
+    }
+
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
 }

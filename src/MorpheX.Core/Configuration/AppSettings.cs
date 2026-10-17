@@ -294,7 +294,7 @@ public sealed class AppearanceSettings
     public string Theme { get; set; } = "Dark";
     public string AccentColor { get; set; } = "System";
     public bool EnableAnimations { get; set; } = true;
-    public bool ShowSystemStats { get; set; } = true;
+    public bool ShowSystemStats { get; set; } = false;
 }
 
 public sealed class AdvancedSettings

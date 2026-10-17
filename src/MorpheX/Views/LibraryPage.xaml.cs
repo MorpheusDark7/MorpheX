@@ -20,11 +20,30 @@ public partial class LibraryPage : Page
     {
         InitializeComponent();
         Loaded += OnLoaded;
+        Unloaded += OnUnloaded;
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        if (Application.Current is App app && app.LibraryService != null)
+        {
+            app.LibraryService.LibraryChanged -= OnLibraryChanged;
+            app.LibraryService.LibraryChanged += OnLibraryChanged;
+        }
         RefreshWallpaperList();
+    }
+
+    private void OnUnloaded(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current is App app && app.LibraryService != null)
+        {
+            app.LibraryService.LibraryChanged -= OnLibraryChanged;
+        }
+    }
+
+    private void OnLibraryChanged(object? sender, EventArgs e)
+    {
+        Dispatcher.InvokeAsync(() => RefreshWallpaperList());
     }
 
     private List<WallpaperInfo> _allWallpapers = new();

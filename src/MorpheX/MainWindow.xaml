@@ -153,16 +153,10 @@
                             <TextBlock x:Name="StatsGpuText" Text="0.0%" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
-                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3" Margin="0,0,6,0">
+                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Text="RAM" FontSize="10" FontWeight="Bold" Foreground="#34D399" Margin="0,0,5,0" VerticalAlignment="Center" />
                             <TextBlock x:Name="StatsRamText" Text="0.0 GB" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Border>
-                    <Border Background="{StaticResource MxPillBackgroundBrush}" BorderBrush="{StaticResource MxPillBorderBrush}" BorderThickness="1" CornerRadius="5" Padding="8,3">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="APP" FontSize="10" FontWeight="Bold" Foreground="#FBBF24" Margin="0,0,5,0" VerticalAlignment="Center" />
-                            <TextBlock x:Name="StatsAppRamText" Text="0 MB" FontSize="11" Foreground="{DynamicResource TextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                 </StackPanel>
