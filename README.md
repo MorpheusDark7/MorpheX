@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.57-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.58-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -164,6 +164,13 @@ MorpheX/
 - **Vector UI & Fluent Visuals** — Replaced legacy unicode characters and emojis with clean vector layout previews (Horizontal Row, Vertical Column, 2x2 Grid), font preview badges (`Aa`, `08`, `>_`, `MON`), casing chips (`AA`, `Aa`, `aa`), and native Segoe Fluent icons (`SymbolIcon`).
 - **Library Hover Card Fix** — Removed the oversized semi-transparent hover preview tooltip in Library that caused text bleed-through and obscured adjacent wallpaper cards.
 - **Clean Lightweight Engine** — Removed experimental taskbar hooks and background SWCA loops, keeping MorpheX 100% stable, safe, and zero-overhead.
+
+### v0.1.58
+- **Fixed Keybinds Menu** — Replaced missing icon symbol with `Play24` and hardened hotkey recording handlers, allowing the Keybinds menu to open reliably without exceptions.
+- **Edge-to-Edge Clean Interface** — Completely removed the bottom "Engine Active" status bar to provide a clean, modern, borderless window aesthetic.
+- **Unified Sidebar Navigation** — Moved Settings up into the primary navigation list alongside Library, Favorites, Displays, Widgets, Profiles, Effects, and Keybinds.
+- **Streamlined Titlebar** — Removed the titlebar theme toggle button in favor of unified appearance settings under the Settings page.
+- **Performance & UI Responsiveness** — Implemented an in-memory decoded bitmap cache for `ThumbnailImageConverter` to eliminate duplicate disk reads and decoding when switching views or filtering wallpapers.
 
 ### v0.1.51
 - **Bundled CC0 Master Wallpapers** — Ships with high-resolution curated CC0 wallpapers out-of-the-box for a rich first-run experience.

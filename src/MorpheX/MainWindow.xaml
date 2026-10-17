@@ -18,7 +18,6 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <ui:TitleBar
@@ -42,32 +41,6 @@
                         VerticalAlignment="Center" />
                 </StackPanel>
             </ui:TitleBar.Header>
-            <ui:TitleBar.TrailingContent>
-                <Button
-                    x:Name="ThemeToggleButton"
-                    Width="32" Height="28"
-                    Margin="0,0,6,0"
-                    Padding="0"
-                    Background="Transparent"
-                    BorderThickness="0"
-                    Cursor="Hand"
-                    ToolTip="Toggle Theme (Light / Dark)"
-                    Click="ThemeToggleButton_Click">
-                    <Button.Template>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="btnBorder" Background="Transparent" CornerRadius="6" Width="32" Height="28">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="btnBorder" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Button.Template>
-                    <ui:SymbolIcon x:Name="ThemeToggleIcon" Symbol="WeatherSunny24" FontSize="16" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                </Button>
-            </ui:TitleBar.TrailingContent>
         </ui:TitleBar>
 
         <Grid Grid.Row="1">
@@ -147,15 +120,12 @@
                         Content="Keybinds"
                         Icon="{ui:SymbolIcon Keyboard24}"
                         TargetPageType="{x:Type local:KeybindsPage}" />
-                </ui:NavigationView.MenuItems>
-
-                <ui:NavigationView.FooterMenuItems>
                     <ui:NavigationViewItem
                         x:Name="NavSettings"
                         Content="Settings"
                         Icon="{ui:SymbolIcon Settings24}"
                         TargetPageType="{x:Type local:SettingsPage}" />
-                </ui:NavigationView.FooterMenuItems>
+                </ui:NavigationView.MenuItems>
 
             </ui:NavigationView>
 
@@ -166,24 +136,5 @@
                 NavigationUIVisibility="Hidden"
                 Margin="0" />
         </Grid>
-
-        <Border
-            x:Name="SystemStatsBar"
-            Grid.Row="2"
-            Height="32"
-            Background="{StaticResource MxStatusBarBrush}"
-            BorderBrush="{StaticResource MxStatusBarBorderBrush}"
-            BorderThickness="0,1,0,0"
-            Padding="16,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="0.7">
-                <Ellipse Width="6" Height="6" Fill="#10B981" Margin="0,0,7,0" />
-                <TextBlock
-                    Text="Engine Active"
-                    FontSize="11"
-                    FontWeight="Medium"
-                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                    VerticalAlignment="Center" />
-            </StackPanel>
-        </Border>
     </Grid>
 </ui:FluentWindow>

@@ -107,7 +107,7 @@
                 <ui:CardControl.Header>
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-                            <ui:SymbolIcon Symbol="PlayPause24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
+                            <ui:SymbolIcon Symbol="Play24" FontSize="15" Margin="0,0,8,0" Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" VerticalAlignment="Center" />
                             <TextBlock Text="Play / Pause Wallpaper" Style="{StaticResource SettingLabelStyle}" VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock Text="Instantly pause video rendering to free up 100% GPU resources, or resume playback" Style="{StaticResource SettingDescriptionStyle}" />

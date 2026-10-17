@@ -59,18 +59,24 @@ public partial class KeybindsPage : Page
         SetButtonState(HotkeyResetEffectsBtn, hotkeys.ResetEffects, "ResetEffects");
     }
 
-    private void SetButtonState(Button btn, HotkeyBinding binding, string targetKey)
+    private void SetButtonState(Button? btn, HotkeyBinding? binding, string targetKey)
     {
+        if (btn == null) return;
+
         if (_recordingTarget == targetKey)
         {
             btn.Content = "Press shortcut...";
-            btn.Foreground = (Brush)FindResource("MxAccentBrush");
+            if (TryFindResource("MxAccentBrush") is Brush b)
+                btn.Foreground = b;
             btn.FontWeight = FontWeights.SemiBold;
         }
         else
         {
-            btn.Content = binding.DisplayText;
-            btn.Foreground = (Brush)FindResource("TextFillColorPrimaryBrush");
+            btn.Content = binding?.DisplayText ?? "Not Assigned";
+            if (TryFindResource("TextFillColorPrimaryBrush") is Brush b)
+                btn.Foreground = b;
+            else
+                btn.ClearValue(System.Windows.Controls.Control.ForegroundProperty);
             btn.FontWeight = FontWeights.Normal;
         }
     }

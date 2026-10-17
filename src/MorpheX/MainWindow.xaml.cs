@@ -59,35 +59,6 @@ public partial class MainWindow : FluentWindow
     private void MainWindow_Loaded(object sender, RoutedEventArgs e)
     {
         ClampToWorkArea();
-        UpdateThemeToggleIcon();
-    }
-
-    private async void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
-    {
-        var app = (App)System.Windows.Application.Current;
-        var effective = Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme();
-        string newMode = (effective == Wpf.Ui.Appearance.ApplicationTheme.Light) ? "Dark" : "Light";
-
-        app.SettingsService.Settings.Appearance.Theme = newMode;
-        await app.SettingsService.SaveAsync();
-
-        Services.ThemeService.ApplyTheme(newMode);
-        UpdateThemeToggleIcon(newMode);
-    }
-
-    public void UpdateThemeToggleIcon(string? themeMode = null)
-    {
-        var effective = Wpf.Ui.Appearance.ApplicationThemeManager.GetAppTheme();
-        if (effective == Wpf.Ui.Appearance.ApplicationTheme.Light)
-        {
-            ThemeToggleIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.WeatherMoon24;
-            ThemeToggleButton.ToolTip = "Switch to Dark Theme";
-        }
-        else
-        {
-            ThemeToggleIcon.Symbol = Wpf.Ui.Controls.SymbolRegular.WeatherSunny24;
-            ThemeToggleButton.ToolTip = "Switch to Light Theme";
-        }
     }
 
     private void ClampToWorkArea()
@@ -290,7 +261,6 @@ public partial class MainWindow : FluentWindow
             Dispatcher.InvokeAsync(() =>
             {
                 Services.ThemeService.ApplyTheme();
-                UpdateThemeToggleIcon();
             });
         }
         return IntPtr.Zero;
