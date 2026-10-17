@@ -1,6 +1,6 @@
 #define MyAppName "MorpheX Live"
 #ifndef MyAppVersion
-#define MyAppVersion "0.1.58"
+#define MyAppVersion "0.1.59"
 #endif
 #define MyAppPublisher "MorpheusDark"
 #define MyAppExeName "MorpheX.exe"
@@ -45,7 +45,6 @@ Name: "startwithwindows"; Description: "Launch MorpheX automatically when Window
 [Files]
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "src\MorpheX\Assets\Branding\morphex-icon.ico"; DestDir: "{app}\Assets\Branding"; Flags: ignoreversion
-Source: "src\MorpheX\Assets\DefaultWallpapers\*"; DestDir: "{app}\Assets\DefaultWallpapers"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\Assets\Branding\morphex-icon.ico"

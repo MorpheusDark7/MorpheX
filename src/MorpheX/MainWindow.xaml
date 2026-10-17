@@ -8,10 +8,11 @@
     Icon="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.ico"
     Width="1200"
     Height="750"
-    MinWidth="900"
-    MinHeight="600"
+    MinWidth="720"
+    MinHeight="560"
     WindowStartupLocation="CenterScreen"
     ExtendsContentIntoTitleBar="True"
+    SizeChanged="MainWindow_SizeChanged"
     WindowBackdropType="Mica">
 
     <Grid>
@@ -27,6 +28,30 @@
             ShowMinimize="True">
             <ui:TitleBar.Header>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
+                    <!-- Hamburger toggle for compact sidebar -->
+                    <Button
+                        x:Name="PaneToggleButton"
+                        Width="32" Height="32"
+                        Margin="0,0,6,0"
+                        VerticalAlignment="Center"
+                        ToolTip="Toggle sidebar"
+                        Click="PaneToggleButton_Click"
+                        Visibility="Collapsed">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="tb" Background="Transparent" CornerRadius="6" Width="32" Height="32">
+                                    <ui:SymbolIcon Symbol="Navigation24" FontSize="16"
+                                                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="tb" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Button.Template>
+                    </Button>
                     <Image
                         Source="pack://application:,,,/MorpheX;component/Assets/Branding/morphex-icon.png"
                         Width="18" Height="18"
@@ -34,6 +59,7 @@
                         VerticalAlignment="Center"
                         Margin="0,0,8,0" />
                     <TextBlock
+                        x:Name="TitleBarText"
                         Text="MorpheX Live"
                         FontSize="12"
                         FontWeight="SemiBold"
@@ -45,7 +71,7 @@
 
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="240" />
+                <ColumnDefinition x:Name="SidebarColumn" Width="240" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -55,6 +81,7 @@
                 PaneDisplayMode="Left"
                 IsBackButtonVisible="Collapsed"
                 OpenPaneLength="240"
+                CompactPaneLength="60"
                 IsPaneToggleVisible="False"
                 IsPaneOpen="True">
 

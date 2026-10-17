@@ -17,6 +17,7 @@ dist/
 *.7z
 *.rar
 *.exe
+!docs/*.exe
 *.dll
 *.so
 *.dylib

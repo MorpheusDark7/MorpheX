@@ -13,7 +13,7 @@
     <Description>Lightweight live wallpapers for Windows.</Description>
     <Company>MorpheusDark</Company>
     <Product>MorpheX Live</Product>
-    <Version>0.1.58</Version>
+    <Version>0.1.59</Version>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
@@ -67,6 +67,22 @@
     <Delete Files="$(PublishDir)libvlc\win-x64\plugins\video_filter\libripple_plugin.dll" />
     <Delete Files="$(PublishDir)libvlc\win-x64\plugins\audio_filter\libspatialaudio_plugin.dll" />
     <Delete Files="$(PublishDir)libvlc\win-x64\plugins\video_output\libcaca_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libsdl_image_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libtheora_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libvorbis_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libtwolame_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libshine_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libschroedinger_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libdaala_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libspeex_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libfluidsynth_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\codec\libmod_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\demux\libadaptive_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\demux\libdvdnav_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\demux\libdvdread_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\demux\libvcd_plugin.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\access\libdvd*.dll" />
+    <Delete Files="$(PublishDir)libvlc\win-x64\plugins\text_renderer\liblibass_plugin.dll" />
     <Delete Files="$(PublishDir)*.pdb" />
     <Delete Files="$(PublishDir)*.xml" />
     <Delete Files="$(PublishDir)WebView2Loader.dll" />

@@ -35,6 +35,44 @@ public partial class MainWindow : FluentWindow
         NavigateTo(typeof(LibraryPage));
     }
 
+    // ── Responsive sidebar ──────────────────────────────────────────────────
+    private const double CompactBreakpoint = 960.0;
+    private bool _isSidebarCompact = false;
+
+    private void MainWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        bool shouldBeCompact = e.NewSize.Width < CompactBreakpoint;
+        if (shouldBeCompact == _isSidebarCompact) return;
+
+        _isSidebarCompact = shouldBeCompact;
+        ApplySidebarMode(shouldBeCompact);
+    }
+
+    private void ApplySidebarMode(bool compact)
+    {
+        if (compact)
+        {
+            NavigationView.IsPaneOpen = false;
+            SidebarColumn.Width = new System.Windows.GridLength(60);
+            PaneToggleButton.Visibility = Visibility.Visible;
+        }
+        else
+        {
+            NavigationView.IsPaneOpen = true;
+            SidebarColumn.Width = new System.Windows.GridLength(240);
+            PaneToggleButton.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void PaneToggleButton_Click(object sender, RoutedEventArgs e)
+    {
+        bool open = !NavigationView.IsPaneOpen;
+        NavigationView.IsPaneOpen = open;
+        SidebarColumn.Width = open
+            ? new System.Windows.GridLength(240)
+            : new System.Windows.GridLength(60);
+    }
+
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
         var app = (App)System.Windows.Application.Current;
