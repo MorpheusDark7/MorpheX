@@ -67,18 +67,16 @@ public static class WidgetWindowHelper
             var helper = new WindowInteropHelper(window);
             var hwnd = helper.EnsureHandle();
 
-            // 1. Attach to Desktop shell window as owner
-            IntPtr desktopHwnd = GetDesktopHandle();
-            if (desktopHwnd != IntPtr.Zero)
-            {
-                helper.Owner = desktopHwnd;
-                Log.Debug("Widget {Type} attached to desktop handle 0x{Handle:X}", window.GetType().Name, desktopHwnd);
-            }
-
-            // 2. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing)
+            // 1. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
+            // Explicitly preserve WS_EX_LAYERED (0x00080000) so WPF never loses per-pixel alpha composition.
             IntPtr currentExStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-            long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+            long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | 0x00080000L /* WS_EX_LAYERED */;
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(newExStyle));
+
+            // Inform OS of extended style changes so DWM updates layered composition immediately
+            NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
+                NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |
+                NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
 
             // 3. Hook WndProc for non-activating click & suppressing minimize during Show Desktop
             var source = HwndSource.FromHwnd(hwnd);

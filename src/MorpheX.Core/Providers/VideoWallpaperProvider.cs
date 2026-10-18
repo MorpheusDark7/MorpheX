@@ -20,6 +20,9 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     private Media? _media;
     private IntPtr _hostHandle;
     private TimeSpan _resumePosition = TimeSpan.Zero;
+    private ScalingMode _scaling = ScalingMode.Fill;
+    private int _lastWidth;
+    private int _lastHeight;
     private bool _disposed;
 
     public WallpaperState State { get; private set; } = WallpaperState.Unloaded;
@@ -86,27 +89,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
                 Mute = !AudioEnabled
             };
 
-            switch (scaling)
-            {
-                case ScalingMode.Stretch:
-                    // Stretch (Fill): Forces video to fill display grid, which may warp aspect ratio
-                    _mediaPlayer.CropGeometry = null;
-                    _mediaPlayer.AspectRatio = (width > 0 && height > 0) ? $"{width}:{height}" : null;
-                    break;
-
-                case ScalingMode.Fit:
-                    // Fit to Screen (Letterbox/Contain): Preserves uncropped frame with neutral bars
-                    _mediaPlayer.CropGeometry = null;
-                    _mediaPlayer.AspectRatio = null;
-                    break;
-
-                case ScalingMode.Fill:
-                default:
-                    // Crop to Center (Center Crop): Zooms in uniformly to fill screen without distortion, cropping outer edges
-                    _mediaPlayer.CropGeometry = (width > 0 && height > 0) ? $"{width}:{height}" : null;
-                    _mediaPlayer.AspectRatio = null;
-                    break;
-            }
+            ApplyScaling(scaling, width, height);
 
             _mediaPlayer.EncounteredError += (_, _) =>
             {
@@ -295,12 +278,45 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
         _mediaPlayer.SetRate(Math.Clamp(rate, 0.25f, 2.0f));
     }
 
+    public void ApplyScaling(ScalingMode scaling, int width, int height)
+    {
+        _scaling = scaling;
+        if (width > 0) _lastWidth = width;
+        if (height > 0) _lastHeight = height;
+        if (_mediaPlayer == null) return;
+
+        int w = _lastWidth;
+        int h = _lastHeight;
+
+        switch (scaling)
+        {
+            case ScalingMode.Stretch:
+                // Stretch (Fill): Forces video to fill display grid, which may warp aspect ratio
+                _mediaPlayer.CropGeometry = null;
+                _mediaPlayer.AspectRatio = (w > 0 && h > 0) ? $"{w}:{h}" : null;
+                break;
+
+            case ScalingMode.Fit:
+                // Fit to Screen (Letterbox/Contain): Preserves uncropped frame with neutral bars
+                _mediaPlayer.CropGeometry = null;
+                _mediaPlayer.AspectRatio = null;
+                break;
+
+            case ScalingMode.Fill:
+            default:
+                // Crop to Center (Center Crop): Zooms in uniformly to fill screen without distortion, cropping outer edges
+                _mediaPlayer.CropGeometry = (w > 0 && h > 0) ? $"{w}:{h}" : null;
+                _mediaPlayer.AspectRatio = null;
+                break;
+        }
+        Log.Information("Applied video scaling mode: {Mode} ({W}x{H})", scaling, w, h);
+    }
+
     public void Resize(int width, int height)
     {
-        if (_mediaPlayer != null && width > 0 && height > 0)
-        {
-            _mediaPlayer.AspectRatio = $"{width}:{height}";
-        }
+        _lastWidth = width;
+        _lastHeight = height;
+        ApplyScaling(_scaling, width, height);
     }
 
     public Task UnloadAsync()

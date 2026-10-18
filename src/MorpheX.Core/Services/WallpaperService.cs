@@ -9,10 +9,18 @@ public interface IWallpaperService : IDisposable
 {
     bool Initialize();
 
+    const string SpanDeviceId = "SPAN";
+
     Task SetWallpaperAsync(string monitorDeviceId, WallpaperInfo wallpaper,
                             CancellationToken ct = default, bool skipSave = false);
 
+    Task SetSpannedWallpaperAsync(WallpaperInfo wallpaper, CancellationToken ct = default, bool skipSave = false);
+
     Task SetWallpaperOnAllMonitorsAsync(WallpaperInfo wallpaper, CancellationToken ct = default);
+
+    void ApplyScalingToMonitor(string monitorDeviceId, ScalingMode mode);
+
+    void ApplyScalingToAll(ScalingMode mode);
 
     Task RemoveWallpaperAsync(string monitorDeviceId);
 
@@ -66,6 +74,7 @@ public interface IWallpaperService : IDisposable
 
 public sealed class WallpaperService : IWallpaperService
 {
+    public const string SpanDeviceId = IWallpaperService.SpanDeviceId;
     private readonly WorkerWInterop _workerW = new();
     private readonly IMonitorService _monitorService;
     private readonly ISettingsService _settingsService;
@@ -117,6 +126,11 @@ public sealed class WallpaperService : IWallpaperService
             var msg = $"Wallpaper file not found on disk:\n{filePath}\n\nIt may have been moved, renamed, or deleted.";
             Log.Error("Wallpaper file not found: {Path}", filePath);
             throw new FileNotFoundException(msg, filePath);
+        }
+
+        if (_monitorStates.ContainsKey(SpanDeviceId))
+        {
+            await RemoveWallpaperAsync(SpanDeviceId);
         }
 
         await RemoveWallpaperAsync(monitorDeviceId);
@@ -344,6 +358,166 @@ public sealed class WallpaperService : IWallpaperService
         }
     }
 
+    public async Task SetSpannedWallpaperAsync(WallpaperInfo wallpaper,
+                                               CancellationToken ct = default, bool skipSave = false)
+    {
+        var monitors = _monitorService.Monitors;
+        if (monitors.Count == 0)
+        {
+            Log.Warning("Cannot set spanned wallpaper: No monitors found");
+            return;
+        }
+
+        var filePath = wallpaper.EffectivePath;
+        bool exists = wallpaper.Type == WallpaperType.Scene
+            ? (Directory.Exists(filePath) || File.Exists(filePath))
+            : File.Exists(filePath);
+        if (!exists)
+        {
+            var msg = $"Wallpaper file not found on disk:\n{filePath}\n\nIt may have been moved, renamed, or deleted.";
+            Log.Error("Wallpaper file not found: {Path}", filePath);
+            throw new FileNotFoundException(msg, filePath);
+        }
+
+        // Clean up any existing wallpapers across all monitors
+        var existingKeys = _monitorStates.Keys.ToList();
+        foreach (var key in existingKeys)
+        {
+            await RemoveWallpaperAsync(key);
+        }
+
+        if (!_workerW.IsAttached)
+        {
+            Log.Information("WorkerW not attached, attempting to initialize...");
+            _workerW.Initialize();
+        }
+
+        int minX = monitors.Min(m => m.Bounds.Left);
+        int minY = monitors.Min(m => m.Bounds.Top);
+        int maxX = monitors.Max(m => m.Bounds.Right);
+        int maxY = monitors.Max(m => m.Bounds.Bottom);
+        int spanWidth = maxX - minX;
+        int spanHeight = maxY - minY;
+
+        var host = new WallpaperHostWindow();
+        bool isLayered = wallpaper.Type is WallpaperType.Image or WallpaperType.AnimatedImage or WallpaperType.Scene;
+        if (!host.Create(_workerW.WorkerWHandle, minX, minY, spanWidth, spanHeight, isLayered))
+        {
+            Log.Error("Failed to create wallpaper host window for span display ({W}x{H})", spanWidth, spanHeight);
+            host.Dispose();
+            return;
+        }
+
+        IWallpaperProvider provider;
+        try
+        {
+            provider = _providerFactory.Create(wallpaper.Type);
+        }
+        catch (NotSupportedException ex)
+        {
+            Log.Error(ex, "No provider for wallpaper type {Type}", wallpaper.Type);
+            host.Dispose();
+            return;
+        }
+
+        var scaling = _settingsService.Settings.Display.DefaultScalingMode;
+        if (_settingsService.Settings.MonitorAssignments.TryGetValue(SpanDeviceId, out var assign) && assign.ScalingMode.HasValue)
+        {
+            scaling = assign.ScalingMode.Value;
+        }
+
+        bool audioEnabled = _settingsService.Settings.Audio.Enabled && !IsMonitorMuted(SpanDeviceId);
+        if (provider is VideoWallpaperProvider vwp)
+        {
+            vwp.AudioEnabled = audioEnabled;
+            vwp.HardwareAccelerationEnabled = _settingsService.Settings.Playback.HardwareAcceleration;
+            vwp.FadeInOnLoad = _settingsService.Settings.Playback.FadeInOnLoad;
+        }
+
+        try
+        {
+            await provider.LoadAsync(wallpaper, host.Handle, spanWidth, spanHeight, scaling, ct);
+            ApplyAudioToMonitor(SpanDeviceId, provider);
+            Log.Information("Spanned wallpaper '{Name}' ({Type}) set across {Count} monitors ({W}x{H})",
+                wallpaper.Name, wallpaper.Type, monitors.Count, spanWidth, spanHeight);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to load spanned wallpaper '{Name}'", wallpaper.Name);
+            provider.Dispose();
+            host.Dispose();
+            return;
+        }
+
+        _monitorStates[SpanDeviceId] = new MonitorWallpaperState
+        {
+            MonitorDeviceId = SpanDeviceId,
+            Wallpaper = wallpaper,
+            Host = host,
+            Provider = provider
+        };
+
+        _settingsService.Settings.Display.PlacementMode = "Span";
+        if (!_settingsService.Settings.MonitorAssignments.TryGetValue(SpanDeviceId, out var savedAssign))
+        {
+            savedAssign = new Configuration.MonitorAssignment();
+            _settingsService.Settings.MonitorAssignments[SpanDeviceId] = savedAssign;
+        }
+        savedAssign.WallpaperId = wallpaper.Id;
+        savedAssign.ScalingMode = scaling;
+
+        if (!skipSave)
+        {
+            await _settingsService.SaveAsync(ct);
+        }
+
+        ApplyEffectsToAll();
+        if (provider is VideoWallpaperProvider loadedVwp)
+            loadedVwp.SetPlaybackRate(_settingsService.Settings.Playback.PlaybackRate);
+
+        Utilities.MemoryOptimizer.TrimWorkingSet();
+    }
+
+    public void ApplyScalingToMonitor(string monitorDeviceId, ScalingMode mode)
+    {
+        if (!_settingsService.Settings.MonitorAssignments.TryGetValue(monitorDeviceId, out var assign))
+        {
+            assign = new Configuration.MonitorAssignment();
+            _settingsService.Settings.MonitorAssignments[monitorDeviceId] = assign;
+        }
+        assign.ScalingMode = mode;
+        _ = _settingsService.SaveAsync();
+
+        if (_monitorStates.TryGetValue(monitorDeviceId, out var state) && state.Provider != null)
+        {
+            int w, h;
+            if (monitorDeviceId == SpanDeviceId)
+            {
+                var monitors = _monitorService.Monitors;
+                w = monitors.Count > 0 ? (monitors.Max(m => m.Bounds.Right) - monitors.Min(m => m.Bounds.Left)) : 1920;
+                h = monitors.Count > 0 ? (monitors.Max(m => m.Bounds.Bottom) - monitors.Min(m => m.Bounds.Top)) : 1080;
+            }
+            else
+            {
+                var mon = _monitorService.Monitors.FirstOrDefault(m => m.DeviceId == monitorDeviceId);
+                w = mon?.Bounds.Width ?? 1920;
+                h = mon?.Bounds.Height ?? 1080;
+            }
+            state.Provider.ApplyScaling(mode, w, h);
+            Log.Information("Applied scaling {Mode} to monitor {DeviceId}", mode, monitorDeviceId);
+        }
+    }
+
+    public void ApplyScalingToAll(ScalingMode mode)
+    {
+        _settingsService.Settings.Display.DefaultScalingMode = mode;
+        foreach (var deviceId in _monitorStates.Keys.ToList())
+        {
+            ApplyScalingToMonitor(deviceId, mode);
+        }
+        _ = _settingsService.SaveAsync();
+    }
+
     /// <inheritdoc />
     public void ApplyEffectsToAll(float brightnessOverride = -1f)
     {
@@ -548,6 +722,10 @@ public sealed class WallpaperService : IWallpaperService
 
     public WallpaperInfo? GetActiveWallpaper(string monitorDeviceId)
     {
+        if (_monitorStates.TryGetValue(SpanDeviceId, out var spanState))
+        {
+            return spanState.Wallpaper;
+        }
         return _monitorStates.TryGetValue(monitorDeviceId, out var state) ? state.Wallpaper : null;
     }
 
@@ -568,8 +746,26 @@ public sealed class WallpaperService : IWallpaperService
             _workerW.Initialize();
         }
 
+        if (_monitorStates.TryGetValue(SpanDeviceId, out var spanState))
+        {
+            int minX = _monitorService.Monitors.Min(m => m.Bounds.Left);
+            int minY = _monitorService.Monitors.Min(m => m.Bounds.Top);
+            int maxX = _monitorService.Monitors.Max(m => m.Bounds.Right);
+            int maxY = _monitorService.Monitors.Max(m => m.Bounds.Bottom);
+            int spanWidth = maxX - minX;
+            int spanHeight = maxY - minY;
+
+            spanState.Host?.Reposition(minX, minY, spanWidth, spanHeight);
+            spanState.Provider?.Resize(spanWidth, spanHeight);
+            if (spanState.Provider is ImageWallpaperProvider or GifWallpaperProvider or SceneWallpaperProvider)
+            {
+                spanState.Host?.Repaint();
+            }
+            return;
+        }
+
         var removedDeviceIds = _monitorStates.Keys
-            .Where(id => !_monitorService.Monitors.Any(m => m.DeviceId == id))
+            .Where(id => id != SpanDeviceId && !_monitorService.Monitors.Any(m => m.DeviceId == id))
             .ToList();
 
         foreach (var deviceId in removedDeviceIds)

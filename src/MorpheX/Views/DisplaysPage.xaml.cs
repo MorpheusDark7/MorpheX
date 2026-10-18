@@ -96,7 +96,7 @@ public partial class DisplaysPage : Page
         }
     }
 
-    private async void ScalingMode_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
+    private void ScalingMode_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (sender is FrameworkElement card && card.Tag is string modeStr)
         {
@@ -108,21 +108,11 @@ public partial class DisplaysPage : Page
                 _ => ScalingMode.Fill
             };
 
-            app.SettingsService.Settings.Display.DefaultScalingMode = mode;
-            await app.SettingsService.SaveAsync();
-
             UpdateScalingModeUI(mode);
             Log.Information("User switched default video scaling mode to: {Mode}", mode);
 
-            // Re-apply scaling to all active wallpapers immediately
-            foreach (var m in app.MonitorService.Monitors)
-            {
-                var active = app.WallpaperService.GetActiveWallpaper(m.DeviceId);
-                if (active != null)
-                {
-                    await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
-                }
-            }
+            // Re-apply scaling to all active wallpapers live without reload
+            app.WallpaperService.ApplyScalingToAll(mode);
         }
     }
 
@@ -171,15 +161,44 @@ public partial class DisplaysPage : Page
             UpdatePlacementModeUI(mode);
             Log.Information("User switched wallpaper placement mode to: {Mode}", mode);
 
-            // If Duplicate is selected, duplicate active wallpaper across all monitors
-            if (string.Equals(mode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(mode, "Span", StringComparison.OrdinalIgnoreCase))
             {
                 var active = app.WallpaperService.GetAllActiveWallpapers().FirstOrDefault();
+                if (active != null)
+                {
+                    await app.WallpaperService.SetSpannedWallpaperAsync(active);
+                    RefreshDisplays();
+                }
+            }
+            else if (string.Equals(mode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+            {
+                var active = app.WallpaperService.GetAllActiveWallpapers().FirstOrDefault();
+                if (app.WallpaperService.GetActiveWallpaper(MorpheX.Core.Services.WallpaperService.SpanDeviceId) != null)
+                {
+                    await app.WallpaperService.RemoveWallpaperAsync(MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+                }
                 if (active != null)
                 {
                     foreach (var m in app.MonitorService.Monitors)
                     {
                         await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
+                    }
+                    RefreshDisplays();
+                }
+            }
+            else // PerDisplay
+            {
+                if (app.WallpaperService.GetActiveWallpaper(MorpheX.Core.Services.WallpaperService.SpanDeviceId) != null)
+                {
+                    var active = app.WallpaperService.GetAllActiveWallpapers().FirstOrDefault();
+                    await app.WallpaperService.RemoveWallpaperAsync(MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+                    if (active != null)
+                    {
+                        var primary = app.MonitorService.Monitors.FirstOrDefault(m => m.IsPrimary) ?? app.MonitorService.Monitors.FirstOrDefault();
+                        if (primary != null)
+                        {
+                            await app.WallpaperService.SetWallpaperAsync(primary.DeviceId, active);
+                        }
                     }
                     RefreshDisplays();
                 }

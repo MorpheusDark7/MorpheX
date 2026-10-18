@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using System.IO;
@@ -88,6 +89,8 @@ public partial class App : Application
         StartNamedPipeServer();
 
         _startMinimized = e.Args.Contains("--minimized");
+
+        DisableProcessWindowsGhosting();
 
         LogManager.Initialize();
         Log.Information("═══════════════════════════════════════");
@@ -379,9 +382,45 @@ public partial class App : Application
 
     private async Task RestoreWallpapersAsync(bool onlyMissing = false)
     {
+        if (string.Equals(SettingsService.Settings.Display.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase))
+        {
+            if (onlyMissing && WallpaperService.GetActiveWallpaper(WallpaperService.SpanDeviceId) != null)
+                return;
+
+            string? wallpaperId = null;
+            if (SettingsService.Settings.MonitorAssignments.TryGetValue(WallpaperService.SpanDeviceId, out var spanAssign)
+                && !string.IsNullOrEmpty(spanAssign.WallpaperId))
+            {
+                wallpaperId = spanAssign.WallpaperId;
+            }
+            else
+            {
+                var first = SettingsService.Settings.MonitorAssignments.Values.FirstOrDefault(a => !string.IsNullOrEmpty(a.WallpaperId));
+                wallpaperId = first?.WallpaperId;
+            }
+
+            if (!string.IsNullOrEmpty(wallpaperId))
+            {
+                var wallpaper = LibraryService.GetById(wallpaperId);
+                if (wallpaper != null)
+                {
+                    try
+                    {
+                        await WallpaperService.SetSpannedWallpaperAsync(wallpaper, skipSave: true);
+                        await SettingsService.SaveAsync();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Failed to restore spanned wallpaper '{Name}'", wallpaper.Name);
+                    }
+                }
+            }
+        }
+
         // Restore monitors concurrently. When onlyMissing is true, skip monitors that already have an active wallpaper.
         var tasks = SettingsService.Settings.MonitorAssignments
-            .Where(kv => !string.IsNullOrEmpty(kv.Value.WallpaperId))
+            .Where(kv => kv.Key != WallpaperService.SpanDeviceId && !string.IsNullOrEmpty(kv.Value.WallpaperId))
             .Where(kv => !onlyMissing || WallpaperService.GetActiveWallpaper(kv.Key) == null)
             .Select(async kv =>
             {
@@ -522,7 +561,7 @@ public partial class App : Application
         };
 
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.61";
+        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.62";
         var header = new System.Windows.Forms.ToolStripMenuItem($"MorpheX Live  •  {verStr}")
         {
             Enabled = false,
@@ -843,4 +882,7 @@ public partial class App : Application
         Log.Error(e.Exception, "Unhandled exception");
         e.Handled = true;
     }
+
+    [DllImport("user32.dll")]
+    private static extern void DisableProcessWindowsGhosting();
 }

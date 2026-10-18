@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.61-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.62-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,13 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.62
+- **Span Screen Placement Mode** — Seamlessly stretch single wallpapers across multi-monitor virtual screens with automatic topology detection and resize adaptation.
+- **Clock Widget Transparency Fix** — Ensured persistent `WS_EX_LAYERED` composition and DWM frame synchronization to eliminate visual artifacts, unwanted backgrounds, and focus-stealing.
+- **Smooth Playback & Memory Optimization** — Replaced aggressive blocking working-set flushes with non-blocking Gen 1 GC optimization, eliminating video hitching/glitches when switching windows.
+- **Dynamic Live Video Scaling** — Instant scaling mode updates (Crop to Center, Fit to Screen, Stretch) applied live without reloading active media.
+- **Process Windows Ghosting Prevention** — Integrated `DisableProcessWindowsGhosting` to keep desktop render loops responsive during intensive graphics transitions.
 
 ### v0.1.61
 - **Installer Size Optimization** — Pruned unused multimedia and subtitle plugins from bundled LibVLC and disabled ReadyToRun binary inflation, reducing download size to ~75MB for direct deployment.

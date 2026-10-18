@@ -32,6 +32,13 @@ public static class MonitorPickerHelper
             return;
         }
 
+        if (string.Equals(app.SettingsService.Settings.Display.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase))
+        {
+            await app.WallpaperService.SetSpannedWallpaperAsync(wallpaper);
+            onComplete?.Invoke();
+            return;
+        }
+
         if (monitors.Count == 1)
         {
             await ApplyToMonitorAsync(monitors[0].DeviceId, wallpaper);

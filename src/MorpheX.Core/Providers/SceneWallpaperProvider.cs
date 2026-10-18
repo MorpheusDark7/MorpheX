@@ -143,6 +143,11 @@ public sealed class SceneWallpaperProvider : IWallpaperProvider
         _visualProvider?.Resize(width, height);
     }
 
+    public void ApplyScaling(ScalingMode scaling, int width, int height)
+    {
+        _visualProvider?.ApplyScaling(scaling, width, height);
+    }
+
     internal void SetColorMatrix(ColorMatrix? matrix)
     {
         if (_visualProvider is ImageWallpaperProvider img)

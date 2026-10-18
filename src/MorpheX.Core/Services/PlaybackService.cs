@@ -151,7 +151,6 @@ public sealed class PlaybackService : IPlaybackService
                     _monitorPaused[monitor.DeviceId] = true;
                     _pausedSince[monitor.DeviceId] = DateTime.UtcNow;
                     Log.Debug("Monitor {Name} paused", monitor.DisplayName);
-                    Utilities.MemoryOptimizer.TrimWorkingSet();
                 }
                 else if (!shouldPause && wasPaused)
                 {

@@ -138,6 +138,12 @@ public sealed class GifWallpaperProvider : IWallpaperProvider
         }
     }
 
+    public void ApplyScaling(ScalingMode scaling, int width, int height)
+    {
+        _scaling = scaling;
+        Resize(width, height);
+    }
+
     public Task UnloadAsync()
     {
         State = WallpaperState.Stopping;

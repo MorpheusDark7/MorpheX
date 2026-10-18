@@ -123,7 +123,7 @@ public partial class SettingsPage : Page
         PlaylistSkipPausedToggle.IsChecked = settings.Playlist.SkipWhenPaused;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.61"}";
+        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.62"}";
 
         if (app.AvailableUpdate != null)
         {
@@ -163,17 +163,7 @@ public partial class SettingsPage : Page
             Enum.TryParse<ScalingMode>((string)item.Tag, out var mode))
         {
             var app = (App)Application.Current;
-            app.SettingsService.Settings.Display.DefaultScalingMode = mode;
-            await app.SettingsService.SaveAsync();
-
-            foreach (var m in app.MonitorService.Monitors)
-            {
-                var active = app.WallpaperService.GetActiveWallpaper(m.DeviceId);
-                if (active != null)
-                {
-                    await app.WallpaperService.SetWallpaperAsync(m.DeviceId, active);
-                }
-            }
+            app.WallpaperService.ApplyScalingToAll(mode);
         }
     }
 

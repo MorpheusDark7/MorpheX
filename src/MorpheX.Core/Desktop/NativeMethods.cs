@@ -5,6 +5,9 @@ namespace MorpheX.Core.Desktop;
 internal static partial class NativeMethods
 {
 
+    [DllImport("user32.dll")]
+    internal static extern void DisableProcessWindowsGhosting();
+
     [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     internal static extern IntPtr FindWindow(string? lpClassName, string? lpWindowName);
 

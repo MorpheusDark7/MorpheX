@@ -22,6 +22,8 @@ public interface IWallpaperProvider : IDisposable
 
     void Resize(int width, int height);
 
+    void ApplyScaling(ScalingMode scaling, int width, int height);
+
     TimeSpan PlaybackPosition { get; }
 
     void SetResumePosition(TimeSpan position);
