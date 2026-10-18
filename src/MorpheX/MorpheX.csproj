@@ -13,13 +13,13 @@
     <Description>Lightweight live wallpapers for Windows.</Description>
     <Company>MorpheusDark</Company>
     <Product>MorpheX Live</Product>
-    <Version>0.1.59</Version>
+    <Version>0.1.61</Version>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ApplicationManifest>app.manifest</ApplicationManifest>
 
-    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRun>false</PublishReadyToRun>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>

@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.60-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.61-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -121,97 +121,79 @@ MorpheX/
 
 ## Changelog
 
-### v0.1.57
-- **Dedicated Global Keybinds Page** — Added a dedicated Keybinds navigation page (`KeybindsPage`) with separate spaces for Quick Navigation (Open Library, Open Favorites, Open Effects, Show/Hide Window), Wallpaper Playback & Audio (Play/Pause, Mute, Next, Previous, Random, Favorite Current), and Power User Controls (Boss Key panic button, Toggle Desktop Widgets, Reset Visual Effects).
-- **Video Scaling Modes for Live Wallpaper** — Added distinct video scaling options across Displays and Settings: "Crop to Center" (Center Crop filling the screen while preserving aspect ratio), "Fit to Screen" (Letterbox with clean black bars), and "Stretch" (Fill entire display grid) with instant live re-rendering.
-- **Main Window Titlebar Theme Switcher** — Added a sleek Sun/Moon toggle button to the main window title bar for 1-click theme switching on the fly.
-- **Light Mode Visibility & Contrast Fixes** — Replaced hardcoded white color values in Widgets configuration with dynamic theme brushes (`TextFillColorPrimaryBrush`, `TextFillColorSecondaryBrush`, `DividerStrokeColorDefaultBrush`), ensuring 100% crisp readability in Light Mode.
-- **Card & Header Clean-up** — Perfectly centered the `ACTIVE` checkmark badge and top action tags across Library and Favorites cards; removed the redundant heart icon from the Favorites page header to maintain clean visual consistency with the Library.
-- **System Resource Monitor Fully Removed** — Cleanly stripped all remaining metrics pills, polling routines, and toggle settings for a clean and lightweight experience.
+### v0.1.61
+- **Installer Size Optimization** — Pruned unused multimedia and subtitle plugins from bundled LibVLC and disabled ReadyToRun binary inflation, reducing download size to ~75MB for direct deployment.
 
-### v0.1.56
-- **Startup Crash Fix** — Eliminated LibVLC background parse access violation (`ntdll.dll 0xc0000005`) by migrating video resolution & duration probing to native Windows Media Properties (WinRT).
-- **Brand Identity on Title Bar** — Clean MorpheX Live branding with sleek 18×18 app icon and semi-bold typography on the top left.
-- **Full Light & Dark Theme Support** — Added comprehensive Light, Dark, and "System Default" (tracking Windows OS preferences) theme switching.
-- **Cinematic 16:9 Widescreen Cards** — Modern wallpaper cards with full-bleed thumbnail, smoked-glass gradient overlay, clean title + resolution typography, and integrated `•••` action button.
-- **Dedicated Placement Modes** — Segmented multi-monitor placement switcher (`Per-Display`, `Duplicate / Mirror`, `Span Screen`) on the Displays page.
-- **Compact Tray Context Menu** — Streamlined tray menu showing `MorpheX Live • v0.1.56`, keeping the tray popup sleek and compact.
-
-### v0.1.55
-- **Dynamic System Accent Theme Adaptation** — Real-time Windows 11 system accent color synchronization (e.g. Razer Green `#44D62C`, Slate Blue, Purple) with automated WCAG contrast protection that dynamically flips button text to dark charcoal `#0F172A` on bright/neon accents and crisp white `#FFFFFF` on deep tones.
-- **Subtle Opacity Accent Styling** — Introduced refined translucent 15% opacity accent washes (`MxAccentSubtleBrush`) and 35% accent borders so vibrant accent themes never overpower dark desktop aesthetics.
-- **Video Resolution & Metadata Probing Fix** — Resolved an asynchronous LibVLC probing race condition so video wallpaper resolutions (4K, 1440p, 1080p) and durations reliably populate on Library and Favorites cards with reactive `INotifyPropertyChanged` UI updates.
-- **Clean System Status Bar** — Removed the application working set memory pill (`APP: 0 MB`) from the bottom status bar and set system metrics to disabled by default, keeping background resource usage minimal.
-
-### v0.1.54
-- **Active Internet Connection Warning** — Added a distinct red warning badge (`[ 🌐 Requires Internet ]`) to the Weather Widget in Widgets settings so users immediately know network connectivity is required.
-- **Video Resolution Detection** — Added hardware video track probing using LibVLC to accurately detect and display video resolution (e.g. 1920x1080, 2560x1440, 3840x2160) in the Library and Favorites cards for all video wallpapers on import and retroactively.
-- **Rich Smoked Glass & Contrast Boost** — Overhauled frosted dark card backgrounds to rich smoked glass (80% opacity matching Weather) and boosted typography contrast so all widgets are crisp and legible over bright anime or light wallpapers.
-- **Notes Widget Interaction Fix** — Moved window drag handling strictly to the header title bar, eliminating text selection interference and enabling smooth, reliable typing and editing in desktop sticky notes.
-- **Aesthetic Color Palettes** — Introduced popular curated color presets (Soft Lavender `#A78BFA`, Rose Pink `#FB7185`, Frost Sky `#89B4FA`, Crimson Red `#F43F5E`) inspired by Catppuccin, JaxCore, and Rainmeter without altering existing profile color indexes.
-- **Weekday & Custom Text Color Immunity** — Decoupled the weekday/custom text card from global theme flipping so chosen custom colors are always preserved.
-- **Clean Context Menus & UI Alignment** — Removed legacy emojis and redundant theme toggles from right-click widget menus, centered the active profile badge, and enhanced profile count visibility.
-
-### v0.1.53
-- **Independent Widget Profiles & Live Positioning** — Desktop profiles now reliably save, restore, and reposition all desktop widgets (Clock, System Monitor, Media Visualizer, Day, Calendar, Notes, Quote, Weather) with independent coordinates and configurations per profile.
-- **Immediate Drag-and-Drop Auto-Save** — Moving widgets across your desktop now automatically persists the latest coordinates in real-time to both configuration and the active profile.
-- **Responsive Library Header** — Redesigned the Library page header into a two-tier layout so the title and wallpaper count are never clipped or hidden when the application is windowed.
-- **Theme Harmonization & Icon Polish** — Aligned Lock widget positions border and icon styling with Desktop Profiles cards, and updated Favorites page heart icons and card badges to match MorpheX green accent.
-
-### v0.1.52
-- **Dedicated Desktop Profiles Hub** — Moved Profiles out of widgets into its own dedicated full-page dashboard (`ProfilesPage`) with hero active banner, tag summaries, instant switching, and wallpaper presets.
-- **Dedicated Effects & Appearance Page** — Separated visual filters (Brightness, Contrast, Saturation, Color Temperature, Reset), playback speed rate, and ambient dimming into an independent navigation page (`EffectsPage`).
-- **Vector UI & Fluent Visuals** — Replaced legacy unicode characters and emojis with clean vector layout previews (Horizontal Row, Vertical Column, 2x2 Grid), font preview badges (`Aa`, `08`, `>_`, `MON`), casing chips (`AA`, `Aa`, `aa`), and native Segoe Fluent icons (`SymbolIcon`).
-- **Library Hover Card Fix** — Removed the oversized semi-transparent hover preview tooltip in Library that caused text bleed-through and obscured adjacent wallpaper cards.
-- **Clean Lightweight Engine** — Removed experimental taskbar hooks and background SWCA loops, keeping MorpheX 100% stable, safe, and zero-overhead.
+### v0.1.59
+- **Real-Time Weather Widget** — Live temperature, weather conditions, automatic geolocation, and dynamic gradient cards.
+- **Audio Visualizer & Clock Typography** — Upgraded vector visualizer styles (Equalizer Bars, Mirrored Center, Smooth Waveform) and modern clock typography.
+- **Refreshed High-Resolution Branding** — High-definition app icons and visual identity across desktop dialogs and store assets.
+- **Responsive Compact Navigation** — Dynamic navigation sidebar that automatically collapses for compact windows with titlebar hamburger toggle.
+- Bug fixed.
 
 ### v0.1.58
-- **Fixed Keybinds Menu** — Replaced missing icon symbol with `Play24` and hardened hotkey recording handlers, allowing the Keybinds menu to open reliably without exceptions.
-- **Edge-to-Edge Clean Interface** — Completely removed the bottom "Engine Active" status bar to provide a clean, modern, borderless window aesthetic.
-- **Unified Sidebar Navigation** — Moved Settings up into the primary navigation list alongside Library, Favorites, Displays, Widgets, Profiles, Effects, and Keybinds.
-- **Streamlined Titlebar** — Removed the titlebar theme toggle button in favor of unified appearance settings under the Settings page.
-- **Performance & UI Responsiveness** — Implemented an in-memory decoded bitmap cache for `ThumbnailImageConverter` to eliminate duplicate disk reads and decoding when switching views or filtering wallpapers.
+- **Edge-to-Edge Clean Interface** — Removed the bottom status bar for a clean, modern, borderless window aesthetic.
+- **Unified Sidebar Navigation** — Consolidated Settings into primary navigation list.
+- **Performance & Caching** — Decoded bitmap caching in thumbnail loader eliminating redundant disk decodes.
+- Bug fixed.
+
+### v0.1.57
+- **Dedicated Global Keybinds Page** — Centralized shortcut management for playback, navigation, and power user controls.
+- **Video Scaling Modes** — Added Crop to Center, Fit to Screen, and Stretch modes with real-time live preview.
+- **Theme & Contrast Hardening** — Dynamic theme brushes ensuring crisp readability across dark and light modes.
+- Bug fixed.
+
+### v0.1.56
+- **Full Light & Dark Theme Support** — Added comprehensive Light, Dark, and System Default theme switching.
+- **Cinematic 16:9 Cards** — Modern wallpaper cards with smoked-glass gradient overlays and clean typography.
+- **Multi-Monitor Placement Modes** — Per-Display, Duplicate / Mirror, and Span Screen placement options.
+- Bug fixed.
+
+### v0.1.55
+- **Dynamic System Accent Theme Adaptation** — Real-time Windows 11 system accent synchronization with automated WCAG contrast protection.
+- **Subtle Opacity Accent Styling** — Translucent accent washes and borders tailored for dark desktop aesthetics.
+- Bug fixed.
+
+### v0.1.54
+- **Automatic Video Resolution Detection** — Hardware video track probing to detect and display video resolution badges (4K, 1440p, 1080p).
+- **Rich Smoked Glass & Contrast Boost** — Smoked glass widget styling with boosted typography contrast.
+- **Aesthetic Color Palettes** — Curated aesthetic color presets for desktop widgets.
+- Bug fixed.
+
+### v0.1.53
+- **Independent Desktop Profiles** — Multi-monitor configurations and widget layouts saved and restored per profile.
+- **Immediate Drag-and-Drop Auto-Save** — Moving widgets across desktops automatically persists positions in real-time.
+- **Responsive Library Header** — Adaptive two-tier layout ensuring controls remain visible at any window width.
+- Bug fixed.
+
+### v0.1.52
+- **Dedicated Desktop Profiles Hub** — Standalone dashboard for creating, customizing, and switching desktop setups.
+- **Dedicated Effects & Appearance Page** — Dedicated page for visual filters (Brightness, Contrast, Saturation), playback speeds, and ambient dimming.
+- **Vector UI & Fluent Visuals** — Modern vector layout diagrams, typography preview badges, and Segoe Fluent icons.
+- Bug fixed.
 
 ### v0.1.51
-- **Bundled CC0 Master Wallpapers** — Ships with high-resolution curated CC0 wallpapers out-of-the-box for a rich first-run experience.
-- **Desktop Profiles System** — Core profiles engine saving and restoring per-monitor wallpapers, taskbar styles, and widget configurations with missing-file safety fallbacks.
-- **Updater Hardening & SHA-256 Sidecar** — Automated `.sha256` checksum generation in CI and strict mandatory checksum verification before executing update installers.
+- **Bundled CC0 Master Wallpapers** — Curated high-resolution wallpapers included out-of-the-box.
+- **Desktop Profiles System** — Core profiles engine saving and restoring per-monitor wallpapers and widget configurations.
+- **Updater Hardening & SHA-256 Verification** — Automated SHA-256 checksum verification before executing update installers.
 
 ### v0.1.50
-- **Automated Update Pipeline** — Integrated release checks with staging path containment verification.
-- **Performance Hardening** — Minimized background memory and CPU impact with efficient timer scheduling.
+- **Automated Update Pipeline** — In-app update checks with staging path containment verification.
+- Bug fixed.
 
 ### v0.1.38
-- **Simplified Format Support** — Deprecated GIF and Scene package formats in favor of high-performance, GPU-accelerated video formats (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`) and static wallpapers.
-- **Bulk Library Management** — Added a "Delete All" button in the wallpaper library to clear imported media in one click.
-- **Modern Dialogs & UI Polish** — Replaced native Windows message boxes with custom Fluent dark dialogs and text prompts across all widgets and settings.
-- **Battery & Widget Optimizations** — Stabilized battery pause detection, refined widget context menus, and cleaned up filter options.
-
-### v0.1.31
-- **Windows 11 Taskbar Fix** — Implemented an automatic 900ms DWM composition refresher loop, corrected unmanaged memory layout, and set `AccentFlags = 2` to keep Clear, Blur, and Acrylic taskbar effects persistently active against Windows 11 shell repaints.
-- **Light Theme for Widgets** — Added a dedicated Light Mode option for widgets (Notes, Daily Quotes, Calendar, Clock, System Monitor, and Media). Renders frosted ivory/cream glass with high-contrast typography optimized for bright wallpapers.
-- **Widget Context Menu Theme Switcher** — Quickly toggle between Dark and Light mode directly from widget right-click menus or from the Widgets settings page.
-
-### v0.1.30
-- **Taskbar Styling** — Built-in Clear, Blur, and Acrylic taskbar effects (primary + all secondary monitors). Resets to default when MorpheX closes.
-- **Faster Startup** — Reduced WorkerW initialization overhead: single spawn message, shorter sleep intervals, and fewer retry attempts.
-- **Widget Tips** — Cleaned up the Desktop Tips card in the Widgets page.
-- **CI Fix** — Fixed GitHub Actions deploy step that was dropping the installer before copying to `docs/`.
-
-### v0.1.29
-- Fixed CI deploy step (copy installer to TEMP before branch switch).
+- **Simplified Format Support** — High-performance, GPU-accelerated video formats (`.mp4`, `.webm`, `.mov`, `.mkv`, `.avi`) and static wallpapers.
+- **Bulk Library Management** — One-click library management and Fluent dark dialogs.
+- Bug fixed.
 
 ### v0.1.28
-- Toggleable neon glow for the audio visualizer.
-- Frosted glass acrylic background option for the Media widget.
-- Optimized installer size by stripping unused VLC architecture runtimes.
-- Auto-deploy installer to GitHub Pages for direct download.
+- **Toggleable Neon Glow** — Audio visualizer neon glow effects.
+- **Frosted Glass Acrylic Option** — Smoked acrylic styling for desktop widgets.
+- Bug fixed.
 
 ### v0.1.27
-- Acrylic frosted glass widget backgrounds.
-- Multi-GPU engine tracking (dGPU load for discrete GPUs).
-- Hide resize grips when widgets are locked.
-- Mond / Anurati font support for Day widget.
+- **Multi-GPU Engine Tracking** — Dedicated GPU metrics tracking for discrete GPUs.
+- **Custom Font Support** — Modern typography options for desktop clock and day widgets.
 
 ---
 
