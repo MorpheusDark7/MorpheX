@@ -24,7 +24,6 @@
     <ServerGarbageCollection>false</ServerGarbageCollection>
     <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
     <RetainVMGarbageCollection>false</RetainVMGarbageCollection>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <Target Name="RemoveUnusedLibVlcRuntimes" AfterTargets="Publish">
@@ -85,7 +84,6 @@
     <Delete Files="$(PublishDir)libvlc\win-x64\plugins\text_renderer\liblibass_plugin.dll" />
     <Delete Files="$(PublishDir)*.pdb" />
     <Delete Files="$(PublishDir)*.xml" />
-    <Delete Files="$(PublishDir)WebView2Loader.dll" />
   </Target>
 
   <ItemGroup>
