@@ -27,11 +27,28 @@ public static class ShellWindowHelper
 
         if (className is "Progman" or "WorkerW" or "Shell_TrayWnd" or "Shell_SecondaryTrayWnd"
             or "NotifyIconOverflowWindow" or "TopLevelWindowForOverflowXamlIsland"
-            or "Windows.UI.Core.CoreWindow" or "Shell_CharmWindow" or "XamlExplorerHostIslandWindow"
+            or "Shell_CharmWindow" or "XamlExplorerHostIslandWindow"
             or "DesktopWindowXamlSource" or "DV2ControlHost" or "MorpheXWallpaperHost"
             or "SHELLDLL_DefView" or "SysListView32" or "#32768" or "#32769" or "Tooltips_class32")
         {
             return true;
+        }
+
+        if (className == "Windows.UI.Core.CoreWindow")
+        {
+            // Only ignore system shell CoreWindows (Start menu, Action center, Search).
+            // Real UWP / Store apps (Media Player, Netflix, Games, Photos) should trigger pause.
+            try
+            {
+                var proc = System.Diagnostics.Process.GetProcessById((int)pid);
+                var name = proc.ProcessName;
+                if (name is "StartMenuExperienceHost" or "ShellExperienceHost" or "SearchHost" or "explorer")
+                    return true;
+            }
+            catch
+            {
+                return true;
+            }
         }
 
         // Check root ancestor window (e.g. child controls or islands inside Progman/WorkerW)

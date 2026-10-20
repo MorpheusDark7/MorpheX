@@ -174,7 +174,9 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             if (_mediaPlayer.IsPlaying)
                 _resumePosition = TimeSpan.FromMilliseconds(_mediaPlayer.Time);
 
-            _mediaPlayer.Pause();
+            // In LibVLC, MediaPlayer.Pause() is a toggle.
+            // Calling SetPause(true) guarantees a strict pause without accidental toggle.
+            _mediaPlayer.SetPause(true);
         }
 
         State = WallpaperState.Paused;
@@ -185,13 +187,17 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
     {
         if (State != WallpaperState.Paused) return;
 
-        if (_mediaPlayer != null && !_mediaPlayer.IsPlaying)
+        if (_mediaPlayer != null)
         {
             if (_resumePosition == TimeSpan.Zero && _mediaPlayer.IsSeekable)
             {
                 _mediaPlayer.Time = 0;
             }
-            _mediaPlayer.Play();
+            _mediaPlayer.SetPause(false);
+            if (!_mediaPlayer.IsPlaying)
+            {
+                _mediaPlayer.Play();
+            }
         }
 
         State = WallpaperState.Playing;

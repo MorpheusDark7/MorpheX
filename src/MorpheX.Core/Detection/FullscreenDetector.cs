@@ -20,7 +20,18 @@ public sealed class FullscreenDetector
             var fgMonitor = Desktop.NativeMethods.MonitorFromWindow(fgWindow,
                 Desktop.NativeMethods.MONITOR_DEFAULTTONEAREST);
 
-            if (fgMonitor == monitorHandle)
+            bool matchesMonitor = (monitorHandle != IntPtr.Zero && fgMonitor == monitorHandle);
+            if (!matchesMonitor && Desktop.NativeMethods.GetWindowRect(fgWindow, out var fgr))
+            {
+                var fgRect = fgr.ToRectangle();
+                var intersect = Rectangle.Intersect(monitorBounds, fgRect);
+                if (intersect.Width > 150 && intersect.Height > 150)
+                {
+                    matchesMonitor = true;
+                }
+            }
+
+            if (matchesMonitor)
             {
                 EvaluateWindow(fgWindow, monitorBounds, workArea, out isFullscreen, out isMaximized);
                 if (isFullscreen || isMaximized)
@@ -41,18 +52,35 @@ public sealed class FullscreenDetector
             if (IsIgnoredWindow(hWnd))
                 return true;
 
-            var hMon = Desktop.NativeMethods.MonitorFromWindow(hWnd,
-                Desktop.NativeMethods.MONITOR_DEFAULTTONEAREST);
-
-            if (hMon != monitorHandle)
-                return true;
-
             if (!Desktop.NativeMethods.GetWindowRect(hWnd, out var wr))
                 return true;
 
             int width = wr.Right - wr.Left;
             int height = wr.Bottom - wr.Top;
             if (width < 150 || height < 150)
+                return true;
+
+            var hMon = Desktop.NativeMethods.MonitorFromWindow(hWnd,
+                Desktop.NativeMethods.MONITOR_DEFAULTTONEAREST);
+
+            bool matchesMonitor = (monitorHandle != IntPtr.Zero && hMon == monitorHandle);
+            if (!matchesMonitor)
+            {
+                var winRect = wr.ToRectangle();
+                var intersect = Rectangle.Intersect(monitorBounds, winRect);
+                if (intersect.Width > 150 && intersect.Height > 150)
+                {
+                    long intersectArea = (long)intersect.Width * intersect.Height;
+                    long monArea = (long)monitorBounds.Width * monitorBounds.Height;
+                    long winArea = (long)winRect.Width * winRect.Height;
+                    if (intersectArea > monArea * 0.4 || (winArea > 0 && intersectArea > winArea * 0.5))
+                    {
+                        matchesMonitor = true;
+                    }
+                }
+            }
+
+            if (!matchesMonitor)
                 return true;
 
             EvaluateWindow(hWnd, monitorBounds, workArea, out foundFullscreen, out foundMaximized);
@@ -78,10 +106,11 @@ public sealed class FullscreenDetector
 
         var winBounds = windowRect.ToRectangle();
 
-        fullscreen = winBounds.Left <= monitorBounds.Left &&
-                     winBounds.Top <= monitorBounds.Top &&
-                     winBounds.Right >= monitorBounds.Right &&
-                     winBounds.Bottom >= monitorBounds.Bottom;
+        // 1. Fullscreen check (covers entire monitor bounds, allowing small invisible borders)
+        fullscreen = winBounds.Left <= monitorBounds.Left + 10 &&
+                     winBounds.Top <= monitorBounds.Top + 10 &&
+                     winBounds.Right >= monitorBounds.Right - 10 &&
+                     winBounds.Bottom >= monitorBounds.Bottom - 10;
 
         if (fullscreen)
         {
@@ -89,6 +118,7 @@ public sealed class FullscreenDetector
             return;
         }
 
+        // 2. Maximized window check (IsZoomed or WS_MAXIMIZE)
         if (Desktop.NativeMethods.IsZoomed(hWnd))
         {
             maximized = true;
@@ -103,10 +133,11 @@ public sealed class FullscreenDetector
             return;
         }
 
-        if (winBounds.Left <= workArea.Left + 10 &&
-            winBounds.Top <= workArea.Top + 10 &&
-            winBounds.Right >= workArea.Right - 10 &&
-            winBounds.Bottom >= workArea.Bottom - 10)
+        // 3. WorkArea coverage check (snapped or borderless window filling work area)
+        if (winBounds.Left <= workArea.Left + 15 &&
+            winBounds.Top <= workArea.Top + 15 &&
+            winBounds.Right >= workArea.Right - 15 &&
+            winBounds.Bottom >= workArea.Bottom - 15)
         {
             maximized = true;
         }

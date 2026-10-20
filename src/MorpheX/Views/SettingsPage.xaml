@@ -120,6 +120,21 @@
             <ui:CardControl Margin="0,0,0,3">
                 <ui:CardControl.Header>
                     <StackPanel>
+                        <TextBlock Text="Multi-monitor pause" Style="{StaticResource SettingLabelStyle}" />
+                        <TextBlock Text="Pause wallpapers across all displays or per active display" Style="{StaticResource SettingDescriptionStyle}" />
+                    </StackPanel>
+                </ui:CardControl.Header>
+                <ComboBox x:Name="MultiMonitorPauseCombo"
+                          Width="210"
+                          SelectionChanged="MultiMonitorPauseCombo_SelectionChanged">
+                    <ComboBoxItem Content="All displays (Recommended)" Tag="AllDisplays" />
+                    <ComboBoxItem Content="Per display" Tag="PerDisplay" />
+                </ComboBox>
+            </ui:CardControl>
+
+            <ui:CardControl Margin="0,0,0,3">
+                <ui:CardControl.Header>
+                    <StackPanel>
                         <TextBlock Text="Pause on battery" Style="{StaticResource SettingLabelStyle}" />
                         <TextBlock Text="Automatically pause the wallpaper when running on battery" Style="{StaticResource SettingDescriptionStyle}" />
                     </StackPanel>
@@ -296,7 +311,7 @@
                                        FontSize="12" Opacity="0.6" Margin="0,2,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="VersionText"
-                                       Text="Version 0.1.62"
+                                       Text="Version 0.1.63"
                                        FontSize="11" Opacity="0.4" Margin="0,3,0,0"
                                        Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
                         </StackPanel>

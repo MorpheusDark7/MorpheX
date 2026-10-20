@@ -80,6 +80,15 @@ public partial class SettingsPage : Page
                 break;
             }
         }
+        var currentMultiPause = settings.Performance.MultiMonitorPauseMode.ToString();
+        foreach (ComboBoxItem item in MultiMonitorPauseCombo.Items)
+        {
+            if ((string)item.Tag == currentMultiPause)
+            {
+                MultiMonitorPauseCombo.SelectedItem = item;
+                break;
+            }
+        }
         PauseBatteryToggle.IsChecked = settings.Performance.PauseOnBattery;
         ResumePositionToggle.IsChecked = settings.Playback.ResumeFromPreviousPosition;
 
@@ -123,7 +132,7 @@ public partial class SettingsPage : Page
         PlaylistSkipPausedToggle.IsChecked = settings.Playlist.SkipWhenPaused;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.62"}";
+        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.63"}";
 
         if (app.AvailableUpdate != null)
         {
@@ -220,6 +229,22 @@ public partial class SettingsPage : Page
                 {
                     app.PlaybackService.PollNow();
                 }
+            }
+        }
+    }
+
+    private async void MultiMonitorPauseCombo_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        if (MultiMonitorPauseCombo.SelectedItem is ComboBoxItem selected && selected.Tag is string tag)
+        {
+            var app = (App)Application.Current;
+            if (Enum.TryParse<MultiMonitorPauseMode>(tag, out var mode))
+            {
+                app.SettingsService.Settings.Performance.MultiMonitorPauseMode = mode;
+                await app.SettingsService.SaveAsync();
+                Log.Information("Multi-monitor pause mode changed to: {Mode}", mode);
+                app.PlaybackService.PollNow();
             }
         }
     }

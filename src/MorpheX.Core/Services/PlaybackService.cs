@@ -1,3 +1,4 @@
+using System.Drawing;
 using MorpheX.Core.Configuration;
 using MorpheX.Core.Detection;
 using MorpheX.Core.Models;
@@ -114,14 +115,19 @@ public sealed class PlaybackService : IPlaybackService
 
             var settings = _settingsService.Settings.Performance;
             bool globalBatteryPause = settings.PauseOnBattery && _batteryDetector.IsOnBattery();
+            bool isSpanned = string.Equals(_settingsService.Settings.Display.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase);
+
+            // 1. Evaluate pause condition for each monitor
+            var monitorTriggers = new Dictionary<string, bool>();
+            bool anyMonitorTriggered = false;
 
             foreach (var monitor in _monitorService.Monitors)
             {
-                bool shouldPause = false;
+                bool triggered = false;
 
                 if (globalBatteryPause)
                 {
-                    shouldPause = true;
+                    triggered = true;
                 }
                 else
                 {
@@ -132,7 +138,7 @@ public sealed class PlaybackService : IPlaybackService
                         _fullscreenDetector.Check(monitor.Bounds, monitor.WorkArea, monitor.Handle,
                             out bool isFullscreen, out bool isMaximized);
 
-                        shouldPause = rule switch
+                        triggered = rule switch
                         {
                             PauseRule.OnFullscreen => isFullscreen,
                             PauseRule.OnMaximized => isFullscreen || isMaximized,
@@ -143,6 +149,22 @@ public sealed class PlaybackService : IPlaybackService
                     }
                 }
 
+                monitorTriggers[monitor.DeviceId] = triggered;
+                if (triggered) anyMonitorTriggered = true;
+            }
+
+            // 2. Decide per-monitor pause based on MultiMonitorPauseMode:
+            // When AllDisplays (recommended, matches Wallpaper Engine default) or on battery,
+            // any active trigger pauses ALL monitors.
+            bool pauseAllMonitors = globalBatteryPause || isSpanned ||
+                                    (settings.MultiMonitorPauseMode == MultiMonitorPauseMode.AllDisplays && anyMonitorTriggered);
+
+            foreach (var monitor in _monitorService.Monitors)
+            {
+                bool shouldPause = pauseAllMonitors
+                    ? (anyMonitorTriggered || globalBatteryPause)
+                    : monitorTriggers.GetValueOrDefault(monitor.DeviceId);
+
                 bool wasPaused = _monitorPaused.GetValueOrDefault(monitor.DeviceId);
 
                 if (shouldPause && !wasPaused)
@@ -150,14 +172,15 @@ public sealed class PlaybackService : IPlaybackService
                     _wallpaperService.PauseMonitor(monitor.DeviceId);
                     _monitorPaused[monitor.DeviceId] = true;
                     _pausedSince[monitor.DeviceId] = DateTime.UtcNow;
-                    Log.Debug("Monitor {Name} paused", monitor.DisplayName);
+                    Log.Information("PlaybackService: Monitor '{Name}' paused (Rule: {Rule}, Battery: {Battery}, AllDisplays: {AllDisplays})",
+                        monitor.DisplayName, settings.PauseRule, globalBatteryPause, settings.MultiMonitorPauseMode == MultiMonitorPauseMode.AllDisplays);
                 }
                 else if (!shouldPause && wasPaused)
                 {
                     _wallpaperService.ResumeMonitor(monitor.DeviceId);
                     _monitorPaused[monitor.DeviceId] = false;
                     _pausedSince.Remove(monitor.DeviceId);
-                    Log.Debug("Monitor {Name} resumed", monitor.DisplayName);
+                    Log.Information("PlaybackService: Monitor '{Name}' resumed", monitor.DisplayName);
                 }
 
                 if (shouldPause && _pausedSince.TryGetValue(monitor.DeviceId, out var pausedAt))
@@ -178,6 +201,26 @@ public sealed class PlaybackService : IPlaybackService
                             _pausedSince.Remove(monitor.DeviceId);
                         }
                     }
+                }
+            }
+
+            // 3. Handle spanned host wallpaper if active
+            if (isSpanned)
+            {
+                bool spanShouldPause = anyMonitorTriggered || globalBatteryPause;
+                bool spanWasPaused = _monitorPaused.GetValueOrDefault(WallpaperService.SpanDeviceId);
+
+                if (spanShouldPause && !spanWasPaused)
+                {
+                    _wallpaperService.PauseMonitor(WallpaperService.SpanDeviceId);
+                    _monitorPaused[WallpaperService.SpanDeviceId] = true;
+                    Log.Information("PlaybackService: Spanned wallpaper paused");
+                }
+                else if (!spanShouldPause && spanWasPaused)
+                {
+                    _wallpaperService.ResumeMonitor(WallpaperService.SpanDeviceId);
+                    _monitorPaused[WallpaperService.SpanDeviceId] = false;
+                    Log.Information("PlaybackService: Spanned wallpaper resumed");
                 }
             }
         }
@@ -220,12 +263,13 @@ public sealed class PlaybackService : IPlaybackService
 
         var windowMonitor = Desktop.NativeMethods.MonitorFromWindow(fgWindow,
             Desktop.NativeMethods.MONITOR_DEFAULTTONEAREST);
-        if (windowMonitor != IntPtr.Zero && monitor.Handle != IntPtr.Zero)
+        if (windowMonitor != IntPtr.Zero && monitor.Handle != IntPtr.Zero && windowMonitor == monitor.Handle)
         {
-            return windowMonitor == monitor.Handle;
+            return true;
         }
 
-        return true;
+        var intersect = Rectangle.Intersect(monitor.Bounds, winRect);
+        return intersect.Width >= 100 && intersect.Height >= 100;
     }
 
     private static TimeSpan? GetUnloadDelay(UnloadDelay delay) => delay switch

@@ -86,6 +86,7 @@ public sealed class WallpaperService : IWallpaperService
     private bool _disposed;
 
     public bool IsAnyPlaying => _monitorStates.Values.Any(s => s.Provider?.State == WallpaperState.Playing);
+    public bool IsSpannedActive => string.Equals(_settingsService.Settings.Display.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase);
 
     public WallpaperService(IMonitorService monitorService, ISettingsService settingsService,
                              WallpaperProviderFactory providerFactory, ILibraryService? libraryService = null)
@@ -302,6 +303,14 @@ public sealed class WallpaperService : IWallpaperService
             }
             state.Provider?.Pause();
         }
+        else if (_monitorStates.TryGetValue(SpanDeviceId, out var spanState) && IsSpannedActive)
+        {
+            if (spanState.Provider != null && _settingsService.Settings.Playback.ResumeFromPreviousPosition)
+            {
+                SaveProviderPosition(SpanDeviceId, spanState.Provider);
+            }
+            spanState.Provider?.Pause();
+        }
     }
 
     public void ResumeMonitor(string monitorDeviceId)
@@ -324,6 +333,25 @@ public sealed class WallpaperService : IWallpaperService
                 state.Provider.SetResumePosition(TimeSpan.Zero);
             }
             state.Provider.Resume();
+        }
+        else if (_monitorStates.TryGetValue(SpanDeviceId, out var spanState) && IsSpannedActive)
+        {
+            if (spanState.Provider == null || spanState.Provider.State == WallpaperState.Unloaded)
+            {
+                if (spanState.Wallpaper != null)
+                {
+                    Log.Information("Reloading auto-unloaded wallpaper '{Name}' on span host",
+                        spanState.Wallpaper.Name);
+                    _ = SetWallpaperAsync(SpanDeviceId, spanState.Wallpaper);
+                }
+                return;
+            }
+
+            if (!_settingsService.Settings.Playback.ResumeFromPreviousPosition)
+            {
+                spanState.Provider.SetResumePosition(TimeSpan.Zero);
+            }
+            spanState.Provider.Resume();
         }
     }
 

@@ -30,3 +30,9 @@ public enum UnloadDelay
     ThirtyMinutes,
     OneHour
 }
+
+public enum MultiMonitorPauseMode
+{
+    AllDisplays,
+    PerDisplay
+}

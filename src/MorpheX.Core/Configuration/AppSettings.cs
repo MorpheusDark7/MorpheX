@@ -277,6 +277,7 @@ public sealed class PerformanceSettings
 {
     public PerformancePreset Preset { get; set; } = PerformancePreset.Balanced;
     public PauseRule PauseRule { get; set; } = PauseRule.OnFullscreen;
+    public MultiMonitorPauseMode MultiMonitorPauseMode { get; set; } = MultiMonitorPauseMode.AllDisplays;
     public bool PauseOnBattery { get; set; } = true;
     public bool ReduceFpsWhenPartiallyCovered { get; set; } = true;
     public int ReducedFps { get; set; } = 10;

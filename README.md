@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.62-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.63-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,12 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.63
+- **Multi-Monitor Smart Pause Fix** — Fixed wallpaper pause detection across multiple monitors with DWM cloaked window filtering and extended tolerance margins, ensuring maximized and fullscreen applications on any display correctly trigger playback pausing.
+- **Configurable Multi-Monitor Pause Mode** — Choose between pausing only on the monitor running the maximized app or pausing all monitors simultaneously whenever an active app is fullscreen or maximized.
+- **Enhanced Battery Power Detection** — Added Win32 `SystemPowerStatus` fallback for battery status detection, ensuring laptops pause properly on DC battery power without false triggers on AC desktop systems.
+- **Streamlined Release Deployments** — Optimized deploy artifacts and updated Microsoft Store installer distribution.
 
 ### v0.1.62
 - **Span Screen Placement Mode** — Seamlessly stretch single wallpapers across multi-monitor virtual screens with automatic topology detection and resize adaptation.
