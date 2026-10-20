@@ -22,7 +22,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 1
 
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
@@ -123,7 +123,7 @@ jobs:
           # Step 2: Switch to main branch
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
+          git fetch origin main --depth 1
           git checkout -B main origin/main
 
           # Step 3: Remove old installers, copy in new one
