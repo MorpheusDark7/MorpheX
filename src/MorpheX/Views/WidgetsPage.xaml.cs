@@ -51,34 +51,43 @@ public partial class WidgetsPage : Page
             ClockToggle.IsChecked       = w.ClockEnabled;
             ClockFormatCheck.IsChecked  = w.ClockIs24Hour;
             ClockDateCheck.IsChecked    = w.ClockShowDate;
+            ClockSecondsCheck.IsChecked = w.ClockShowSeconds;
+            ClockGlowCheck.IsChecked    = w.ClockGlow;
             ClockCardCheck.IsChecked    = w.ClockShowBackground;
-            SelectComboItem(ClockSizeCombo,  w.ClockFontSize);
-            SelectComboItem(ClockColorCombo, w.ClockColorMode);
-            SelectComboItem(ClockFontCombo,  w.ClockFontMode);
+            SelectComboItem(ClockSizeCombo,      w.ClockFontSize);
+            SelectComboItem(ClockColorCombo,     w.ClockColorMode);
+            SelectComboItem(ClockFontCombo,      w.ClockFontMode);
+            SelectComboItem(ClockAlignmentCombo, w.ClockTextAlignment);
+            SelectOpacityCombo(ClockOpacityCombo, w.ClockOpacity);
 
             // Day Name
             DayToggle.IsChecked     = w.DayEnabled;
             DayCardCheck.IsChecked  = w.DayShowBackground;
+            DayGlowCheck.IsChecked  = w.DayGlow;
             SelectComboItem(DaySizeCombo,    w.DayFontSize);
             SelectComboItem(DayColorCombo,   w.DayColorMode);
             SelectComboItem(DayFontCombo,    w.DayFontMode);
             SelectComboItem(DayCaseCombo,    w.DayCaseMode);
             SelectComboItem(DaySpacingCombo, w.DaySpacingMode);
+            SelectOpacityCombo(DayOpacityCombo, w.DayOpacity);
             DayCustomTextCheck.IsChecked = w.DayUseCustomText;
             DayCustomTextBox.Text        = w.DayCustomText ?? string.Empty;
             DayCustomTextPanel.Visibility = w.DayUseCustomText ? Visibility.Visible : Visibility.Collapsed;
             UpdateDayCustomCounter(w.DayCustomText?.Length ?? 0);
 
             // System Monitor (Simplicity Circles)
-            SysMonToggle.IsChecked    = w.SystemMonitorEnabled;
-            SysMonCardCheck.IsChecked = w.SysMonShowBackground;
-            SysMonCpuCheck.IsChecked  = w.SysMonShowCpu;
-            SysMonRamCheck.IsChecked  = w.SysMonShowRam;
-            SysMonGpuCheck.IsChecked  = w.SysMonShowGpu;
-            SysMonDiskCheck.IsChecked = w.SysMonShowDisk;
-            SelectComboItem(SysMonSizeCombo,   w.SysMonSize);
-            SelectComboItem(SysMonColorCombo,  w.SysMonColorMode);
-            SelectComboItem(SysMonLayoutCombo, w.SysMonOrientation);
+            SysMonToggle.IsChecked      = w.SystemMonitorEnabled;
+            SysMonCardCheck.IsChecked   = w.SysMonShowBackground;
+            SysMonCpuCheck.IsChecked    = w.SysMonShowCpu;
+            SysMonRamCheck.IsChecked    = w.SysMonShowRam;
+            SysMonGpuCheck.IsChecked    = w.SysMonShowGpu;
+            SysMonDiskCheck.IsChecked   = w.SysMonShowDisk;
+            SysMonLabelsCheck.IsChecked = w.SysMonShowLabels;
+            SysMonGlowCheck.IsChecked   = w.SysMonGlow;
+            SelectComboItem(SysMonSizeCombo,     w.SysMonSize);
+            SelectComboItem(SysMonColorCombo,    w.SysMonColorMode);
+            SelectComboItem(SysMonLayoutCombo,   w.SysMonOrientation);
+            SelectOpacityCombo(SysMonOpacityCombo, w.SysMonOpacity);
 
             // Media & Visualizer
             MediaToggle.IsChecked       = w.MediaEnabled;
@@ -87,15 +96,40 @@ public partial class WidgetsPage : Page
             MediaGlowCheck.IsChecked    = w.VisualizerGlow;
             SelectComboItem(VisualizerStyleCombo, w.VisualizerStyle);
             SelectComboItem(VisualizerColorCombo, w.VisualizerColorMode);
+            SelectOpacityCombo(VisualizerOpacityCombo, w.VisualizerOpacity);
+            VisualizerSensitivitySlider.Value = Math.Clamp(w.VisualizerSensitivity, 0.2, 3.0);
+            VisualizerSensitivityText.Text = $"{w.VisualizerSensitivity:0.0}x";
 
-            // Other widgets
-            CalendarToggle.IsChecked = w.CalendarEnabled;
+            // Calendar
+            CalendarToggle.IsChecked      = w.CalendarEnabled;
+            CalendarCardCheck.IsChecked   = w.CalendarShowBackground;
+            CalendarMondayCheck.IsChecked = w.CalendarStartOnMonday;
+            SelectComboItem(CalendarSizeCombo,     w.CalendarFontSize);
+            SelectComboItem(CalendarColorCombo,    w.CalendarColorMode);
+            SelectOpacityCombo(CalendarOpacityCombo, w.CalendarOpacity);
+
+            // Notes
             NotesToggle.IsChecked    = w.NotesEnabled;
+            NotesCardCheck.IsChecked = w.NotesShowBackground;
+            SelectComboItem(NotesSizeCombo,    w.NotesFontSize);
+            SelectComboItem(NotesColorCombo,   w.NotesColorMode);
+            SelectOpacityCombo(NotesOpacityCombo, w.NotesOpacity);
+
+            // Quote
             QuoteToggle.IsChecked    = w.QuoteEnabled;
+            QuoteCardCheck.IsChecked = w.QuoteShowBackground;
+            SelectComboItem(QuoteFontCombo,    w.QuoteFontMode);
+            SelectComboItem(QuoteSizeCombo,    w.QuoteFontSize);
+            SelectComboItem(QuoteColorCombo,   w.QuoteColorMode);
+            SelectOpacityCombo(QuoteOpacityCombo, w.QuoteOpacity);
+
+            // Weather
             WeatherToggle.IsChecked  = w.WeatherEnabled;
             WeatherOptionsPanel.Visibility = w.WeatherEnabled ? Visibility.Visible : Visibility.Collapsed;
             SelectComboItem(WeatherUnitsCombo, w.WeatherUseFahrenheit ? 1 : 0);
             SelectComboItem(WeatherScaleCombo, w.WeatherScale);
+            SelectComboItem(WeatherColorCombo, w.WeatherColorMode);
+            SelectOpacityCombo(WeatherOpacityCombo, w.WeatherOpacity);
             WeatherHiLoCheck.IsChecked = w.WeatherShowHiLo;
             WeatherHumidityCheck.IsChecked = w.WeatherShowHumidity;
             WeatherWindCheck.IsChecked = w.WeatherShowWind;
@@ -126,6 +160,21 @@ public partial class WidgetsPage : Page
                 return;
             }
         }
+    }
+
+    private static void SelectOpacityCombo(ComboBox? combo, double opacity)
+    {
+        if (combo == null) return;
+        int target = (int)Math.Round(opacity * 100);
+        foreach (ComboBoxItem item in combo.Items)
+        {
+            if (item.Tag is string s && int.TryParse(s, out int v) && Math.Abs(v - target) <= 5)
+            {
+                combo.SelectedItem = item;
+                return;
+            }
+        }
+        if (combo.Items.Count > 0) combo.SelectedIndex = 0;
     }
 
     // ── Master / Lock ────────────────────────────────────────────────────────
@@ -175,6 +224,10 @@ public partial class WidgetsPage : Page
             w.ClockColorMode = col;
         if (ClockFontCombo.SelectedItem is ComboBoxItem fi && int.TryParse(fi.Tag?.ToString(), out int font))
             w.ClockFontMode = font;
+        if (ClockAlignmentCombo?.SelectedItem is ComboBoxItem ai && int.TryParse(ai.Tag?.ToString(), out int al))
+            w.ClockTextAlignment = al;
+        if (ClockOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.ClockOpacity = op / 100.0;
 
         app.WidgetService.RefreshClock();
         await app.SettingsService.SaveAsync();
@@ -188,6 +241,8 @@ public partial class WidgetsPage : Page
 
         w.ClockIs24Hour       = ClockFormatCheck.IsChecked == true;
         w.ClockShowDate       = ClockDateCheck.IsChecked == true;
+        w.ClockShowSeconds    = ClockSecondsCheck.IsChecked == true;
+        w.ClockGlow           = ClockGlowCheck.IsChecked == true;
         w.ClockShowBackground = ClockCardCheck.IsChecked == true;
 
         app.WidgetService.RefreshClock();
@@ -221,6 +276,8 @@ public partial class WidgetsPage : Page
             w.DayCaseMode = cs;
         if (DaySpacingCombo.SelectedItem is ComboBoxItem sp && int.TryParse(sp.Tag?.ToString(), out int space))
             w.DaySpacingMode = space;
+        if (DayOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.DayOpacity = op / 100.0;
 
         app.WidgetService.RefreshDay();
         await app.SettingsService.SaveAsync();
@@ -233,6 +290,7 @@ public partial class WidgetsPage : Page
         var w = app.SettingsService.Settings.Widgets;
 
         w.DayShowBackground = DayCardCheck.IsChecked == true;
+        w.DayGlow           = DayGlowCheck.IsChecked == true;
 
         app.WidgetService.RefreshDay();
         await app.SettingsService.SaveAsync();
@@ -299,6 +357,8 @@ public partial class WidgetsPage : Page
             w.SysMonColorMode = col;
         if (SysMonLayoutCombo.SelectedItem is ComboBoxItem li && int.TryParse(li.Tag?.ToString(), out int lay))
             w.SysMonOrientation = lay;
+        if (SysMonOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.SysMonOpacity = op / 100.0;
 
         app.WidgetService.RefreshSysMon();
         await app.SettingsService.SaveAsync();
@@ -315,6 +375,8 @@ public partial class WidgetsPage : Page
         w.SysMonShowRam        = SysMonRamCheck.IsChecked == true;
         w.SysMonShowGpu        = SysMonGpuCheck.IsChecked == true;
         w.SysMonShowDisk       = SysMonDiskCheck.IsChecked == true;
+        w.SysMonShowLabels     = SysMonLabelsCheck.IsChecked == true;
+        w.SysMonGlow           = SysMonGlowCheck.IsChecked == true;
 
         app.WidgetService.RefreshSysMon();
         await app.SettingsService.SaveAsync();
@@ -331,6 +393,18 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
+    private async void VisualizerSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+    {
+        if (VisualizerSensitivityText != null)
+            VisualizerSensitivityText.Text = $"{e.NewValue:0.0}x";
+
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        app.SettingsService.Settings.Widgets.VisualizerSensitivity = Math.Round(e.NewValue, 2);
+        app.WidgetService.RefreshMedia();
+        await app.SettingsService.SaveAsync();
+    }
+
     private async void MediaSetting_Changed(object sender, SelectionChangedEventArgs e)
     {
         if (_isInitializing) return;
@@ -341,6 +415,8 @@ public partial class WidgetsPage : Page
             w.VisualizerStyle = st;
         if (VisualizerColorCombo.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
             w.VisualizerColorMode = col;
+        if (VisualizerOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.VisualizerOpacity = op / 100.0;
 
         app.WidgetService.RefreshMedia();
         await app.SettingsService.SaveAsync();
@@ -371,6 +447,36 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
+    private async void CalendarSetting_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (CalendarSizeCombo?.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.CalendarFontSize = sz;
+        if (CalendarColorCombo?.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.CalendarColorMode = col;
+        if (CalendarOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.CalendarOpacity = op / 100.0;
+
+        app.WidgetService.RefreshCalendar();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void CalendarOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.CalendarShowBackground = CalendarCardCheck.IsChecked == true;
+        w.CalendarStartOnMonday  = CalendarMondayCheck.IsChecked == true;
+
+        app.WidgetService.RefreshCalendar();
+        await app.SettingsService.SaveAsync();
+    }
+
     private async void NotesToggle_Changed(object sender, RoutedEventArgs e)
     {
         if (_isInitializing) return;
@@ -380,12 +486,72 @@ public partial class WidgetsPage : Page
         await app.SettingsService.SaveAsync();
     }
 
+    private async void NotesSetting_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (NotesSizeCombo?.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.NotesFontSize = sz;
+        if (NotesColorCombo?.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.NotesColorMode = col;
+        if (NotesOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.NotesOpacity = op / 100.0;
+
+        app.WidgetService.RefreshNotes();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void NotesOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.NotesShowBackground = NotesCardCheck.IsChecked == true;
+
+        app.WidgetService.RefreshNotes();
+        await app.SettingsService.SaveAsync();
+    }
+
     private async void QuoteToggle_Changed(object sender, RoutedEventArgs e)
     {
         if (_isInitializing) return;
         var app = (App)Application.Current;
         app.SettingsService.Settings.Widgets.QuoteEnabled = QuoteToggle.IsChecked == true;
         app.WidgetService.ApplySettings();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void QuoteSetting_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        if (QuoteFontCombo?.SelectedItem is ComboBoxItem fi && int.TryParse(fi.Tag?.ToString(), out int font))
+            w.QuoteFontMode = font;
+        if (QuoteSizeCombo?.SelectedItem is ComboBoxItem si && int.TryParse(si.Tag?.ToString(), out int sz))
+            w.QuoteFontSize = sz;
+        if (QuoteColorCombo?.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.QuoteColorMode = col;
+        if (QuoteOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.QuoteOpacity = op / 100.0;
+
+        app.WidgetService.RefreshQuote();
+        await app.SettingsService.SaveAsync();
+    }
+
+    private async void QuoteOption_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_isInitializing) return;
+        var app = (App)Application.Current;
+        var w = app.SettingsService.Settings.Widgets;
+
+        w.QuoteShowBackground = QuoteCardCheck.IsChecked == true;
+
+        app.WidgetService.RefreshQuote();
         await app.SettingsService.SaveAsync();
     }
 
@@ -463,6 +629,12 @@ public partial class WidgetsPage : Page
 
         if (WeatherCardBgCheck != null)
             w.WeatherShowBackground = WeatherCardBgCheck.IsChecked == true;
+
+        if (WeatherColorCombo?.SelectedItem is ComboBoxItem ci && int.TryParse(ci.Tag?.ToString(), out int col))
+            w.WeatherColorMode = col;
+
+        if (WeatherOpacityCombo?.SelectedItem is ComboBoxItem oi && double.TryParse(oi.Tag?.ToString(), out double op))
+            w.WeatherOpacity = op / 100.0;
 
         app.WidgetService.RefreshWeather();
         await app.SettingsService.SaveAsync();

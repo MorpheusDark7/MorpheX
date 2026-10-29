@@ -214,7 +214,7 @@ public sealed class SceneWallpaperProvider : IWallpaperProvider
                 _audioMedia = new Media(_libVLC, _tempAudioPath, FromType.FromPath);
                 _audioMedia.AddOption(":no-video");
                 _audioMedia.AddOption(":input-repeat=65535"); // loop seamlessly
-                _audioMedia.AddOption(":file-caching=300");
+                _audioMedia.AddOption(":file-caching=150");
 
                 _audioPlayer = new MediaPlayer(_audioMedia)
                 {

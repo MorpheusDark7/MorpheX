@@ -129,6 +129,68 @@ public sealed class WidgetService : IDisposable
         });
     }
 
+    public void RefreshCalendar()
+    {
+        _calendar?.Dispatcher.InvokeAsync(() => _calendar.RefreshDisplay());
+    }
+
+    public void RefreshNotes()
+    {
+        _notes?.Dispatcher.InvokeAsync(() => _notes.RefreshDisplay());
+    }
+
+    public void RefreshQuote()
+    {
+        _quote?.Dispatcher.InvokeAsync(() => _quote.RefreshDisplay());
+    }
+
+    public void ReloadWidget(Type widgetType)
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (widgetType == typeof(ClockWidget))
+            {
+                CloseWidget(ref _clock);
+                SetWidget(ref _clock, _settings.ClockEnabled, () => new ClockWidget(_settings));
+            }
+            else if (widgetType == typeof(SystemMonitorWidget))
+            {
+                CloseWidget(ref _sysmon);
+                SetWidget(ref _sysmon, _settings.SystemMonitorEnabled, () => new SystemMonitorWidget(_settings));
+            }
+            else if (widgetType == typeof(MediaWidget))
+            {
+                CloseWidget(ref _media);
+                SetWidget(ref _media, _settings.MediaEnabled, () => new MediaWidget(_settings));
+            }
+            else if (widgetType == typeof(DayWidget))
+            {
+                CloseWidget(ref _day);
+                SetWidget(ref _day, _settings.DayEnabled, () => new DayWidget(_settings));
+            }
+            else if (widgetType == typeof(CalendarWidget))
+            {
+                CloseWidget(ref _calendar);
+                SetWidget(ref _calendar, _settings.CalendarEnabled, () => new CalendarWidget(_settings));
+            }
+            else if (widgetType == typeof(NotesWidget))
+            {
+                CloseWidget(ref _notes);
+                SetWidget(ref _notes, _settings.NotesEnabled, () => new NotesWidget(_settings));
+            }
+            else if (widgetType == typeof(QuoteWidget))
+            {
+                CloseWidget(ref _quote);
+                SetWidget(ref _quote, _settings.QuoteEnabled, () => new QuoteWidget(_settings));
+            }
+            else if (widgetType == typeof(WeatherWidget))
+            {
+                CloseWidget(ref _weather);
+                SetWidget(ref _weather, _settings.WeatherEnabled, () => new WeatherWidget(_settings));
+            }
+        });
+    }
+
     public void RefreshWeather()
     {
         Application.Current?.Dispatcher.InvokeAsync(() =>

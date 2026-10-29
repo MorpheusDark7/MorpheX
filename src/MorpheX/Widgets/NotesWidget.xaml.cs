@@ -30,16 +30,39 @@ public partial class NotesWidget : Window
         SizeChanged += OnSizeChanged;
     }
 
+    public void RefreshDisplay() => ApplyTheme();
+
     public void ApplyTheme()
     {
         bool isLight = _settings.WidgetTheme == 1;
-        WidgetStyles.ApplyFrostedGlass(CardBorder, true, cornerRadius: 12, isLightTheme: isLight);
+        WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.NotesShowBackground, cornerRadius: 12, isLightTheme: isLight);
 
-        HeaderTitleText.Foreground = WidgetStyles.GetWidgetSubtleForeground(isLight);
-        NoteText.Foreground = WidgetStyles.GetWidgetForeground(isLight);
-        NoteText.CaretBrush = isLight
-            ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x30, 0x28, 0x20))
-            : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(0xAA, 0xFF, 0xFF, 0xFF));
+        NoteText.FontSize = _settings.NotesFontSize switch { 0 => 11, 2 => 16, _ => 13 };
+
+        var (textBrush, headerBrush) = _settings.NotesColorMode switch
+        {
+            1 => (new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(56, 189, 248)),
+                  new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 56, 189, 248))),
+            2 => (new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(74, 222, 128)),
+                  new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 74, 222, 128))),
+            3 => (new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 132, 252)),
+                  new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 192, 132, 252))),
+            4 => (new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(251, 146, 60)),
+                  new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(160, 251, 146, 60))),
+            5 => (new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(254, 240, 138)),
+                  new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(180, 254, 240, 138))),
+            _ => (WidgetStyles.GetWidgetForeground(isLight), WidgetStyles.GetWidgetSubtleForeground(isLight))
+        };
+
+        HeaderTitleText.Foreground = headerBrush;
+        NoteText.Foreground = textBrush;
+        NoteText.CaretBrush = textBrush;
+
+        Opacity = Math.Clamp(_settings.NotesOpacity > 0 ? _settings.NotesOpacity : 1.0, 0.2, 1.0);
+        MorpheX.Services.WidgetWindowHelper.RefreshWidgetSurface(this);
+
+        if (ToggleCardMenu != null)
+            ToggleCardMenu.Header = _settings.NotesShowBackground ? "Hide Background Card" : "Show Background Card";
     }
 
     private void OnLoaded(object sender, RoutedEventArgs e)
@@ -88,6 +111,49 @@ public partial class NotesWidget : Window
     {
         WidgetStyles.ApplyLockState(this, HeaderPanel, _settings.WidgetsLocked, hasResizeGrip: true);
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
+    }
+
+    private void ToggleCard_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.NotesShowBackground = !_settings.NotesShowBackground;
+        ApplyTheme();
+        Save();
+    }
+
+    private void ColorPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.MenuItem item && int.TryParse(item.Tag?.ToString(), out int c))
+        {
+            _settings.NotesColorMode = c;
+            ApplyTheme();
+            Save();
+        }
+    }
+
+    private void SizePreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.MenuItem item && int.TryParse(item.Tag?.ToString(), out int sz))
+        {
+            _settings.NotesFontSize = sz;
+            ApplyTheme();
+            Save();
+        }
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is System.Windows.Controls.MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.NotesOpacity = op;
+            ApplyTheme();
+            Save();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(NotesWidget));
     }
 
     private void ResetSize_Click(object sender, RoutedEventArgs e)

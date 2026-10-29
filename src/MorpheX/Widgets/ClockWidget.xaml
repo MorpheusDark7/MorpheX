@@ -18,8 +18,23 @@
     <Window.ContextMenu>
         <ContextMenu Background="#1A1A1E" BorderBrush="#30FFFFFF" Foreground="#FFFFFF" Padding="4">
             <MenuItem x:Name="ToggleFormatMenu" Header="Format: 24-Hour / 12-Hour" Click="ToggleFormat_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleSecondsMenu" Header="Show Seconds" Click="ToggleSeconds_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="ToggleDateMenu" Header="Toggle Date Line" Click="ToggleDate_Click" Foreground="#FFFFFF"/>
             <MenuItem x:Name="ToggleCardMenu" Header="Toggle Background Card" Click="ToggleCard_Click" Foreground="#FFFFFF"/>
+            <MenuItem x:Name="ToggleGlowMenu" Header="Toggle Neon Glow" Click="ToggleGlow_Click" Foreground="#FFFFFF"/>
+            <MenuItem Header="Text Alignment">
+                <MenuItem Header="Left" Click="Align_Click" Tag="0"/>
+                <MenuItem Header="Center" Click="Align_Click" Tag="1"/>
+                <MenuItem Header="Right" Click="Align_Click" Tag="2"/>
+            </MenuItem>
+            <MenuItem Header="Opacity">
+                <MenuItem Header="100%" Click="Opacity_Click" Tag="1.0"/>
+                <MenuItem Header="85%" Click="Opacity_Click" Tag="0.85"/>
+                <MenuItem Header="70%" Click="Opacity_Click" Tag="0.70"/>
+                <MenuItem Header="50%" Click="Opacity_Click" Tag="0.50"/>
+            </MenuItem>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Reload Widget" Click="ReloadWidget_Click" Foreground="#38BDF8"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Size">
                 <MenuItem Header="Small (40px)" Click="SizePreset_Click" Tag="0"/>

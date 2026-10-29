@@ -27,6 +27,11 @@ public sealed class DesktopProfile
     public bool IncludeWallpaper { get; set; } = true;
 
     /// <summary>
+    /// Placement mode snapshot for this profile ("PerDisplay" or "Span").
+    /// </summary>
+    public string PlacementMode { get; set; } = "PerDisplay";
+
+    /// <summary>
     /// Monitor assignment snapshots: MonitorId -> WallpaperId or FilePath
     /// </summary>
     public Dictionary<string, string> MonitorWallpapers { get; set; } = new();

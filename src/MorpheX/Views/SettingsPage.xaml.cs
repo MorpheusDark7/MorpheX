@@ -123,7 +123,7 @@ public partial class SettingsPage : Page
         PlaylistSkipPausedToggle.IsChecked = settings.Playlist.SkipWhenPaused;
 
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.62"}";
+        VersionText.Text = $"Version {version?.ToString(3) ?? "0.1.64"}";
 
         if (app.AvailableUpdate != null)
         {

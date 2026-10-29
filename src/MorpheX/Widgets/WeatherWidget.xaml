@@ -26,6 +26,22 @@
                 <MenuItem x:Name="WindMenuItem" Header="Wind Speed" IsCheckable="True" Click="ToggleWind_Click"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Color Theme" Foreground="#FFFFFF">
+                <MenuItem Header="Dynamic Condition" Click="ColorPreset_Click" Tag="0"/>
+                <MenuItem Header="Pure White" Click="ColorPreset_Click" Tag="1"/>
+                <MenuItem Header="Neon Cyan" Click="ColorPreset_Click" Tag="2"/>
+                <MenuItem Header="Emerald Mint" Click="ColorPreset_Click" Tag="3"/>
+                <MenuItem Header="Cyber Violet" Click="ColorPreset_Click" Tag="4"/>
+                <MenuItem Header="Sunset Amber" Click="ColorPreset_Click" Tag="5"/>
+            </MenuItem>
+            <MenuItem Header="Opacity" Foreground="#FFFFFF">
+                <MenuItem Header="100%" Click="Opacity_Click" Tag="1.0"/>
+                <MenuItem Header="85%" Click="Opacity_Click" Tag="0.85"/>
+                <MenuItem Header="70%" Click="Opacity_Click" Tag="0.70"/>
+                <MenuItem Header="50%" Click="Opacity_Click" Tag="0.50"/>
+            </MenuItem>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Reload Widget" Click="ReloadWidget_Click" Foreground="#38BDF8"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>

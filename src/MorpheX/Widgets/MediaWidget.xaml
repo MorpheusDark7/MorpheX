@@ -32,6 +32,24 @@
                 <MenuItem Header="Rose Pink" Click="ColorRose_Click" Foreground="#FB7185"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Sensitivity">
+                <MenuItem Header="Low (0.5x)" Click="Sensitivity_Click" Tag="0.5"/>
+                <MenuItem Header="Relaxed (0.8x)" Click="Sensitivity_Click" Tag="0.8"/>
+                <MenuItem Header="Normal (1.0x)" Click="Sensitivity_Click" Tag="1.0"/>
+                <MenuItem Header="High (1.5x)" Click="Sensitivity_Click" Tag="1.5"/>
+                <MenuItem Header="Aggressive (2.0x)" Click="Sensitivity_Click" Tag="2.0"/>
+                <MenuItem Header="Extreme (2.5x)" Click="Sensitivity_Click" Tag="2.5"/>
+                <MenuItem Header="Maximum (3.0x)" Click="Sensitivity_Click" Tag="3.0"/>
+            </MenuItem>
+            <MenuItem Header="Opacity">
+                <MenuItem Header="100%" Click="Opacity_Click" Tag="1.0"/>
+                <MenuItem Header="85%" Click="Opacity_Click" Tag="0.85"/>
+                <MenuItem Header="70%" Click="Opacity_Click" Tag="0.70"/>
+                <MenuItem Header="50%" Click="Opacity_Click" Tag="0.50"/>
+            </MenuItem>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Reload Widget" Click="ReloadWidget_Click" Foreground="#38BDF8"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <MenuItem Header="Reset Size" Click="ResetSize_Click" Foreground="#AAFFFFFF"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>

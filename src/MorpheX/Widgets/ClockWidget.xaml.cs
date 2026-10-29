@@ -1,3 +1,4 @@
+using MorpheX.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -48,10 +49,10 @@ public partial class ClockWidget : Window
     private void Tick()
     {
         var now = DateTime.Now;
-        // No seconds — clean minimal time display
-        TimeText.Text = _settings.ClockIs24Hour
-            ? now.ToString("HH:mm")
-            : now.ToString("h:mm tt");
+        string format = _settings.ClockIs24Hour
+            ? (_settings.ClockShowSeconds ? "HH:mm:ss" : "HH:mm")
+            : (_settings.ClockShowSeconds ? "h:mm:ss tt" : "h:mm tt");
+        TimeText.Text = now.ToString(format);
         DateText.Text = now.ToString("dddd, MMMM d");
     }
 
@@ -92,10 +93,51 @@ public partial class ClockWidget : Window
         // Card background (translucent smoked glass, not an opaque black box)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8), _settings.WidgetTheme == 1);
 
-        // Context menu headers (no emoji)
-        ToggleFormatMenu.Header = _settings.ClockIs24Hour ? "Format: 24-Hour (click for 12h)" : "Format: 12-Hour (click for 24h)";
-        ToggleDateMenu.Header   = _settings.ClockShowDate ? "Hide Date Line" : "Show Date Line";
-        ToggleCardMenu.Header   = _settings.ClockShowBackground ? "Hide Background Card" : "Show Background Card";
+        // Alignment
+        var align = _settings.ClockTextAlignment switch
+        {
+            1 => System.Windows.HorizontalAlignment.Center,
+            2 => System.Windows.HorizontalAlignment.Right,
+            _ => System.Windows.HorizontalAlignment.Left
+        };
+        TimeText.HorizontalAlignment = align;
+        DateText.HorizontalAlignment = align;
+
+        // Glow
+        if (_settings.ClockGlow)
+        {
+            var glowColor = _settings.ClockColorMode switch
+            {
+                2 => System.Windows.Media.Color.FromRgb(56, 189, 248),
+                3 => System.Windows.Media.Color.FromRgb(74, 222, 128),
+                4 => System.Windows.Media.Color.FromRgb(168, 85, 247),
+                5 => System.Windows.Media.Color.FromRgb(251, 146, 60),
+                6 => System.Windows.Media.Color.FromRgb(251, 191, 36),
+                7 => System.Windows.Media.Color.FromRgb(196, 181, 253),
+                8 => System.Windows.Media.Color.FromRgb(251, 113, 133),
+                9 => System.Windows.Media.Color.FromRgb(147, 197, 253),
+                10 => System.Windows.Media.Color.FromRgb(244, 63, 94),
+                _ => System.Windows.Media.Color.FromRgb(255, 255, 255)
+            };
+            TimeText.Effect = new DropShadowEffect { BlurRadius = 14, ShadowDepth = 0, Color = glowColor, Opacity = 0.75 };
+        }
+        else
+        {
+            TimeText.Effect = null;
+        }
+
+        // Opacity
+        Opacity = Math.Clamp(_settings.ClockOpacity > 0 ? _settings.ClockOpacity : 1.0, 0.2, 1.0);
+
+        // Self-heal transparent surface against black box bug
+        WidgetWindowHelper.RefreshWidgetSurface(this);
+
+        // Context menu headers
+        ToggleFormatMenu.Header  = _settings.ClockIs24Hour ? "Format: 24-Hour (click for 12h)" : "Format: 12-Hour (click for 24h)";
+        ToggleSecondsMenu.Header = _settings.ClockShowSeconds ? "Hide Seconds" : "Show Seconds";
+        ToggleDateMenu.Header    = _settings.ClockShowDate ? "Hide Date Line" : "Show Date Line";
+        ToggleCardMenu.Header    = _settings.ClockShowBackground ? "Hide Background Card" : "Show Background Card";
+        ToggleGlowMenu.Header    = _settings.ClockGlow ? "Hide Neon Glow" : "Show Neon Glow";
     }
 
     public void ApplyTheme()
@@ -250,6 +292,47 @@ public partial class ClockWidget : Window
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
+    }
+
+    private void ToggleSeconds_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockShowSeconds = !_settings.ClockShowSeconds;
+        ApplyAppearance();
+        Tick();
+        Save();
+    }
+
+    private void ToggleGlow_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.ClockGlow = !_settings.ClockGlow;
+        ApplyAppearance();
+        Save();
+    }
+
+    private void Align_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int a))
+        {
+            _settings.ClockTextAlignment = a;
+            ApplyAppearance();
+            Save();
+        }
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.ClockOpacity = op;
+            ApplyAppearance();
+            Save();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(ClockWidget));
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

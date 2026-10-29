@@ -116,6 +116,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -288,7 +289,29 @@
                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
                                 <CheckBox x:Name="ClockFormatCheck" Content="24-Hour Format" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
                                 <CheckBox x:Name="ClockDateCheck" Content="Show Date Below" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                                <CheckBox x:Name="ClockSecondsCheck" Content="Show Seconds" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                                <CheckBox x:Name="ClockGlowCheck" Content="Neon Glow" Margin="0,0,0,4" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
                                 <CheckBox x:Name="ClockCardCheck" Content="Frosted Background Card" Checked="ClockOption_Changed" Unchecked="ClockOption_Changed"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,8,8,0">
+                                <TextBlock Text="Alignment" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="ClockAlignmentCombo" SelectionChanged="ClockSetting_Changed">
+                                    <ComboBoxItem Content="Left" Tag="0"/>
+                                    <ComboBoxItem Content="Center" Tag="1"/>
+                                    <ComboBoxItem Content="Right" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,8,0,0">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="ClockOpacityCombo" SelectionChanged="ClockSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -315,6 +338,7 @@
                     <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
@@ -528,7 +552,19 @@
                             </StackPanel>
 
                             <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
-                                <CheckBox x:Name="DayCardCheck" Content="Frosted Background Card" Checked="DayOption_Changed" Unchecked="DayOption_Changed"/>
+                                <CheckBox x:Name="DayCardCheck" Content="Frosted Background Card" Margin="0,0,0,4" Checked="DayOption_Changed" Unchecked="DayOption_Changed"/>
+                                <CheckBox x:Name="DayGlowCheck" Content="Neon Glow" Checked="DayOption_Changed" Unchecked="DayOption_Changed"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,8,0,0">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="DayOpacityCombo" SelectionChanged="DaySetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -597,6 +633,7 @@
                     <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
@@ -724,12 +761,27 @@
 
                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" VerticalAlignment="Center">
                                 <CheckBox x:Name="SysMonCardCheck" Content="Frosted Background Card" Margin="0,0,0,4" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
-                                <WrapPanel Margin="0,2,0,0">
+                                <WrapPanel Margin="0,2,0,4">
                                     <CheckBox x:Name="SysMonCpuCheck" Content="CPU" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
                                     <CheckBox x:Name="SysMonRamCheck" Content="RAM" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
                                     <CheckBox x:Name="SysMonGpuCheck" Content="GPU" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
                                     <CheckBox x:Name="SysMonDiskCheck" Content="DISK" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
                                 </WrapPanel>
+                                <WrapPanel Margin="0,2,0,0">
+                                    <CheckBox x:Name="SysMonLabelsCheck" Content="Labels" Margin="0,0,10,0" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                    <CheckBox x:Name="SysMonGlowCheck" Content="Neon Glow" Checked="SysMonOption_Changed" Unchecked="SysMonOption_Changed"/>
+                                </WrapPanel>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,8,0,0">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="SysMonOpacityCombo" SelectionChanged="SysMonSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
                             </StackPanel>
                         </Grid>
                     </Border>
@@ -756,6 +808,7 @@
                     <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
                         <Grid>
                             <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
@@ -894,6 +947,27 @@
                                 <CheckBox x:Name="MediaDetailsCheck" Content="Track Details" Margin="0,0,16,0" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
                                 <CheckBox x:Name="MediaGlowCheck" Content="Neon Glow" Checked="MediaOption_Changed" Unchecked="MediaOption_Changed"/>
                             </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,10,8,0">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Text="Equalizer Sensitivity / Bar Height" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}"/>
+                                    <TextBlock x:Name="VisualizerSensitivityText" Text="1.0x" FontSize="11" FontWeight="SemiBold" Foreground="#38BDF8" HorizontalAlignment="Right"/>
+                                </Grid>
+                                <Slider x:Name="VisualizerSensitivitySlider" Minimum="0.2" Maximum="3.0" Value="1.0"
+                                        SmallChange="0.1" LargeChange="0.2" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                        ValueChanged="VisualizerSensitivitySlider_ValueChanged"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,10,0,0">
+                                <TextBlock Text="Widget Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="VisualizerOpacityCombo" SelectionChanged="MediaSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
+                            </StackPanel>
                         </Grid>
                     </Border>
                 </StackPanel>
@@ -905,15 +979,68 @@
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Monthly Calendar" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Shows current month with today highlighted. Minimal frosted dark card." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="CalendarToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="CalendarToggle_Changed" Unchecked="CalendarToggle_Changed"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Monthly Calendar" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Shows current month with today highlighted. Minimal frosted dark card." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="CalendarToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="CalendarToggle_Changed" Unchecked="CalendarToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CalendarColorCombo" SelectionChanged="CalendarSetting_Changed">
+                                    <ComboBoxItem Content="Pure White" Tag="0"/>
+                                    <ComboBoxItem Content="Dim Slate" Tag="1"/>
+                                    <ComboBoxItem Content="Electric Cyan" Tag="2"/>
+                                    <ComboBoxItem Content="Neon Mint" Tag="3"/>
+                                    <ComboBoxItem Content="Cyber Violet" Tag="4"/>
+                                    <ComboBoxItem Content="Sunset Amber" Tag="5"/>
+                                    <ComboBoxItem Content="Soft Lavender" Tag="6"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Font / Card Size" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CalendarSizeCombo" SelectionChanged="CalendarSetting_Changed">
+                                    <ComboBoxItem Content="Small (Compact)" Tag="0"/>
+                                    <ComboBoxItem Content="Normal (Default)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (Roomy)" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                <CheckBox x:Name="CalendarCardCheck" Content="Frosted Card" Margin="0,0,16,0" Checked="CalendarOption_Changed" Unchecked="CalendarOption_Changed"/>
+                                <CheckBox x:Name="CalendarMondayCheck" Content="Monday First" Checked="CalendarOption_Changed" Unchecked="CalendarOption_Changed"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="CalendarOpacityCombo" SelectionChanged="CalendarSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- ─── NOTES ─────────────────────────────────────────── -->
@@ -922,15 +1049,65 @@
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Sticky Notes" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Editable desktop note with auto-save. Resizable from bottom-right corner." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="NotesToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="NotesToggle_Changed" Unchecked="NotesToggle_Changed"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Sticky Notes" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Editable desktop note with auto-save. Resizable from bottom-right corner." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="NotesToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="NotesToggle_Changed" Unchecked="NotesToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="NotesColorCombo" SelectionChanged="NotesSetting_Changed">
+                                    <ComboBoxItem Content="Dark Glass (Default)" Tag="0"/>
+                                    <ComboBoxItem Content="Deep Charcoal" Tag="1"/>
+                                    <ComboBoxItem Content="Warm Notepad Amber" Tag="2"/>
+                                    <ComboBoxItem Content="Neon Slate Cyan" Tag="3"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Font Size" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="NotesSizeCombo" SelectionChanged="NotesSetting_Changed">
+                                    <ComboBoxItem Content="Small (11px)" Tag="0"/>
+                                    <ComboBoxItem Content="Normal (13px)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (15px)" Tag="2"/>
+                                    <ComboBoxItem Content="Extra Large (18px)" Tag="3"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                                <CheckBox x:Name="NotesCardCheck" Content="Frosted Background Card" Checked="NotesOption_Changed" Unchecked="NotesOption_Changed"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="NotesOpacityCombo" SelectionChanged="NotesSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- ─── QUOTE ─────────────────────────────────────────── -->
@@ -939,15 +1116,76 @@
             <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
                     BorderThickness="1" CornerRadius="8" Padding="16,14" Margin="0,0,0,8">
-                <Grid>
-                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
-                        <TextBlock Text="Motivational Quote" Style="{StaticResource SettingLabelStyle}"/>
-                        <TextBlock Text="Floating quote card with 30 curated quotes. Double-click to cycle." Style="{StaticResource SettingDescriptionStyle}"/>
-                    </StackPanel>
-                    <ui:ToggleSwitch x:Name="QuoteToggle" Grid.Column="1" VerticalAlignment="Center"
-                        Checked="QuoteToggle_Changed" Unchecked="QuoteToggle_Changed"/>
-                </Grid>
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                            <TextBlock Text="Motivational Quote" Style="{StaticResource SettingLabelStyle}"/>
+                            <TextBlock Text="Floating quote card with 30 curated quotes. Double-click to cycle." Style="{StaticResource SettingDescriptionStyle}"/>
+                        </StackPanel>
+                        <ui:ToggleSwitch x:Name="QuoteToggle" Grid.Column="1" VerticalAlignment="Center"
+                            Checked="QuoteToggle_Changed" Unchecked="QuoteToggle_Changed"/>
+                    </Grid>
+
+                    <Border BorderBrush="{DynamicResource DividerStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,12,0,0" Padding="0,12,0,0">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Color Theme" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="QuoteColorCombo" SelectionChanged="QuoteSetting_Changed">
+                                    <ComboBoxItem Content="Minimalist White" Tag="0"/>
+                                    <ComboBoxItem Content="Electric Cyan" Tag="1"/>
+                                    <ComboBoxItem Content="Cyber Violet" Tag="2"/>
+                                    <ComboBoxItem Content="Emerald Mint" Tag="3"/>
+                                    <ComboBoxItem Content="Sunset Amber" Tag="4"/>
+                                    <ComboBoxItem Content="Soft Lavender" Tag="5"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Typography / Font Style" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="QuoteFontCombo" SelectionChanged="QuoteSetting_Changed">
+                                    <ComboBoxItem Content="Georgia (Serif Elegant)" Tag="0"/>
+                                    <ComboBoxItem Content="Segoe UI (Clean Sans)" Tag="1"/>
+                                    <ComboBoxItem Content="Bahnschrift (Modern Condensed)" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,10">
+                                <TextBlock Text="Font Size" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="QuoteSizeCombo" SelectionChanged="QuoteSetting_Changed">
+                                    <ComboBoxItem Content="Small (12px)" Tag="0"/>
+                                    <ComboBoxItem Content="Normal (14px)" Tag="1"/>
+                                    <ComboBoxItem Content="Large (16px)" Tag="2"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,10">
+                                <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox x:Name="QuoteOpacityCombo" SelectionChanged="QuoteSetting_Changed">
+                                    <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                    <ComboBoxItem Content="90%" Tag="90"/>
+                                    <ComboBoxItem Content="80%" Tag="80"/>
+                                    <ComboBoxItem Content="70%" Tag="70"/>
+                                    <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                </ComboBox>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">
+                                <CheckBox x:Name="QuoteCardCheck" Content="Frosted Background Card" Checked="QuoteOption_Changed" Unchecked="QuoteOption_Changed"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </StackPanel>
             </Border>
 
             <!-- ─── WEATHER ───────────────────────────────────────── -->
@@ -1017,6 +1255,7 @@
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto"/>
                                         <RowDefinition Height="Auto"/>
+                                        <RowDefinition Height="Auto"/>
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
@@ -1043,7 +1282,7 @@
                                     </StackPanel>
 
                                     <!-- Details Toggles -->
-                                    <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4,0,0">
+                                    <WrapPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,4,0,8">
                                         <CheckBox x:Name="WeatherHiLoCheck" Content="Hi / Lo Temp" Margin="0,0,16,8"
                                                   Checked="WeatherOption_Changed" Unchecked="WeatherOption_Changed"/>
                                         <CheckBox x:Name="WeatherHumidityCheck" Content="Humidity" Margin="0,0,16,8"
@@ -1053,6 +1292,30 @@
                                         <CheckBox x:Name="WeatherCardBgCheck" Content="Frosted Background Card" Margin="0,0,0,8"
                                                   Checked="WeatherOption_Changed" Unchecked="WeatherOption_Changed"/>
                                     </WrapPanel>
+
+                                    <!-- Theme & Opacity -->
+                                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0">
+                                        <TextBlock Text="Color Theme" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="WeatherColorCombo" SelectionChanged="WeatherOption_Changed">
+                                            <ComboBoxItem Content="Minimalist White" Tag="0"/>
+                                            <ComboBoxItem Content="Electric Cyan" Tag="1"/>
+                                            <ComboBoxItem Content="Emerald Mint" Tag="2"/>
+                                            <ComboBoxItem Content="Sunset Amber" Tag="3"/>
+                                            <ComboBoxItem Content="Cyber Violet" Tag="4"/>
+                                            <ComboBoxItem Content="Slate Grey" Tag="5"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0">
+                                        <TextBlock Text="Opacity" FontSize="11" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,4"/>
+                                        <ComboBox x:Name="WeatherOpacityCombo" SelectionChanged="WeatherOption_Changed">
+                                            <ComboBoxItem Content="100% (Solid)" Tag="100"/>
+                                            <ComboBoxItem Content="90%" Tag="90"/>
+                                            <ComboBoxItem Content="80%" Tag="80"/>
+                                            <ComboBoxItem Content="70%" Tag="70"/>
+                                            <ComboBoxItem Content="50% (Transparent)" Tag="50"/>
+                                        </ComboBox>
+                                    </StackPanel>
                                 </Grid>
                             </StackPanel>
                         </Border>

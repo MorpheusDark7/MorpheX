@@ -18,7 +18,7 @@ public static class MemoryOptimizer
             if (!force && _lastTrimTimestamp > 0)
             {
                 var elapsedSeconds = (now - _lastTrimTimestamp) / (double)Stopwatch.Frequency;
-                if (elapsedSeconds < 30.0)
+                if (elapsedSeconds < 20.0)
                     return;
             }
             _lastTrimTimestamp = now;
@@ -26,21 +26,14 @@ public static class MemoryOptimizer
 
         try
         {
-            if (force)
-            {
-                GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-                GC.Collect(2, GCCollectionMode.Aggressive, blocking: false, compacting: true);
-                GC.WaitForPendingFinalizers();
+            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
 
-                using var currentProcess = Process.GetCurrentProcess();
-                NativeMethods.EmptyWorkingSet(currentProcess.Handle);
-                Log.Debug("Working set memory forced trimmed");
-            }
-            else
-            {
-                // Non-blocking collection without paging active GPU/D3D surfaces to disk
-                GC.Collect(1, GCCollectionMode.Optimized, blocking: false);
-            }
+            using var currentProcess = Process.GetCurrentProcess();
+            NativeMethods.EmptyWorkingSet(currentProcess.Handle);
+            Log.Debug("Working set memory successfully trimmed (force={Force})", force);
         }
         catch (Exception ex)
         {

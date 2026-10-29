@@ -61,9 +61,21 @@ public partial class ProfilesPage : Page
         if (activeProfile != null)
         {
             ActiveProfileNameText.Text = activeProfile.Name;
-            string wpSummary = activeProfile.IncludeWallpaper
-                ? $"{activeProfile.MonitorWallpapers.Count} monitor wallpaper(s)"
-                : "No wallpapers locked";
+            string wpSummary;
+            if (!activeProfile.IncludeWallpaper)
+            {
+                wpSummary = "No wallpapers locked";
+            }
+            else if (string.Equals(activeProfile.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase) ||
+                     (activeProfile.MonitorWallpapers.ContainsKey(MorpheX.Core.Services.WallpaperService.SpanDeviceId) && activeProfile.MonitorWallpapers.Count == 1))
+            {
+                wpSummary = "Spanned across displays";
+            }
+            else
+            {
+                int monitorCount = activeProfile.MonitorWallpapers.Keys.Count(k => k != MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+                wpSummary = $"{monitorCount} monitor wallpaper(s)";
+            }
             ActiveProfileSummaryText.Text = $"{wpSummary}  •  Updated {activeProfile.UpdatedAt:MMM d, yyyy h:mm tt}";
         }
 
@@ -139,9 +151,21 @@ public partial class ProfilesPage : Page
         // Tags / pills row
         var tagsRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
 
-        string wpTag = profile.IncludeWallpaper
-            ? $"{profile.MonitorWallpapers.Count} monitor(s)"
-            : "No wallpapers";
+        string wpTag;
+        if (!profile.IncludeWallpaper)
+        {
+            wpTag = "No wallpapers";
+        }
+        else if (string.Equals(profile.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase) ||
+                 (profile.MonitorWallpapers.ContainsKey(MorpheX.Core.Services.WallpaperService.SpanDeviceId) && profile.MonitorWallpapers.Count == 1))
+        {
+            wpTag = "Spanned";
+        }
+        else
+        {
+            int monitorCount = profile.MonitorWallpapers.Keys.Count(k => k != MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+            wpTag = $"{monitorCount} monitor(s)";
+        }
         tagsRow.Children.Add(CreateTag(wpTag));
 
         var dateBlock = new System.Windows.Controls.TextBlock

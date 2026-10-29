@@ -1,3 +1,5 @@
+using MenuItem = System.Windows.Controls.MenuItem;
+using MorpheX.Services;
 using System.Net.Http;
 using System.Text.Json;
 using System.Windows;
@@ -535,6 +537,32 @@ public partial class WeatherWidget : Window
         ((App)Application.Current).WidgetService.RefreshLockState();
     }
 
+    private void ColorPreset_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && int.TryParse(item.Tag?.ToString(), out int col))
+        {
+            _settings.WeatherColorMode = col;
+            ApplyCustomizations();
+            Save();
+        }
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.WeatherOpacity = op;
+            ApplyCustomizations();
+            Save();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(WeatherWidget));
+    }
+
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
     {
         _settings.WeatherEnabled = false;
@@ -588,6 +616,9 @@ public partial class WeatherWidget : Window
 
         // 5. Instantly recalculate & render displayed numbers with current unit
         RenderCurrentWeather();
+
+        Opacity = Math.Clamp(_settings.WeatherOpacity > 0 ? _settings.WeatherOpacity : 1.0, 0.2, 1.0);
+        WidgetWindowHelper.RefreshWidgetSurface(this);
     }
 
     public void ApplyTheme()

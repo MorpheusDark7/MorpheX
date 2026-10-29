@@ -73,6 +73,18 @@ public partial class MainWindow : FluentWindow
             : new System.Windows.GridLength(60);
     }
 
+    public void ReleaseUiResources()
+    {
+        try
+        {
+            _pageCache.Clear();
+            ContentFrame.Content = null;
+            ThumbnailImageConverter.Invalidate();
+        }
+        catch { }
+        MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
+    }
+
     private void MainWindow_StateChanged(object? sender, EventArgs e)
     {
         var app = (App)System.Windows.Application.Current;
@@ -83,10 +95,14 @@ public partial class MainWindow : FluentWindow
                 app.SystemMetricsService.Stop();
             }
             Hide();
-            MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
+            ReleaseUiResources();
         }
         else if (WindowState == WindowState.Normal || WindowState == WindowState.Maximized)
         {
+            if (ContentFrame.Content == null)
+            {
+                NavigateTo(typeof(LibraryPage));
+            }
             if (app.SettingsService.Settings.Widgets.SystemMonitorEnabled)
             {
                 app.SystemMetricsService.Start();
@@ -227,6 +243,11 @@ public partial class MainWindow : FluentWindow
 
     public void BringToFront()
     {
+        if (ContentFrame.Content == null)
+        {
+            NavigateTo(typeof(LibraryPage));
+        }
+
         Show();
 
         var hwnd = new WindowInteropHelper(this).Handle;
@@ -274,7 +295,7 @@ public partial class MainWindow : FluentWindow
                 app.SystemMetricsService.Stop();
             }
             Hide();
-            MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: true);
+            ReleaseUiResources();
             return;
         }
 

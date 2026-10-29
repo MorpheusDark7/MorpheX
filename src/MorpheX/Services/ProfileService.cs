@@ -20,6 +20,7 @@ public sealed class ProfileService
     {
         _settingsService = settingsService;
         EnsureDefaultProfileExists();
+        SanitizeProfiles();
     }
 
     private void EnsureDefaultProfileExists()
@@ -34,17 +35,70 @@ public sealed class ProfileService
                 IncludeWallpaper = true
             };
 
-            foreach (var kvp in Settings.MonitorAssignments)
-            {
-                if (!string.IsNullOrEmpty(kvp.Value.WallpaperId))
-                {
-                    defaultProfile.MonitorWallpapers[kvp.Key] = kvp.Value.WallpaperId;
-                }
-            }
+            PopulateProfileWallpapers(defaultProfile);
 
             Settings.Profiles.Add(defaultProfile);
             Settings.ActiveProfileId = defaultProfile.Id;
             _ = _settingsService.SaveAsync();
+        }
+    }
+
+    private void SanitizeProfiles()
+    {
+        if (Settings.Profiles == null) return;
+        bool modified = false;
+
+        foreach (var profile in Settings.Profiles)
+        {
+            bool hasSpan = profile.MonitorWallpapers.ContainsKey(MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+            int nonSpanCount = profile.MonitorWallpapers.Keys.Count(k => k != MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+
+            // Clean up old profiles where SPAN was erroneously included alongside physical monitors
+            if (hasSpan && nonSpanCount > 0)
+            {
+                profile.MonitorWallpapers.Remove(MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+                profile.PlacementMode = "PerDisplay";
+                modified = true;
+            }
+            else if (hasSpan && nonSpanCount == 0)
+            {
+                profile.PlacementMode = "Span";
+            }
+            else if (string.IsNullOrEmpty(profile.PlacementMode))
+            {
+                profile.PlacementMode = "PerDisplay";
+            }
+        }
+
+        if (modified)
+        {
+            _ = _settingsService.SaveAsync();
+        }
+    }
+
+    private void PopulateProfileWallpapers(DesktopProfile profile)
+    {
+        profile.MonitorWallpapers.Clear();
+        string placement = Settings.Display.PlacementMode;
+        profile.PlacementMode = string.Equals(placement, "Span", StringComparison.OrdinalIgnoreCase) ? "Span" : "PerDisplay";
+
+        if (profile.PlacementMode == "Span")
+        {
+            if (Settings.MonitorAssignments.TryGetValue(MorpheX.Core.Services.WallpaperService.SpanDeviceId, out var spanAssign)
+                && !string.IsNullOrEmpty(spanAssign.WallpaperId))
+            {
+                profile.MonitorWallpapers[MorpheX.Core.Services.WallpaperService.SpanDeviceId] = spanAssign.WallpaperId;
+            }
+        }
+        else
+        {
+            foreach (var kvp in Settings.MonitorAssignments)
+            {
+                if (kvp.Key != MorpheX.Core.Services.WallpaperService.SpanDeviceId && !string.IsNullOrEmpty(kvp.Value.WallpaperId))
+                {
+                    profile.MonitorWallpapers[kvp.Key] = kvp.Value.WallpaperId;
+                }
+            }
         }
     }
 
@@ -63,13 +117,7 @@ public sealed class ProfileService
 
         if (includeWallpaper)
         {
-            foreach (var kvp in Settings.MonitorAssignments)
-            {
-                if (!string.IsNullOrEmpty(kvp.Value.WallpaperId))
-                {
-                    profile.MonitorWallpapers[kvp.Key] = kvp.Value.WallpaperId;
-                }
-            }
+            PopulateProfileWallpapers(profile);
         }
 
         Settings.Profiles.Add(profile);
@@ -91,14 +139,7 @@ public sealed class ProfileService
 
         if (profile.IncludeWallpaper)
         {
-            profile.MonitorWallpapers.Clear();
-            foreach (var kvp in Settings.MonitorAssignments)
-            {
-                if (!string.IsNullOrEmpty(kvp.Value.WallpaperId))
-                {
-                    profile.MonitorWallpapers[kvp.Key] = kvp.Value.WallpaperId;
-                }
-            }
+            PopulateProfileWallpapers(profile);
         }
 
         Settings.ActiveProfileId = profile.Id;
@@ -172,7 +213,7 @@ public sealed class ProfileService
         // 1. Copy target profile widget snapshot into active settings in-place
         Settings.Widgets.CopyFrom(profile.Widgets);
 
-        // 2. Re-apply widget window lifecycle and properties
+        // 2. Re-apply widget window lifecycle and properties across all widgets
         widgetService.ApplySettings();
         widgetService.RefreshLockState();
         widgetService.RefreshTheme();
@@ -181,38 +222,83 @@ public sealed class ProfileService
         widgetService.RefreshDay();
         widgetService.RefreshSysMon();
         widgetService.RefreshWeather();
+        widgetService.RefreshCalendar();
+        widgetService.RefreshNotes();
+        widgetService.RefreshQuote();
 
-        // 3. Optionally restore saved wallpapers (with deleted-wallpaper safety!)
+        // 3. Restore saved wallpapers cleanly without conflicting span vs per-display states
         if (profile.IncludeWallpaper && profile.MonitorWallpapers != null && profile.MonitorWallpapers.Count > 0)
         {
+            bool isSpanProfile = string.Equals(profile.PlacementMode, "Span", StringComparison.OrdinalIgnoreCase)
+                || (profile.MonitorWallpapers.ContainsKey(MorpheX.Core.Services.WallpaperService.SpanDeviceId) && profile.MonitorWallpapers.Count == 1);
+
             bool anyMissing = false;
-            foreach (var kvp in profile.MonitorWallpapers)
+
+            if (isSpanProfile)
             {
-                var monitorId = kvp.Key;
-                var wallpaperIdOrPath = kvp.Value;
-
-                // Look up by ID first, then by path
-                var wallpaper = libraryService.GetById(wallpaperIdOrPath)
-                    ?? libraryService.Wallpapers.FirstOrDefault(w =>
-                        string.Equals(w.EffectivePath, wallpaperIdOrPath, StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(w.SourcePath, wallpaperIdOrPath, StringComparison.OrdinalIgnoreCase));
-
-                if (wallpaper != null && File.Exists(wallpaper.EffectivePath))
+                var wpId = profile.MonitorWallpapers.Values.FirstOrDefault();
+                if (!string.IsNullOrEmpty(wpId))
                 {
-                    try
+                    var wallpaper = libraryService.GetById(wpId)
+                        ?? libraryService.Wallpapers.FirstOrDefault(w =>
+                            string.Equals(w.EffectivePath, wpId, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(w.SourcePath, wpId, StringComparison.OrdinalIgnoreCase));
+
+                    if (wallpaper != null && File.Exists(wallpaper.EffectivePath))
                     {
-                        await wallpaperService.SetWallpaperAsync(monitorId, wallpaper, skipSave: true);
+                        try
+                        {
+                            await wallpaperService.SetSpannedWallpaperAsync(wallpaper, skipSave: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warning(ex, "Failed to apply spanned wallpaper for profile {Profile}", profile.Name);
+                        }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        Log.Warning(ex, "Failed to apply wallpaper for monitor {Monitor}", monitorId);
+                        anyMissing = true;
                     }
                 }
-                else
+            }
+            else
+            {
+                // PerDisplay mode: ensure Spanned wallpaper is removed so it doesn't conflict
+                if (wallpaperService.GetActiveWallpaper(MorpheX.Core.Services.WallpaperService.SpanDeviceId) != null)
                 {
-                    // Wallpaper was moved or deleted — protect user and keep current wallpaper playing
-                    anyMissing = true;
-                    Log.Information("Profile wallpaper '{Id}' no longer exists on disk; keeping current wallpaper.", wallpaperIdOrPath);
+                    await wallpaperService.RemoveWallpaperAsync(MorpheX.Core.Services.WallpaperService.SpanDeviceId);
+                }
+
+                Settings.Display.PlacementMode = "PerDisplay";
+
+                foreach (var kvp in profile.MonitorWallpapers)
+                {
+                    var monitorId = kvp.Key;
+                    if (monitorId == MorpheX.Core.Services.WallpaperService.SpanDeviceId) continue;
+
+                    var wallpaperIdOrPath = kvp.Value;
+
+                    var wallpaper = libraryService.GetById(wallpaperIdOrPath)
+                        ?? libraryService.Wallpapers.FirstOrDefault(w =>
+                            string.Equals(w.EffectivePath, wallpaperIdOrPath, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(w.SourcePath, wallpaperIdOrPath, StringComparison.OrdinalIgnoreCase));
+
+                    if (wallpaper != null && File.Exists(wallpaper.EffectivePath))
+                    {
+                        try
+                        {
+                            await wallpaperService.SetWallpaperAsync(monitorId, wallpaper, skipSave: true);
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Warning(ex, "Failed to apply wallpaper for monitor {Monitor}", monitorId);
+                        }
+                    }
+                    else
+                    {
+                        anyMissing = true;
+                        Log.Information("Profile wallpaper '{Id}' no longer exists on disk; keeping current wallpaper.", wallpaperIdOrPath);
+                    }
                 }
             }
 

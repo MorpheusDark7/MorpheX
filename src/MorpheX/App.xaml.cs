@@ -561,7 +561,7 @@ public partial class App : Application
         };
 
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.62";
+        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.64";
         var header = new System.Windows.Forms.ToolStripMenuItem($"MorpheX Live  •  {verStr}")
         {
             Enabled = false,

@@ -46,18 +46,23 @@ public sealed class WidgetSettings
     public bool ClockIs24Hour { get; set; } = true;
     public bool ClockShowDate { get; set; } = true;
     public bool ClockShowBackground { get; set; } = false;
-    /// <summary>0=Small(40px) 1=Medium(64px) 2=Large(88px) 3=Huge(112px)</summary>
+    /// <summary>0=Small(40px) 1=Medium(64px) 2=Large(88px) 3=Huge(112px) 4=Giant(140px)</summary>
     public int ClockFontSize { get; set; } = 1;
-    /// <summary>0=White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold</summary>
+    /// <summary>0=White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold 7=Soft Lavender 8=Rose Pink 9=Frost Sky 10=Crimson</summary>
     public int ClockColorMode { get; set; } = 0;
-    /// <summary>0=Bahnschrift Light 1=Segoe UI Light 2=Consolas</summary>
+    /// <summary>0=Bahnschrift Light 1=Segoe UI Light 2=Anurati 3=Consolas 4=Quicksand</summary>
     public int ClockFontMode { get; set; } = 0;
+    public bool ClockShowSeconds { get; set; } = false;
+    /// <summary>0=Left 1=Center 2=Right</summary>
+    public int ClockTextAlignment { get; set; } = 0;
+    public bool ClockGlow { get; set; } = false;
+    public double ClockOpacity { get; set; } = 1.0;
 
     // ── System Monitor (Simplicity Circles) ───────────────────────────
     public bool SystemMonitorEnabled { get; set; } = false;
     /// <summary>0=Small(44px) 1=Medium(56px) 2=Large(72px) 3=ExtraLarge(88px)</summary>
     public int SysMonSize { get; set; } = 1;
-    /// <summary>0=White 1=Cyan Neon 2=Emerald Mint 3=Cyber Violet 4=Sunset Amber</summary>
+    /// <summary>0=White 1=Cyan Neon 2=Emerald Mint 3=Cyber Violet 4=Sunset Amber 5=Soft Lavender 6=Rose Pink</summary>
     public int SysMonColorMode { get; set; } = 0;
     /// <summary>0=Horizontal Row 1=Vertical Column 2=Grid 2x2</summary>
     public int SysMonOrientation { get; set; } = 0;
@@ -66,24 +71,30 @@ public sealed class WidgetSettings
     public bool SysMonShowRam { get; set; } = true;
     public bool SysMonShowGpu { get; set; } = true;
     public bool SysMonShowDisk { get; set; } = true;
+    public bool SysMonShowLabels { get; set; } = true;
+    public bool SysMonGlow { get; set; } = false;
+    public double SysMonOpacity { get; set; } = 1.0;
 
     // ── Audio Visualizer & Media ───────────────────────────────────────
     public bool MediaEnabled { get; set; } = false;
     /// <summary>Visualizer style: 0=Bars 1=Mirrored 2=Waveform</summary>
     public int VisualizerStyle { get; set; } = 0;
-    /// <summary>Visualizer color: 0=White 1=Neon Cyan 2=Violet Glow 3=Emerald Mint 4=Sunset Amber</summary>
+    /// <summary>Visualizer color: 0=White 1=Neon Cyan 2=Violet Glow 3=Emerald Mint 4=Sunset Amber 5=Soft Lavender 6=Rose Pink</summary>
     public int VisualizerColorMode { get; set; } = 0;
     public bool MediaShowBackground { get; set; } = false;
     public bool MediaShowTrackDetails { get; set; } = true;
     public bool VisualizerGlow { get; set; } = false;
+    /// <summary>Audio visualizer sensitivity multiplier: 0.2 to 3.0 (default 1.0)</summary>
+    public double VisualizerSensitivity { get; set; } = 1.0;
+    public double VisualizerOpacity { get; set; } = 1.0;
 
     // ── Day Name ───────────────────────────────────────────────────────
     public bool DayEnabled { get; set; } = false;
-    /// <summary>0=Small(42) 1=Medium(64) 2=Large(86) 3=Huge(110) 4=Giant(140)</summary>
+    /// <summary>0=Small(42) 1=Medium(64) 2=Large(86) 3=Huge(110) 4=Giant(140) 5=Massive(180)</summary>
     public int DayFontSize { get; set; } = 1;
-    /// <summary>0=Pure White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold 7=Rose Pink</summary>
+    /// <summary>0=Pure White 1=Dim Slate 2=Electric Cyan 3=Neon Mint 4=Cyber Violet 5=Sunset Orange 6=Amber Gold 7=Rose Pink 8=Crimson Red</summary>
     public int DayColorMode { get; set; } = 0;
-    /// <summary>0=Anurati (Mond) 1=Bahnschrift Light 2=Segoe UI Light</summary>
+    /// <summary>0=Anurati (Mond) 1=Bahnschrift Light 2=Segoe UI Light 3=Consolas 4=Quicksand</summary>
     public int DayFontMode { get; set; } = 0;
     /// <summary>0=UPPERCASE 1=Title Case 2=lowercase</summary>
     public int DayCaseMode { get; set; } = 0;
@@ -94,11 +105,36 @@ public sealed class WidgetSettings
     public bool DayUseCustomText { get; set; } = false;
     /// <summary>User-defined text shown when DayUseCustomText is true. Max 20 chars.</summary>
     public string DayCustomText { get; set; } = string.Empty;
+    public bool DayGlow { get; set; } = false;
+    public double DayOpacity { get; set; } = 1.0;
 
     // ── Other widgets ──────────────────────────────────────────────────
     public bool CalendarEnabled { get; set; } = false;
+    public bool CalendarShowBackground { get; set; } = true;
+    /// <summary>0=White 1=Cyan 2=Mint 3=Violet 4=Amber 5=Rose</summary>
+    public int CalendarColorMode { get; set; } = 0;
+    public bool CalendarStartOnMonday { get; set; } = false;
+    /// <summary>0=Small 1=Normal 2=Large</summary>
+    public int CalendarFontSize { get; set; } = 1;
+    public double CalendarOpacity { get; set; } = 1.0;
+
     public bool NotesEnabled { get; set; } = false;
+    public bool NotesShowBackground { get; set; } = true;
+    /// <summary>0=White 1=Cyan 2=Mint 3=Violet 4=Amber 5=Yellow Note</summary>
+    public int NotesColorMode { get; set; } = 0;
+    /// <summary>0=Small(11px) 1=Medium(13px) 2=Large(16px)</summary>
+    public int NotesFontSize { get; set; } = 1;
+    public double NotesOpacity { get; set; } = 1.0;
+
     public bool QuoteEnabled { get; set; } = false;
+    public bool QuoteShowBackground { get; set; } = true;
+    /// <summary>0=White 1=Cyan 2=Mint 3=Violet 4=Amber 5=Rose</summary>
+    public int QuoteColorMode { get; set; } = 0;
+    /// <summary>0=Small(11px) 1=Medium(13px) 2=Large(16px)</summary>
+    public int QuoteFontSize { get; set; } = 1;
+    /// <summary>0=Georgia Serif 1=Segoe UI 2=Bahnschrift</summary>
+    public int QuoteFontMode { get; set; } = 0;
+    public double QuoteOpacity { get; set; } = 1.0;
 
     [Obsolete("Merged into SystemMonitor Simplicity Circles")]
     public bool TaskbarStatsEnabled { get; set; } = false;
@@ -149,6 +185,9 @@ public sealed class WidgetSettings
     public bool WeatherShowWind { get; set; } = true;
     public bool WeatherShowBackground { get; set; } = true;
     public int WeatherScale { get; set; } = 1; // 0=Small (85%), 1=Normal (100%), 2=Large (120%)
+    /// <summary>0=Dynamic Condition 1=White 2=Cyan 3=Mint 4=Violet 5=Amber</summary>
+    public int WeatherColorMode { get; set; } = 0;
+    public double WeatherOpacity { get; set; } = 1.0;
 
     /// <summary>
     /// Copies all widget preferences, configurations, and positions in-place from another instance.
@@ -168,6 +207,10 @@ public sealed class WidgetSettings
         ClockFontSize = source.ClockFontSize;
         ClockColorMode = source.ClockColorMode;
         ClockFontMode = source.ClockFontMode;
+        ClockShowSeconds = source.ClockShowSeconds;
+        ClockTextAlignment = source.ClockTextAlignment;
+        ClockGlow = source.ClockGlow;
+        ClockOpacity = source.ClockOpacity;
         ClockX = source.ClockX;
         ClockY = source.ClockY;
 
@@ -181,6 +224,9 @@ public sealed class WidgetSettings
         SysMonShowRam = source.SysMonShowRam;
         SysMonShowGpu = source.SysMonShowGpu;
         SysMonShowDisk = source.SysMonShowDisk;
+        SysMonShowLabels = source.SysMonShowLabels;
+        SysMonGlow = source.SysMonGlow;
+        SysMonOpacity = source.SysMonOpacity;
         SystemMonitorX = source.SystemMonitorX;
         SystemMonitorY = source.SystemMonitorY;
 
@@ -191,6 +237,8 @@ public sealed class WidgetSettings
         MediaShowBackground = source.MediaShowBackground;
         MediaShowTrackDetails = source.MediaShowTrackDetails;
         VisualizerGlow = source.VisualizerGlow;
+        VisualizerSensitivity = source.VisualizerSensitivity;
+        VisualizerOpacity = source.VisualizerOpacity;
         MediaX = source.MediaX;
         MediaY = source.MediaY;
         MediaWidth = source.MediaWidth;
@@ -206,16 +254,27 @@ public sealed class WidgetSettings
         DayShowBackground = source.DayShowBackground;
         DayUseCustomText = source.DayUseCustomText;
         DayCustomText = source.DayCustomText;
+        DayGlow = source.DayGlow;
+        DayOpacity = source.DayOpacity;
         DayX = source.DayX;
         DayY = source.DayY;
 
         // Calendar
         CalendarEnabled = source.CalendarEnabled;
+        CalendarShowBackground = source.CalendarShowBackground;
+        CalendarColorMode = source.CalendarColorMode;
+        CalendarStartOnMonday = source.CalendarStartOnMonday;
+        CalendarFontSize = source.CalendarFontSize;
+        CalendarOpacity = source.CalendarOpacity;
         CalendarX = source.CalendarX;
         CalendarY = source.CalendarY;
 
         // Notes
         NotesEnabled = source.NotesEnabled;
+        NotesShowBackground = source.NotesShowBackground;
+        NotesColorMode = source.NotesColorMode;
+        NotesFontSize = source.NotesFontSize;
+        NotesOpacity = source.NotesOpacity;
         NotesX = source.NotesX;
         NotesY = source.NotesY;
         NotesWidth = source.NotesWidth;
@@ -224,6 +283,11 @@ public sealed class WidgetSettings
 
         // Quote
         QuoteEnabled = source.QuoteEnabled;
+        QuoteShowBackground = source.QuoteShowBackground;
+        QuoteColorMode = source.QuoteColorMode;
+        QuoteFontSize = source.QuoteFontSize;
+        QuoteFontMode = source.QuoteFontMode;
+        QuoteOpacity = source.QuoteOpacity;
         QuoteX = source.QuoteX;
         QuoteY = source.QuoteY;
         QuoteIndex = source.QuoteIndex;
@@ -241,6 +305,8 @@ public sealed class WidgetSettings
         WeatherShowWind = source.WeatherShowWind;
         WeatherShowBackground = source.WeatherShowBackground;
         WeatherScale = source.WeatherScale;
+        WeatherColorMode = source.WeatherColorMode;
+        WeatherOpacity = source.WeatherOpacity;
     }
 }
 

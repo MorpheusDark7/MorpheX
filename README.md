@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.62-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.64-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,14 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.64
+- **Multi-Monitor Profile Topology Fix** — Resolved profile manager display counting issue where virtual span descriptors were registered as extra physical displays (e.g., showing 3 monitors instead of 2). Multi-display and Spanned modes now separate cleanly.
+- **Deep Memory Footprint Optimization (<80MB)** — Solved persistent high working-set consumption (>700MB) via aggressive UI visual tree & thumbnail cache releasing upon window hide/minimize, picture pool capping, and periodic background working-set compaction.
+- **Audio Visualizer Sensitivity Multiplier** — Added a responsive sensitivity multiplier slider (0.2x to 3.0x) allowing custom equalizer bounce height and audio responsiveness.
+- **Comprehensive Customization Across All 8 Widgets** — Added full color themes, frosted cards, opacity sliders, and sizing across Clock, Day Name, System Monitor, Audio Visualizer, Calendar, Sticky Notes, Motivational Quote, and Weather widgets.
+- **Clock Transparency & Composition Hardening** — Intercepted `WM_ERASEBKGND` and handled `WM_DWMCOMPOSITIONCHANGED` to permanently eliminate the square black background glitch during display device resets or wallpaper transitions.
+- **Seamless Profile Sync** — All widget settings, positions, themes, and monitor layouts now sync and switch instantly with desktop profiles.
 
 ### v0.1.62
 - **Span Screen Placement Mode** — Seamlessly stretch single wallpapers across multi-monitor virtual screens with automatic topology detection and resize adaptation.

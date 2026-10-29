@@ -1,3 +1,4 @@
+using MorpheX.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -120,6 +121,30 @@ public partial class DayWidget : Window
         // Background card (ultra-clean smoked or cream frosted glass)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.DayShowBackground, 16, new Thickness(14, 6, 14, 6), _settings.WidgetTheme == 1);
         ToggleCardMenu.Header = _settings.DayShowBackground ? "Hide Background Card" : "Show Background Card";
+
+        if (_settings.DayGlow)
+        {
+            var glowColor = _settings.DayColorMode switch
+            {
+                2 => System.Windows.Media.Color.FromRgb(56, 189, 248),
+                3 => System.Windows.Media.Color.FromRgb(74, 222, 128),
+                4 => System.Windows.Media.Color.FromRgb(192, 132, 252),
+                5 => System.Windows.Media.Color.FromRgb(251, 146, 60),
+                6 => System.Windows.Media.Color.FromRgb(251, 191, 36),
+                7 => System.Windows.Media.Color.FromRgb(251, 113, 133),
+                8 => System.Windows.Media.Color.FromRgb(244, 63, 94),
+                _ => System.Windows.Media.Color.FromRgb(255, 255, 255)
+            };
+            DayLettersPanel.Effect = new System.Windows.Media.Effects.DropShadowEffect { BlurRadius = 16, ShadowDepth = 0, Color = glowColor, Opacity = 0.75 };
+        }
+        else
+        {
+            DayLettersPanel.Effect = null;
+        }
+
+        Opacity = Math.Clamp(_settings.DayOpacity > 0 ? _settings.DayOpacity : 1.0, 0.2, 1.0);
+        WidgetWindowHelper.RefreshWidgetSurface(this);
+        ToggleGlowMenu.Header = _settings.DayGlow ? "Hide Neon Glow" : "Show Neon Glow";
     }
 
     public void ApplyTheme() => UpdateDayDisplay();
@@ -262,6 +287,29 @@ public partial class DayWidget : Window
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
+    }
+
+    private void ToggleGlow_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.DayGlow = !_settings.DayGlow;
+        UpdateDayDisplay();
+        Save();
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.DayOpacity = op;
+            UpdateDayDisplay();
+            Save();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(DayWidget));
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

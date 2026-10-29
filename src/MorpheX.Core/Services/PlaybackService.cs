@@ -37,6 +37,7 @@ public sealed class PlaybackService : IPlaybackService
     private readonly Dictionary<string, bool> _monitorPaused = new();
 
     private readonly Dictionary<string, DateTime> _pausedSince = new();
+    private int _trimCounter;
 
     public IReadOnlyDictionary<string, bool> MonitorPauseStates => _monitorPaused;
     public bool IsManuallyPaused => _isManuallyPaused;
@@ -103,6 +104,12 @@ public sealed class PlaybackService : IPlaybackService
 
         try
         {
+            if (++_trimCounter >= 180)
+            {
+                _trimCounter = 0;
+                MorpheX.Core.Utilities.MemoryOptimizer.TrimWorkingSet(force: false);
+            }
+
             if (_isManuallyPaused)
             {
                 return;

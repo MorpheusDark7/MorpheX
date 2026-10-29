@@ -58,6 +58,15 @@
                 <MenuItem Header="lowercase" Click="CasePreset_Click" Tag="2"/>
             </MenuItem>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem x:Name="ToggleGlowMenu" Header="Toggle Neon Glow" Click="ToggleGlow_Click" Foreground="#FFFFFF" Icon="{x:Null}"/>
+            <MenuItem Header="Opacity" Icon="{x:Null}">
+                <MenuItem Header="100%" Click="Opacity_Click" Tag="1.0" Icon="{x:Null}"/>
+                <MenuItem Header="85%" Click="Opacity_Click" Tag="0.85" Icon="{x:Null}"/>
+                <MenuItem Header="70%" Click="Opacity_Click" Tag="0.70" Icon="{x:Null}"/>
+                <MenuItem Header="50%" Click="Opacity_Click" Tag="0.50" Icon="{x:Null}"/>
+            </MenuItem>
+            <Separator Background="#25FFFFFF" Margin="0,4"/>
+            <MenuItem Header="Reload Widget" Click="ReloadWidget_Click" Foreground="#38BDF8" Icon="{x:Null}"/>
             <MenuItem x:Name="LockMenuItem" Header="Lock Position" Click="LockPosition_Click" Foreground="#FFD700"/>
             <Separator Background="#25FFFFFF" Margin="0,4"/>
             <MenuItem Header="Close Widget" Click="CloseWidget_Click" Foreground="#FF8888"/>

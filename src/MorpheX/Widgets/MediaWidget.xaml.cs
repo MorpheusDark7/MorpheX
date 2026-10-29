@@ -197,6 +197,7 @@ public partial class MediaWidget : Window
         ToggleCardMenu.Header = _settings.MediaShowBackground ? "Hide Background Card" : "Show Background Card";
         ToggleDetailsMenu.Header = _settings.MediaShowTrackDetails ? "Hide Track Details" : "Show Track Details";
         ToggleGlowMenu.Header = _settings.VisualizerGlow ? "Hide Glow Effect" : "Show Glow Effect";
+        Opacity = Math.Clamp(_settings.VisualizerOpacity > 0 ? _settings.VisualizerOpacity : 1.0, 0.2, 1.0);
     }
 
     private System.Windows.Media.Brush GetVisualizerBrush()
@@ -239,10 +240,13 @@ public partial class MediaWidget : Window
         float peak = _peakMeter.GetPeak();
         _time += 0.25;
 
+        double sens = _settings.VisualizerSensitivity > 0 ? _settings.VisualizerSensitivity : 1.0;
+        double effectivePeak = Math.Clamp(peak * sens, 0.0, 1.0);
+
         // Use the full available height of the visualizer container
         double maxBarHeight = Math.Max(16.0, VisualizerContainer.ActualHeight - 2);
 
-        if (peak > 0.005f)
+        if (effectivePeak > 0.005f)
         {
             LiveIndicator.Fill = _activeBrush;
 
@@ -250,7 +254,7 @@ public partial class MediaWidget : Window
             {
                 // Dynamic wave flutter for energetic organic movement
                 double flutter = 0.85 + 0.3 * Math.Sin(_time * 2.0 + i * 0.5) + (_rnd.NextDouble() - 0.5) * 0.2;
-                double target = MinBarHeight + (maxBarHeight - MinBarHeight) * Math.Clamp(peak * _frequencyWeights[i] * flutter, 0.0, 1.0);
+                double target = MinBarHeight + (maxBarHeight - MinBarHeight) * Math.Clamp(effectivePeak * _frequencyWeights[i] * flutter, 0.0, 1.0);
 
                 if (target > _currentHeights[i])
                 {
@@ -495,6 +499,33 @@ public partial class MediaWidget : Window
     private void UpdateLockMenuHeader()
     {
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
+    }
+
+    private void Sensitivity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double s))
+        {
+            _settings.VisualizerSensitivity = s;
+            var app = (App)Application.Current;
+            _ = app.SettingsService.SaveAsync();
+        }
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.VisualizerOpacity = op;
+            ApplyAppearance();
+            var app = (App)Application.Current;
+            _ = app.SettingsService.SaveAsync();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(MediaWidget));
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)

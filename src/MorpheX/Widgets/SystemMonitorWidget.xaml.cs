@@ -1,3 +1,4 @@
+using MorpheX.Services;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -162,20 +163,26 @@ public partial class SystemMonitorWidget : Window
 
             arc.Stroke = arcBrush;
             arc.StrokeThickness = thickness;
-            arc.Effect = glow;
+            arc.Effect = _settings.SysMonGlow ? glow : null;
 
             text.FontSize = fontSize;
             text.Foreground = textBrush;
 
             label.FontSize = labelSize;
             label.Foreground = labelBrush;
+            label.Visibility = _settings.SysMonShowLabels ? Visibility.Visible : Visibility.Collapsed;
         }
+
+        Opacity = Math.Clamp(_settings.SysMonOpacity > 0 ? _settings.SysMonOpacity : 1.0, 0.2, 1.0);
+        WidgetWindowHelper.RefreshWidgetSurface(this);
 
         // 3. Background Card Styling (translucent frosted smoked or cream acrylic)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.SysMonShowBackground, 16, _settings.SysMonShowBackground ? new Thickness(10) : new Thickness(4), _settings.WidgetTheme == 1);
 
         // Update menu checkmarks
         ToggleCardMenu.Header = _settings.SysMonShowBackground ? "Hide Background Card" : "Show Background Card";
+        ToggleLabelsMenu.Header = _settings.SysMonShowLabels ? "Hide Meter Labels" : "Show Meter Labels";
+        ToggleGlowMenu.Header = _settings.SysMonGlow ? "Hide Neon Glow" : "Show Neon Glow";
         ToggleCpuMenu.IsChecked  = _settings.SysMonShowCpu;
         ToggleRamMenu.IsChecked  = _settings.SysMonShowRam;
         ToggleGpuMenu.IsChecked  = _settings.SysMonShowGpu;
@@ -344,6 +351,36 @@ public partial class SystemMonitorWidget : Window
     {
         WidgetStyles.ApplyLockState(this, CardBorder, _settings.WidgetsLocked);
         LockMenuItem.Header = _settings.WidgetsLocked ? "Unlock Position" : "Lock Position";
+    }
+
+    private void ToggleLabels_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonShowLabels = !_settings.SysMonShowLabels;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void ToggleGlow_Click(object sender, RoutedEventArgs e)
+    {
+        _settings.SysMonGlow = !_settings.SysMonGlow;
+        ApplyStylingAndLayout();
+        Save();
+    }
+
+    private void Opacity_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuItem item && double.TryParse(item.Tag?.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double op))
+        {
+            _settings.SysMonOpacity = op;
+            ApplyStylingAndLayout();
+            Save();
+        }
+    }
+
+    private void ReloadWidget_Click(object sender, RoutedEventArgs e)
+    {
+        var app = (App)Application.Current;
+        app?.WidgetService.ReloadWidget(typeof(SystemMonitorWidget));
     }
 
     private void CloseWidget_Click(object sender, RoutedEventArgs e)
