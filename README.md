@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.64-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.65-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,9 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.65
+- **Video Wallpaper Hardware Renderer Fix** — Restored native LibVLC options to eliminate instantiation exception, ensuring seamless D3D11 hardware-accelerated video playback.
 
 ### v0.1.64
 - **Multi-Monitor Profile Topology Fix** — Resolved profile manager display counting issue where virtual span descriptors were registered as extra physical displays (e.g., showing 3 monitors instead of 2). Multi-display and Spanned modes now separate cleanly.

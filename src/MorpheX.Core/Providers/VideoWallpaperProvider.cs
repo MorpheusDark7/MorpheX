@@ -63,8 +63,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
             _media.AddOption(":no-video-title-show");
             _media.AddOption(":input-repeat=65535");
             _media.AddOption(":no-mouse-events");
-            _media.AddOption(":file-caching=150");
-            _media.AddOption(":picture-pool-size=4");
+            _media.AddOption(":file-caching=300");
             _media.AddOption(":clock-jitter=0");
             _media.AddOption(":clock-synchro=0");
 
@@ -381,8 +380,7 @@ public sealed class VideoWallpaperProvider : IWallpaperProvider
                 "--vout=direct3d11",
                 "--directx-hw-yuv",
                 "--direct3d11-hw-blending",
-                "--file-caching=150",
-                "--picture-pool-size=4",
+                "--file-caching=300",
                 "--live-caching=0",
                 "--disc-caching=0",
                 "--network-caching=0",
