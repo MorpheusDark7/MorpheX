@@ -55,6 +55,7 @@ public partial class DayWidget : Window
 
     private void UpdateDayDisplay()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         DayLettersPanel.Children.Clear();
 
         string day = ResolveDisplayText();

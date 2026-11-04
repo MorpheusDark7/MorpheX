@@ -54,6 +54,14 @@ public static class WidgetWindowHelper
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
     private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
+
+    private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+    private const int DWMSBT_NONE = 1;
+    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+    private const int WM_SETTINGCHANGE = 0x001A;
+
     private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
     {
         return IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : new IntPtr(GetWindowLong32(hWnd, nIndex));
@@ -68,8 +76,19 @@ public static class WidgetWindowHelper
     {
         try
         {
+            window.Background = System.Windows.Media.Brushes.Transparent;
             var helper = new WindowInteropHelper(window);
             var hwnd = helper.EnsureHandle();
+
+            // Clear any DWM system backdrop (Mica / Acrylic) so Windows never renders a dark background
+            try
+            {
+                int backdrop = DWMSBT_NONE;
+                DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+                int dark = 0;
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
+            }
+            catch { }
 
             // 1. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
             // Explicitly preserve WS_EX_LAYERED so WPF never loses per-pixel alpha composition.
@@ -96,9 +115,17 @@ public static class WidgetWindowHelper
     {
         try
         {
+            window.Background = System.Windows.Media.Brushes.Transparent;
             var helper = new WindowInteropHelper(window);
             var hwnd = helper.Handle;
             if (hwnd == IntPtr.Zero) return;
+
+            try
+            {
+                int backdrop = DWMSBT_NONE;
+                DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+            }
+            catch { }
 
             IntPtr currentExStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
             long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_LAYERED;
@@ -162,8 +189,15 @@ public static class WidgetWindowHelper
             handled = true;
             return new IntPtr(1);
         }
-        else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE)
+        else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE || msg == WM_SETTINGCHANGE)
         {
+            try
+            {
+                int backdrop = DWMSBT_NONE;
+                DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+            }
+            catch { }
+
             // Re-assert layered attributes and trigger frame refresh to restore transparent alpha if DWM resets
             NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
                 NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |

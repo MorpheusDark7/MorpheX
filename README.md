@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.65-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.66-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,10 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.66
+- **Clock Widget Transparency & Dark Box Permanent Fix** — Isolated `ThemeService` and `ApplicationThemeManager` to never inject Mica backdrops or default window backgrounds into transparent desktop layered widgets, explicitly cleared DWM system backdrops, removed sub-pixel ClearType alpha conflicts on the Clock widget, and ensured all widgets strictly enforce transparent backgrounds.
+- **Ultra-Smooth Audio Visualizer Animation** — Replaced the jittery 30 FPS timer and per-bar `BitmapCache` with hardware-synced `CompositionTarget.Rendering` running at native display refresh rates (60Hz / 120Hz / 144Hz+). Implemented delta-time based exponential attack and release spring physics with harmonic wave modulation, eliminating slideshow / PowerPoint stutter for silky-smooth equalizer motion.
 
 ### v0.1.65
 - **Video Wallpaper Hardware Renderer Fix** — Restored native LibVLC options to eliminate instantiation exception, ensuring seamless D3D11 hardware-accelerated video playback.

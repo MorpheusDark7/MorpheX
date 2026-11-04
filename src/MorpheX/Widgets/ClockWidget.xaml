@@ -88,7 +88,7 @@
                 FontWeight="Light"
                 FontFamily="Bahnschrift Light, Segoe UI Light, Segoe UI"
                 Foreground="#EEFFFFFF"
-                TextOptions.TextRenderingMode="ClearType"
+                
                 HorizontalAlignment="Left"/>
 
             <!-- Date below (optional) -->

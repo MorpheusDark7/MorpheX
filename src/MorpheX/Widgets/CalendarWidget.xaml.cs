@@ -39,6 +39,7 @@ public partial class CalendarWidget : Window
 
     public void ApplyTheme()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         bool isLight = _settings.WidgetTheme == 1;
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.CalendarShowBackground, cornerRadius: 12, isLightTheme: isLight);
         MonthYearText.Foreground = isLight

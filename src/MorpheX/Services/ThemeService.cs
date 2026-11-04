@@ -66,10 +66,16 @@ public static class ThemeService
                     : ApplicationTheme.Dark;
             }
 
-            // Apply theme to WPF-UI application and window backdrop
+            // Apply theme to WPF-UI application resources without injecting Mica into transparent desktop widgets
             try
             {
-                ApplicationThemeManager.Apply(effectiveTheme, WindowBackdropType.Mica, updateAccent: false);
+                ApplicationThemeManager.Apply(effectiveTheme, WindowBackdropType.None, updateAccent: false);
+
+                // Apply Mica backdrop exclusively to the main application window
+                if (app.MainWindow is FluentWindow fluentMain)
+                {
+                    WindowBackdrop.ApplyBackdrop(fluentMain, WindowBackdropType.Mica);
+                }
             }
             catch (Exception ex)
             {
@@ -85,6 +91,12 @@ public static class ThemeService
 
             // Apply system accent & contrast-aware variants
             ApplySystemThemeAndAccent(effectiveTheme);
+
+            // Re-assert transparent backgrounds on all active widgets so DWM/theme changes never introduce dark boxes
+            if (app is App mxApp && mxApp.WidgetService != null)
+            {
+                mxApp.WidgetService.RefreshTheme();
+            }
 
             Log.Information("Applied app theme: {Mode} (Effective: {Effective})", mode, effectiveTheme);
         }

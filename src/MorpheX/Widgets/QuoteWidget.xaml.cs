@@ -62,6 +62,7 @@ public partial class QuoteWidget : Window
 
     public void ApplyTheme()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         bool isLight = _settings.WidgetTheme == 1;
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.QuoteShowBackground, cornerRadius: 12, isLightTheme: isLight);
 

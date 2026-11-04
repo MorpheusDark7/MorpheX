@@ -34,6 +34,7 @@ public partial class NotesWidget : Window
 
     public void ApplyTheme()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         bool isLight = _settings.WidgetTheme == 1;
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.NotesShowBackground, cornerRadius: 12, isLightTheme: isLight);
 

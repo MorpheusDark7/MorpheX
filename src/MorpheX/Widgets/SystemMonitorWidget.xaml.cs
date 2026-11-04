@@ -112,6 +112,7 @@ public partial class SystemMonitorWidget : Window
 
     public void ApplyStylingAndLayout()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         double gridSize = GetGridSize();
         double ringSize = gridSize - 6;
         double fontSize = _settings.SysMonSize switch { 0 => 10, 1 => 12, 2 => 15, 3 => 18, _ => 12 };

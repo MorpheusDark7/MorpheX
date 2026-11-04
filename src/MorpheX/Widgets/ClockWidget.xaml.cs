@@ -90,6 +90,9 @@ public partial class ClockWidget : Window
         // Date visibility
         DateText.Visibility = _settings.ClockShowDate ? Visibility.Visible : Visibility.Collapsed;
 
+        // Enforce transparent window background so theme manager or DWM never paints a dark box
+        Background = Brushes.Transparent;
+
         // Card background (translucent smoked glass, not an opaque black box)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8), _settings.WidgetTheme == 1);
 

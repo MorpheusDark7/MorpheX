@@ -21,13 +21,15 @@ public partial class MediaWidget : Window
     private readonly AudioPeakMeter _peakMeter = new();
     private readonly SystemMediaManager _mediaManager = new();
 
-    private readonly DispatcherTimer _animTimer;
     private readonly DispatcherTimer _mediaTimer;
+    private readonly System.Diagnostics.Stopwatch _animStopwatch = new();
+    private TimeSpan _lastRenderTime;
+    private float _smoothedPeak;
+    private bool _isRenderingHooked;
 
     private readonly Border[] _bars = new Border[BarCount];
     private readonly double[] _currentHeights = new double[BarCount];
     private readonly double[] _frequencyWeights = new double[BarCount];
-    private readonly Random _rnd = new();
 
     private readonly SolidColorBrush _activeBrush = new(System.Windows.Media.Color.FromArgb(255, 255, 255, 255));
     private readonly SolidColorBrush _idleBrush = new(System.Windows.Media.Color.FromArgb(255, 80, 80, 85));
@@ -54,13 +56,6 @@ public partial class MediaWidget : Window
             _frequencyWeights[i] = 0.7 + 0.6 * Math.Sin(norm * Math.PI) + (1.0 - norm) * 0.2;
             _currentHeights[i] = MinBarHeight;
         }
-
-        // 30 FPS animation timer for fluid equalizer bars
-        _animTimer = new DispatcherTimer(DispatcherPriority.Render)
-        {
-            Interval = TimeSpan.FromMilliseconds(33)
-        };
-        _animTimer.Tick += OnAnimTick;
 
         // 1-second timer for polling system media track title/artist
         _mediaTimer = new DispatcherTimer
@@ -89,9 +84,7 @@ public partial class MediaWidget : Window
                 Background = brush,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Height = MinBarHeight,
-                Effect = glow,
-                // Cache mode for GPU-accelerated rendering
-                CacheMode = new BitmapCache { RenderAtScale = 1.0 }
+                SnapsToDevicePixels = true
             };
             _bars[i] = bar;
             BarsGrid.Children.Add(bar);
@@ -99,7 +92,7 @@ public partial class MediaWidget : Window
 
         RefreshVisualizerStyle();
 
-        _animTimer.Start();
+        StartAnimation();
         _mediaTimer.Start();
 
         await _mediaManager.InitializeAsync();
@@ -116,6 +109,7 @@ public partial class MediaWidget : Window
         if (_settings.VisualizerStyle == 2) // Waveform
         {
             BarsGrid.Visibility = Visibility.Collapsed;
+            BarsGrid.Effect = null;
             WavePath.Visibility = Visibility.Visible;
             WavePath.Stroke = brush;
             WavePath.Effect = glow;
@@ -123,7 +117,9 @@ public partial class MediaWidget : Window
         else
         {
             BarsGrid.Visibility = Visibility.Visible;
+            BarsGrid.Effect = glow;
             WavePath.Visibility = Visibility.Collapsed;
+            WavePath.Effect = null;
 
             var valignment = _settings.VisualizerStyle == 1
                 ? VerticalAlignment.Center
@@ -136,7 +132,7 @@ public partial class MediaWidget : Window
                 {
                     _bars[i].VerticalAlignment = valignment;
                     _bars[i].Background = brush;
-                    _bars[i].Effect = glow;
+                    _bars[i].Effect = null;
                 }
             }
         }
@@ -146,6 +142,7 @@ public partial class MediaWidget : Window
 
     private void ApplyAppearance()
     {
+        Background = System.Windows.Media.Brushes.Transparent;
         bool isLight = _settings.WidgetTheme == 1;
         WidgetStyles.ApplyFrostedGlass(MainCardBorder, _settings.MediaShowBackground, 14, isLightTheme: isLight);
         MainCardBorder.Margin = _settings.MediaShowBackground ? new Thickness(8) : new Thickness(2);
@@ -235,52 +232,113 @@ public partial class MediaWidget : Window
         return new DropShadowEffect { BlurRadius = 10, ShadowDepth = 0, Color = col, Opacity = op };
     }
 
-    private void OnAnimTick(object? sender, EventArgs e)
+    private void StartAnimation()
     {
-        float peak = _peakMeter.GetPeak();
-        _time += 0.25;
+        if (!_isRenderingHooked)
+        {
+            _isRenderingHooked = true;
+            _animStopwatch.Restart();
+            _lastRenderTime = TimeSpan.Zero;
+            CompositionTarget.Rendering += OnCompositionRendering;
+        }
+    }
 
+    private void StopAnimation()
+    {
+        if (_isRenderingHooked)
+        {
+            _isRenderingHooked = false;
+            CompositionTarget.Rendering -= OnCompositionRendering;
+            _animStopwatch.Stop();
+        }
+    }
+
+    private void OnCompositionRendering(object? sender, EventArgs e)
+    {
+        double dt;
+        if (e is RenderingEventArgs renderingArgs)
+        {
+            if (_lastRenderTime == TimeSpan.Zero)
+            {
+                dt = 0.016;
+            }
+            else
+            {
+                dt = (renderingArgs.RenderingTime - _lastRenderTime).TotalSeconds;
+            }
+            _lastRenderTime = renderingArgs.RenderingTime;
+        }
+        else
+        {
+            dt = _animStopwatch.Elapsed.TotalSeconds;
+            _animStopwatch.Restart();
+        }
+
+        dt = Math.Clamp(dt, 0.001, 0.05);
+
+        float rawPeak = _peakMeter.GetPeak();
         double sens = _settings.VisualizerSensitivity > 0 ? _settings.VisualizerSensitivity : 1.0;
-        double effectivePeak = Math.Clamp(peak * sens, 0.0, 1.0);
+        float targetPeak = (float)Math.Clamp(rawPeak * sens, 0.0, 1.0);
 
-        // Use the full available height of the visualizer container
+        // Smooth peak tracking (snappy attack, smooth decay)
+        if (targetPeak > _smoothedPeak)
+        {
+            _smoothedPeak += (float)((targetPeak - _smoothedPeak) * Math.Min(1.0, dt * 26.0));
+        }
+        else
+        {
+            _smoothedPeak += (float)((targetPeak - _smoothedPeak) * Math.Min(1.0, dt * 7.5));
+        }
+
+        _time += dt * 3.2;
+
         double maxBarHeight = Math.Max(16.0, VisualizerContainer.ActualHeight - 2);
 
-        if (effectivePeak > 0.005f)
+        if (_smoothedPeak > 0.003f)
         {
             LiveIndicator.Fill = _activeBrush;
 
             for (int i = 0; i < BarCount; i++)
             {
-                // Dynamic wave flutter for energetic organic movement
-                double flutter = 0.85 + 0.3 * Math.Sin(_time * 2.0 + i * 0.5) + (_rnd.NextDouble() - 0.5) * 0.2;
-                double target = MinBarHeight + (maxBarHeight - MinBarHeight) * Math.Clamp(effectivePeak * _frequencyWeights[i] * flutter, 0.0, 1.0);
+                // Smooth organic harmonic modulation (continuous waves across spectrum, no random stutter)
+                double wave1 = Math.Sin(_time * 2.8 + i * 0.45);
+                double wave2 = Math.Cos(_time * 1.7 - i * 0.32) * 0.55;
+                double wave = 0.82 + 0.28 * (wave1 + wave2);
+
+                double target = MinBarHeight + (maxBarHeight - MinBarHeight) * Math.Clamp(_smoothedPeak * _frequencyWeights[i] * wave, 0.0, 1.0);
 
                 if (target > _currentHeights[i])
                 {
-                    // Fast attack
-                    _currentHeights[i] = target;
+                    // Snappy spring-like attack
+                    double attackRate = 1.0 - Math.Exp(-26.0 * dt);
+                    _currentHeights[i] += (target - _currentHeights[i]) * attackRate;
                 }
                 else
                 {
-                    // Smooth gravity falloff
-                    _currentHeights[i] = Math.Max(MinBarHeight, _currentHeights[i] - 2.8);
+                    // Natural gravity decay
+                    double decayRate = 1.0 - Math.Exp(-9.5 * dt);
+                    _currentHeights[i] += (target - _currentHeights[i]) * decayRate;
                 }
 
-                _bars[i].Height = _currentHeights[i];
+                _bars[i].Height = Math.Max(MinBarHeight, _currentHeights[i]);
             }
         }
         else
         {
             LiveIndicator.Fill = _idleBrush;
 
-            // Decay to resting line
+            double decayRate = 1.0 - Math.Exp(-7.0 * dt);
             for (int i = 0; i < BarCount; i++)
             {
-                if (_currentHeights[i] > MinBarHeight)
+                if (_currentHeights[i] > MinBarHeight + 0.05)
                 {
-                    _currentHeights[i] = Math.Max(MinBarHeight, _currentHeights[i] - 1.8);
+                    _currentHeights[i] += (MinBarHeight - _currentHeights[i]) * decayRate;
                     _bars[i].Height = _currentHeights[i];
+                }
+                else
+                {
+                    _currentHeights[i] = MinBarHeight;
+                    _bars[i].Height = MinBarHeight;
                 }
             }
         }
@@ -566,7 +624,7 @@ public partial class MediaWidget : Window
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)
     {
-        _animTimer.Stop();
+        StopAnimation();
         _mediaTimer.Stop();
         _peakMeter.Dispose();
 
