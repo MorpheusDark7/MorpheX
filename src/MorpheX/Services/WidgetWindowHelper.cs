@@ -2,6 +2,7 @@ using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using MorpheX.Core.Desktop;
+using MorpheX.Widgets;
 using Serilog;
 
 namespace MorpheX.Services;
@@ -12,7 +13,8 @@ namespace MorpheX.Services;
 /// 2. Sets WS_EX_NOACTIVATE so interacting with the widget never steals focus from active apps.
 /// 3. Ensures WS_EX_LAYERED composition remains rock-solid against D3D resets and DWM changes.
 /// 4. Intercepts WM_WINDOWPOSCHANGING to ignore minimize coordinates (-32000, -32000).
-/// 5. Intercepts WM_ERASEBKGND to prevent the OS from painting an opaque black background rectangle.
+/// 5. Intercepts WM_ERASEBKGND, WM_NCPAINT, and WM_NCACTIVATE to prevent Windows/GDI from painting opaque rectangles.
+/// 6. Extends DWM glass frame across entire client area and assigns NULL class background brush.
 /// </summary>
 public static class WidgetWindowHelper
 {
@@ -25,10 +27,30 @@ public static class WidgetWindowHelper
     private const int MA_NOACTIVATE = 3;
     private const int WM_WINDOWPOSCHANGING = 0x0046;
     private const int WM_ERASEBKGND = 0x0014;
+    private const int WM_NCPAINT = 0x0085;
+    private const int WM_NCACTIVATE = 0x0086;
     private const int WM_DWMCOMPOSITIONCHANGED = 0x031E;
     private const int WM_DISPLAYCHANGE = 0x007E;
+    private const int WM_SETTINGCHANGE = 0x001A;
+
     private const uint SWP_NOMOVE = 0x0002;
     private const uint SWP_NOSIZE = 0x0001;
+
+    private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+    private const int DWMSBT_NONE = 1;
+    private const int DWMWA_TRANSITIONS_FORCEDISABLED = 3;
+
+    private const int GCLP_HBRBACKGROUND = -10;
+    private const int NULL_BRUSH = 5;
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MARGINS
+    {
+        public int cxLeftWidth;
+        public int cxRightWidth;
+        public int cyTopHeight;
+        public int cyBottomHeight;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
     public struct WINDOWPOS
@@ -42,6 +64,15 @@ public static class WidgetWindowHelper
         public uint flags;
     }
 
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmExtendFrameIntoClientArea(IntPtr hWnd, ref MARGINS pMarInset);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
+
+    [DllImport("gdi32.dll")]
+    private static extern IntPtr GetStockObject(int fnObject);
+
     [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
     private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
 
@@ -54,13 +85,11 @@ public static class WidgetWindowHelper
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
     private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
+    [DllImport("user32.dll", EntryPoint = "SetClassLong", SetLastError = true)]
+    private static extern int SetClassLong32(IntPtr hWnd, int nIndex, int dwNewLong);
 
-    private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
-    private const int DWMSBT_NONE = 1;
-    private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
-    private const int WM_SETTINGCHANGE = 0x001A;
+    [DllImport("user32.dll", EntryPoint = "SetClassLongPtr", SetLastError = true)]
+    private static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
     private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
     {
@@ -72,38 +101,76 @@ public static class WidgetWindowHelper
         return IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
     }
 
+    private static IntPtr SetClassLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        return IntPtr.Size == 8 ? SetClassLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetClassLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+    }
+
     public static void SetupWidgetWindow(Window window)
     {
         try
         {
+            window.ShowActivated = false;
+            if (window is not NotesWidget)
+            {
+                window.Focusable = false;
+            }
             window.Background = System.Windows.Media.Brushes.Transparent;
+
             var helper = new WindowInteropHelper(window);
             var hwnd = helper.EnsureHandle();
 
-            // Clear any DWM system backdrop (Mica / Acrylic) so Windows never renders a dark background
+            // 1. Extend DWM frame glass completely across client area (-1 margins).
+            // This guarantees DWM treats the entire window as a transparent glass sheet
+            // and never substitutes an opaque fallback surface when another app minimizes/closes.
+            try
+            {
+                var margins = new MARGINS { cxLeftWidth = -1, cxRightWidth = -1, cyTopHeight = -1, cyBottomHeight = -1 };
+                DwmExtendFrameIntoClientArea(hwnd, ref margins);
+            }
+            catch { }
+
+            // 2. Disable DWM window transition animations for this widget.
+            // When other apps minimize or restore, DWM will not generate transition snapshots for this window.
+            try
+            {
+                int disableTransitions = 1;
+                DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, ref disableTransitions, sizeof(int));
+            }
+            catch { }
+
+            // 3. Clear any DWM system backdrop (Mica / Acrylic)
             try
             {
                 int backdrop = DWMSBT_NONE;
                 DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
-                int dark = 0;
-                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref dark, sizeof(int));
             }
             catch { }
 
-            // 1. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
-            // Explicitly preserve WS_EX_LAYERED so WPF never loses per-pixel alpha composition.
+            // 4. Set the Win32 window class background brush to NULL_BRUSH.
+            // This guarantees GDI will NEVER fill dirty rects with COLOR_WINDOW (white/dark box)
+            // when an occluding app is minimized, restored, or closed.
+            try
+            {
+                IntPtr nullBrush = GetStockObject(NULL_BRUSH);
+                SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, nullBrush);
+            }
+            catch { }
+
+            // 5. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
+            // Preserves WS_EX_LAYERED for WPF's per-pixel alpha composition.
             IntPtr currentExStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
             long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_LAYERED;
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(newExStyle));
 
-            // Inform OS of extended style changes so DWM updates layered composition immediately
+            // Inform OS of extended style changes
             NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
                 NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |
                 NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
 
-            // 3. Hook WndProc for non-activating click, suppress minimize, and prevent black background artifacts
+            // 6. Hook WndProc for non-activating click, suppress minimize, and intercept all GDI erase/NC paint messages
             var source = HwndSource.FromHwnd(hwnd);
-            source?.AddHook(WndProc);
+            source?.AddHook((IntPtr h, int m, IntPtr w, IntPtr l, ref bool hnd) => HandleWndProc(window, h, m, w, l, ref hnd));
         }
         catch (Exception ex)
         {
@@ -122,8 +189,22 @@ public static class WidgetWindowHelper
 
             try
             {
+                var margins = new MARGINS { cxLeftWidth = -1, cxRightWidth = -1, cyTopHeight = -1, cyBottomHeight = -1 };
+                DwmExtendFrameIntoClientArea(hwnd, ref margins);
+            }
+            catch { }
+
+            try
+            {
                 int backdrop = DWMSBT_NONE;
                 DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+            }
+            catch { }
+
+            try
+            {
+                IntPtr nullBrush = GetStockObject(NULL_BRUSH);
+                SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, nullBrush);
             }
             catch { }
 
@@ -131,10 +212,7 @@ public static class WidgetWindowHelper
             long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_LAYERED;
             SetWindowLongPtr(hwnd, GWL_EXSTYLE, new IntPtr(newExStyle));
 
-            NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
-                NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |
-                NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
-            NativeMethods.InvalidateRect(hwnd, IntPtr.Zero, true);
+            // Invalidate WPF visual tree without GDI background erase
             window.InvalidateVisual();
         }
         catch { }
@@ -164,7 +242,7 @@ public static class WidgetWindowHelper
         return shellWindow != IntPtr.Zero ? shellWindow : (progman != IntPtr.Zero ? progman : NativeMethods.GetShellWindow());
     }
 
-    private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+    private static IntPtr HandleWndProc(Window window, IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
     {
         if (msg == WM_MOUSEACTIVATE)
         {
@@ -185,7 +263,19 @@ public static class WidgetWindowHelper
         }
         else if (msg == WM_ERASEBKGND)
         {
-            // Prevent Windows/GDI from drawing an opaque black background brush over transparent layered windows
+            // Prevent Windows/GDI from erasing the background with COLOR_WINDOW (white/dark box)
+            handled = true;
+            return new IntPtr(1);
+        }
+        else if (msg == WM_NCPAINT)
+        {
+            // Suppress non-client frame painting so Windows never draws an opaque box
+            handled = true;
+            return IntPtr.Zero;
+        }
+        else if (msg == WM_NCACTIVATE)
+        {
+            // Prevent Windows from repainting non-client areas when other apps minimize or close
             handled = true;
             return new IntPtr(1);
         }
@@ -195,14 +285,22 @@ public static class WidgetWindowHelper
             {
                 int backdrop = DWMSBT_NONE;
                 DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
+
+                var margins = new MARGINS { cxLeftWidth = -1, cxRightWidth = -1, cyTopHeight = -1, cyBottomHeight = -1 };
+                DwmExtendFrameIntoClientArea(hwnd, ref margins);
+
+                IntPtr nullBrush = GetStockObject(NULL_BRUSH);
+                SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, nullBrush);
             }
             catch { }
 
-            // Re-assert layered attributes and trigger frame refresh to restore transparent alpha if DWM resets
-            NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
-                NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOZORDER |
-                NativeMethods.SWP_NOACTIVATE | NativeMethods.SWP_FRAMECHANGED);
-            NativeMethods.InvalidateRect(hwnd, IntPtr.Zero, true);
+            // Re-render WPF layered visual surface cleanly
+            window.Dispatcher.InvokeAsync(() =>
+            {
+                window.Background = null;
+                window.Background = System.Windows.Media.Brushes.Transparent;
+                window.InvalidateVisual();
+            });
         }
 
         return IntPtr.Zero;

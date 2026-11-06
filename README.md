@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.66-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.67-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,9 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.67
+- **Clock Widget Transparency Hardening & App Minimize Box Elimination** — Resolved an issue where Windows/DWM filled the Clock widget HWND with an opaque `COLOR_WINDOW` background (black in dark mode, solid white in light mode) whenever an active application was closed or minimized. Extended DWM glass margins (`-1`) across the client area, replaced the window class brush with `NULL_BRUSH`, forced `DWMWA_TRANSITIONS_FORCEDISABLED`, intercepted `WM_NCPAINT`, `WM_NCACTIVATE`, and `WM_ERASEBKGND`, and set `ShowActivated="False"` and `Focusable="False"` across desktop widgets to permanently eliminate background glitch boxes.
 
 ### v0.1.66
 - **Clock Widget Transparency & Dark Box Permanent Fix** — Isolated `ThemeService` and `ApplicationThemeManager` to never inject Mica backdrops or default window backgrounds into transparent desktop layered widgets, explicitly cleared DWM system backdrops, removed sub-pixel ClearType alpha conflicts on the Clock widget, and ensured all widgets strictly enforce transparent backgrounds.
