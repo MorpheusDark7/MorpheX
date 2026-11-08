@@ -114,7 +114,7 @@ public partial class DayWidget : Window
                 Margin = new Thickness(leftMargin, 0, rightMargin, 0),
                 VerticalAlignment = VerticalAlignment.Center
             };
-            TextOptions.SetTextRenderingMode(tb, TextRenderingMode.ClearType);
+            TextOptions.SetTextRenderingMode(tb, TextRenderingMode.Auto);
             TextOptions.SetTextFormattingMode(tb, TextFormattingMode.Display);
             DayLettersPanel.Children.Add(tb);
         }

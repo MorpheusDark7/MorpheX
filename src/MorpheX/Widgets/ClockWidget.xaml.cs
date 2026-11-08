@@ -52,8 +52,13 @@ public partial class ClockWidget : Window
         string format = _settings.ClockIs24Hour
             ? (_settings.ClockShowSeconds ? "HH:mm:ss" : "HH:mm")
             : (_settings.ClockShowSeconds ? "h:mm:ss tt" : "h:mm tt");
-        TimeText.Text = now.ToString(format);
-        DateText.Text = now.ToString("dddd, MMMM d");
+        string timeStr = now.ToString(format);
+        string dateStr = now.ToString("dddd, MMMM d");
+
+        if (TimeText.Text != timeStr)
+            TimeText.Text = timeStr;
+        if (DateText.Text != dateStr)
+            DateText.Text = dateStr;
     }
 
     public void ApplyAppearance()

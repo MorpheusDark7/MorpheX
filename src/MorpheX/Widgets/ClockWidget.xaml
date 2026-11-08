@@ -12,8 +12,7 @@
     Focusable="False"
     Topmost="False"
     ResizeMode="NoResize"
-    TextOptions.TextFormattingMode="Display"
-    TextOptions.TextRenderingMode="ClearType">
+    TextOptions.TextFormattingMode="Display">
 
     <Window.Resources>
         <DropShadowEffect x:Key="CardShadow" BlurRadius="20" ShadowDepth="4" Color="#000000" Opacity="0.6"/>

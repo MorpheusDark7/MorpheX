@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.67-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.68-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,10 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.68
+- **Permanent Elimination of Desktop Widget White/Dark Box Glitch** — Resolved the root cause where DWM composite swapchains dropped per-pixel alpha transparency when foreground windows minimized or closed over desktop widgets. Completely removed conflicting DWM glass frame extension (`DwmExtendFrameIntoClientArea`) and removed sub-pixel ClearType text rendering from layered transparent windows in favor of high-DPI display formatting with grayscale alpha. Added Windows 11 DWM corner preference disablement (`DWMWCP_DONOTROUND`), disabled transition animations (`DWMWA_TRANSITIONS_FORCEDISABLED`), and implemented atomic DirectComposition surface recovery to guarantee desktop widgets remain 100% transparent at all times.
+- **Clock Widget Render Cycle Optimization** — Optimized the clock update loop to conditionally update UI text only when display strings change, preventing unnecessary WPF visual invalidation and layout recalculations during rapid desktop state transitions.
 
 ### v0.1.67
 - **Clock Widget Transparency Hardening & App Minimize Box Elimination** — Resolved an issue where Windows/DWM filled the Clock widget HWND with an opaque `COLOR_WINDOW` background (black in dark mode, solid white in light mode) whenever an active application was closed or minimized. Extended DWM glass margins (`-1`) across the client area, replaced the window class brush with `NULL_BRUSH`, forced `DWMWA_TRANSITIONS_FORCEDISABLED`, intercepted `WM_NCPAINT`, `WM_NCACTIVATE`, and `WM_ERASEBKGND`, and set `ShowActivated="False"` and `Focusable="False"` across desktop widgets to permanently eliminate background glitch boxes.

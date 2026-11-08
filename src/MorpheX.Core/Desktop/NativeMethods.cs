@@ -190,6 +190,7 @@ internal static partial class NativeMethods
     internal const uint SWP_NOACTIVATE = 0x0010;
     internal const uint SWP_FRAMECHANGED = 0x0020;
     internal const uint SWP_SHOWWINDOW = 0x0040;
+    internal const uint SWP_HIDEWINDOW = 0x0080;
 
     internal const uint MONITOR_DEFAULTTOPRIMARY = 0x00000001;
     internal const uint MONITOR_DEFAULTTONEAREST = 0x00000002;
