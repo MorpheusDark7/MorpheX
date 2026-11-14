@@ -47,7 +47,6 @@ public partial class CalendarWidget : Window
             : new SolidColorBrush(Color.FromArgb(215, 255, 255, 255));
 
         Opacity = Math.Clamp(_settings.CalendarOpacity > 0 ? _settings.CalendarOpacity : 1.0, 0.2, 1.0);
-        WidgetWindowHelper.RefreshWidgetSurface(this);
 
         ToggleCardMenu.Header = _settings.CalendarShowBackground ? "Hide Background Card" : "Show Background Card";
         ToggleWeekStartMenu.Header = _settings.CalendarStartOnMonday ? "Start Week on Sunday" : "Start Week on Monday";

@@ -618,7 +618,6 @@ public partial class WeatherWidget : Window
         RenderCurrentWeather();
 
         Opacity = Math.Clamp(_settings.WeatherOpacity > 0 ? _settings.WeatherOpacity : 1.0, 0.2, 1.0);
-        WidgetWindowHelper.RefreshWidgetSurface(this);
     }
 
     public void ApplyTheme()

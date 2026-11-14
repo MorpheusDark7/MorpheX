@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.69-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.70-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,9 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.70
+- **Permanent Fix for Desktop Widget White Box Glitch** — Completely eliminated the destructive Win32 `SWP_HIDEWINDOW` / `SWP_SHOWWINDOW` visibility cycling inside `RefreshWidgetSurface` that caused DirectComposition swapchains to detach and expose Windows GDI's default `COLOR_WINDOW` solid white background during app minimizes and desktop profile switching. Removed redundant surface refresh calls from widget appearance loops, registered `NULL_BRUSH` as the Win32 window class background to structurally prevent GDI from painting white, suppressed `WM_ERASEBKGND` / `WM_NCPAINT`, and stabilized WPF per-pixel alpha composition across all desktop widgets.
 
 ### v0.1.69
 - **Permanent Fix for Wallpaper Blurring & Clock White Box Glitch** — Completely eliminated the periodic `EmptyWorkingSet` memory purging call and aggressive Large Object Heap (LOH) compaction loops that caused hard page-fault storms, video decoding stutter/blurring in LibVLC, and Direct3D surface starvation. Added container margin padding to the Clock widget to prevent drop shadow glow clipping, enforced high-quality shader rendering, and added automatic workstation unlock recovery via `SessionSwitch`.

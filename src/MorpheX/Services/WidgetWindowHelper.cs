@@ -62,6 +62,11 @@ public static class WidgetWindowHelper
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int dwAttribute, ref int pvAttribute, int cbAttribute);
 
+    [DllImport("gdi32.dll")]
+    private static extern IntPtr GetStockObject(int fnObject);
+    private const int NULL_BRUSH = 5;
+    private const int GCLP_HBRBACKGROUND = -10;
+
     [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
     private static extern int GetWindowLong32(IntPtr hWnd, int nIndex);
 
@@ -74,6 +79,12 @@ public static class WidgetWindowHelper
     [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", SetLastError = true)]
     private static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
+    [DllImport("user32.dll", EntryPoint = "SetClassLong", SetLastError = true)]
+    private static extern int SetClassLong32(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll", EntryPoint = "SetClassLongPtr", SetLastError = true)]
+    private static extern IntPtr SetClassLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
     private static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
     {
         return IntPtr.Size == 8 ? GetWindowLongPtr64(hWnd, nIndex) : new IntPtr(GetWindowLong32(hWnd, nIndex));
@@ -82,6 +93,11 @@ public static class WidgetWindowHelper
     private static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
     {
         return IntPtr.Size == 8 ? SetWindowLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetWindowLong32(hWnd, nIndex, dwNewLong.ToInt32()));
+    }
+
+    private static IntPtr SetClassLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+    {
+        return IntPtr.Size == 8 ? SetClassLongPtr64(hWnd, nIndex, dwNewLong) : new IntPtr(SetClassLong32(hWnd, nIndex, dwNewLong.ToInt32()));
     }
 
     public static void SetupWidgetWindow(Window window)
@@ -123,14 +139,22 @@ public static class WidgetWindowHelper
             }
             catch { }
 
-            // 4. Ensure HwndSource CompositionTarget background is pure Transparent
+            // 4. Ensure window class background brush is NULL so Windows/GDI never paints COLOR_WINDOW (solid white)
+            try
+            {
+                IntPtr nullBrush = GetStockObject(NULL_BRUSH);
+                SetClassLongPtr(hwnd, GCLP_HBRBACKGROUND, nullBrush);
+            }
+            catch { }
+
+            // 5. Ensure HwndSource CompositionTarget background is pure Transparent
             var source = HwndSource.FromHwnd(hwnd);
             if (source?.CompositionTarget != null)
             {
                 source.CompositionTarget.BackgroundColor = System.Windows.Media.Colors.Transparent;
             }
 
-            // 5. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
+            // 6. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
             // Preserves WS_EX_LAYERED for WPF's per-pixel alpha composition.
             IntPtr currentExStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
             long newExStyle = currentExStyle.ToInt64() | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE | WS_EX_LAYERED;
@@ -140,7 +164,7 @@ public static class WidgetWindowHelper
             NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
 
-            // 6. Hook WndProc for non-activating click, suppress minimize, and intercept all GDI erase/NC paint messages
+            // 7. Hook WndProc for non-activating click, suppress minimize, and intercept all GDI erase/NC paint messages
             source?.AddHook((IntPtr h, int m, IntPtr w, IntPtr l, ref bool hnd) => HandleWndProc(window, h, m, w, l, ref hnd));
         }
         catch (Exception ex)
@@ -150,38 +174,19 @@ public static class WidgetWindowHelper
     }
 
     /// <summary>
-    /// Performs an atomic DirectComposition surface refresh on the widget HWND to heal any
-    /// corrupt fallback surfaces without visible flicker.
+    /// Performs a safe WPF visual refresh on the widget window without destructive Win32 visibility cycling.
+    /// Never call SWP_HIDEWINDOW / SWP_SHOWWINDOW on an active WPF layered window.
     /// </summary>
     public static void RefreshWidgetSurface(Window window)
     {
         try
         {
-            window.Background = System.Windows.Media.Brushes.Transparent;
-            var helper = new WindowInteropHelper(window);
-            var hwnd = helper.Handle;
-            if (hwnd == IntPtr.Zero) return;
-
-            try
+            if (window == null) return;
+            window.Dispatcher.InvokeAsync(() =>
             {
-                int disableTransitions = 1;
-                DwmSetWindowAttribute(hwnd, DWMWA_TRANSITIONS_FORCEDISABLED, ref disableTransitions, sizeof(int));
-
-                int cornerPreference = DWMWCP_DONOTROUND;
-                DwmSetWindowAttribute(hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref cornerPreference, sizeof(int));
-
-                int backdrop = DWMSBT_NONE;
-                DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdrop, sizeof(int));
-            }
-            catch { }
-
-            // Atomic hide/show cycle to re-instantiate pristine DirectComposition alpha visual channel
-            NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_HIDEWINDOW);
-            NativeMethods.SetWindowPos(hwnd, IntPtr.Zero, 0, 0, 0, 0,
-                SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-
-            window.InvalidateVisual();
+                window.Background = System.Windows.Media.Brushes.Transparent;
+                window.InvalidateVisual();
+            });
         }
         catch { }
     }
@@ -247,7 +252,7 @@ public static class WidgetWindowHelper
             handled = true;
             return new IntPtr(1);
         }
-        else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE || msg == WM_SETTINGCHANGE)
+        else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE)
         {
             RefreshWidgetSurface(window);
         }

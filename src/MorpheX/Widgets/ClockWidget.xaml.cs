@@ -137,9 +137,6 @@ public partial class ClockWidget : Window
         // Opacity
         Opacity = Math.Clamp(_settings.ClockOpacity > 0 ? _settings.ClockOpacity : 1.0, 0.2, 1.0);
 
-        // Self-heal transparent surface against black box bug
-        WidgetWindowHelper.RefreshWidgetSurface(this);
-
         // Context menu headers
         ToggleFormatMenu.Header  = _settings.ClockIs24Hour ? "Format: 24-Hour (click for 12h)" : "Format: 12-Hour (click for 24h)";
         ToggleSecondsMenu.Header = _settings.ClockShowSeconds ? "Hide Seconds" : "Show Seconds";

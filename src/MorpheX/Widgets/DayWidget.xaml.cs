@@ -144,7 +144,6 @@ public partial class DayWidget : Window
         }
 
         Opacity = Math.Clamp(_settings.DayOpacity > 0 ? _settings.DayOpacity : 1.0, 0.2, 1.0);
-        WidgetWindowHelper.RefreshWidgetSurface(this);
         ToggleGlowMenu.Header = _settings.DayGlow ? "Hide Neon Glow" : "Show Neon Glow";
     }
 

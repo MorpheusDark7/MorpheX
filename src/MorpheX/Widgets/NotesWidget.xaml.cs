@@ -60,7 +60,6 @@ public partial class NotesWidget : Window
         NoteText.CaretBrush = textBrush;
 
         Opacity = Math.Clamp(_settings.NotesOpacity > 0 ? _settings.NotesOpacity : 1.0, 0.2, 1.0);
-        MorpheX.Services.WidgetWindowHelper.RefreshWidgetSurface(this);
 
         if (ToggleCardMenu != null)
             ToggleCardMenu.Header = _settings.NotesShowBackground ? "Hide Background Card" : "Show Background Card";

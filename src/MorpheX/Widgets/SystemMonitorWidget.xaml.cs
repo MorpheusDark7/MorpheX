@@ -175,7 +175,6 @@ public partial class SystemMonitorWidget : Window
         }
 
         Opacity = Math.Clamp(_settings.SysMonOpacity > 0 ? _settings.SysMonOpacity : 1.0, 0.2, 1.0);
-        WidgetWindowHelper.RefreshWidgetSurface(this);
 
         // 3. Background Card Styling (translucent frosted smoked or cream acrylic)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.SysMonShowBackground, 16, _settings.SysMonShowBackground ? new Thickness(10) : new Thickness(4), _settings.WidgetTheme == 1);

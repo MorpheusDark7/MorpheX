@@ -104,7 +104,6 @@ public partial class QuoteWidget : Window
         AuthorText.Foreground = authorBrush;
 
         Opacity = Math.Clamp(_settings.QuoteOpacity > 0 ? _settings.QuoteOpacity : 1.0, 0.2, 1.0);
-        MorpheX.Services.WidgetWindowHelper.RefreshWidgetSurface(this);
 
         if (ToggleCardMenu != null)
             ToggleCardMenu.Header = _settings.QuoteShowBackground ? "Hide Background Card" : "Show Background Card";
