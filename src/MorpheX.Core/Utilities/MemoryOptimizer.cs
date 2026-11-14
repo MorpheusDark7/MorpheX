@@ -1,10 +1,13 @@
 using System.Diagnostics;
-using System.Runtime;
-using MorpheX.Core.Desktop;
 using Serilog;
 
 namespace MorpheX.Core.Utilities;
 
+/// <summary>
+/// Provides safe, non-blocking memory management.
+/// Avoids aggressive EmptyWorkingSet calls that cause hard page faults,
+/// video playback stutter/blurring, and DirectX/WPF surface invalidation.
+/// </summary>
 public static class MemoryOptimizer
 {
     private static long _lastTrimTimestamp;
@@ -18,7 +21,7 @@ public static class MemoryOptimizer
             if (!force && _lastTrimTimestamp > 0)
             {
                 var elapsedSeconds = (now - _lastTrimTimestamp) / (double)Stopwatch.Frequency;
-                if (elapsedSeconds < 20.0)
+                if (elapsedSeconds < 60.0)
                     return;
             }
             _lastTrimTimestamp = now;
@@ -26,14 +29,9 @@ public static class MemoryOptimizer
 
         try
         {
-            GCSettings.LargeObjectHeapCompactionMode = GCLargeObjectHeapCompactionMode.CompactOnce;
-            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
-            GC.WaitForPendingFinalizers();
-            GC.Collect(2, GCCollectionMode.Aggressive, blocking: true, compacting: true);
-
-            using var currentProcess = Process.GetCurrentProcess();
-            NativeMethods.EmptyWorkingSet(currentProcess.Handle);
-            Log.Debug("Working set memory successfully trimmed (force={Force})", force);
+            // Standard non-blocking garbage collection without hard page-fault inducing EmptyWorkingSet
+            GC.Collect(2, GCCollectionMode.Default, blocking: false);
+            Log.Debug("Memory cleanup performed (force={Force})", force);
         }
         catch (Exception ex)
         {

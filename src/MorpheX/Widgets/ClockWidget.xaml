@@ -78,6 +78,7 @@
         Background="Transparent"
         BorderThickness="0"
         CornerRadius="16"
+        Margin="8"
         Padding="6,4"
         MouseLeftButtonDown="Widget_MouseLeftButtonDown"
         Cursor="SizeAll">

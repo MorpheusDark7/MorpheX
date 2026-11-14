@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using Microsoft.Win32;
 using MorpheX.Core.Configuration;
 using MorpheX.Widgets;
 using Application = System.Windows.Application;
@@ -32,6 +33,21 @@ public sealed class WidgetService : IDisposable
     public WidgetService(WidgetSettings settings)
     {
         _settings = settings;
+
+        // Auto-heal widgets on workstation unlock or display resume
+        SystemEvents.SessionSwitch += OnSessionSwitch;
+    }
+
+    private void OnSessionSwitch(object sender, SessionSwitchEventArgs e)
+    {
+        if (e.Reason is SessionSwitchReason.SessionUnlock or SessionSwitchReason.SessionLogon)
+        {
+            Application.Current?.Dispatcher.InvokeAsync(async () =>
+            {
+                await Task.Delay(500);
+                RepositionAllCore();
+            });
+        }
     }
 
     // ── Public API ──────────────────────────────────────────────────────────
@@ -271,6 +287,8 @@ public sealed class WidgetService : IDisposable
     {
         if (_disposed) return;
         _disposed = true;
+
+        SystemEvents.SessionSwitch -= OnSessionSwitch;
 
         Application.Current?.Dispatcher.Invoke(() =>
         {

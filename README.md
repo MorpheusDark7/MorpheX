@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.68-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.69-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,9 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.69
+- **Permanent Fix for Wallpaper Blurring & Clock White Box Glitch** — Completely eliminated the periodic `EmptyWorkingSet` memory purging call and aggressive Large Object Heap (LOH) compaction loops that caused hard page-fault storms, video decoding stutter/blurring in LibVLC, and Direct3D surface starvation. Added container margin padding to the Clock widget to prevent drop shadow glow clipping, enforced high-quality shader rendering, and added automatic workstation unlock recovery via `SessionSwitch`.
 
 ### v0.1.68
 - **Permanent Elimination of Desktop Widget White/Dark Box Glitch** — Resolved the root cause where DWM composite swapchains dropped per-pixel alpha transparency when foreground windows minimized or closed over desktop widgets. Completely removed conflicting DWM glass frame extension (`DwmExtendFrameIntoClientArea`) and removed sub-pixel ClearType text rendering from layered transparent windows in favor of high-DPI display formatting with grayscale alpha. Added Windows 11 DWM corner preference disablement (`DWMWCP_DONOTROUND`), disabled transition animations (`DWMWA_TRANSITIONS_FORCEDISABLED`), and implemented atomic DirectComposition surface recovery to guarantee desktop widgets remain 100% transparent at all times.

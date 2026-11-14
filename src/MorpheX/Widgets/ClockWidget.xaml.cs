@@ -127,7 +127,7 @@ public partial class ClockWidget : Window
                 10 => System.Windows.Media.Color.FromRgb(244, 63, 94),
                 _ => System.Windows.Media.Color.FromRgb(255, 255, 255)
             };
-            TimeText.Effect = new DropShadowEffect { BlurRadius = 14, ShadowDepth = 0, Color = glowColor, Opacity = 0.75 };
+            TimeText.Effect = new DropShadowEffect { BlurRadius = 14, ShadowDepth = 0, Color = glowColor, Opacity = 0.75, RenderingBias = RenderingBias.Quality };
         }
         else
         {
