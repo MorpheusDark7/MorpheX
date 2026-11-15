@@ -622,7 +622,7 @@ public partial class WeatherWidget : Window
 
     public void ApplyTheme()
     {
-        Background = System.Windows.Media.Brushes.Transparent;
+        Background = WidgetWindowHelper.MicroAlphaBrush;
         bool isLight = _settings.WidgetTheme == 1;
         bool showBg  = _settings.WeatherShowBackground;
 

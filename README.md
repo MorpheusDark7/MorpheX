@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.70-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.71-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,9 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.71
+- **Structural Immunity against DWM Window Occlusion Culling (White Box Bug)** — Eliminated the DWM occlusion culling glitch that occurred when application windows covered and un-covered/minimized over the Clock widget. Applied a micro-alpha background (`#01000000`, 0.3% invisible alpha) across desktop widgets so DWM never treats transparent windows as "hollow" or falls back to an uncommitted white GDI backing buffer. Assigned native `UpdateLayeredWindow` software composition (`RenderMode.SoftwareOnly`) to the Clock widget, completely bypassing DirectComposition swapchain drops on minimize. Optimized Clock text drop-shadow rendering to performance bias, significantly lowering CPU and GPU shader compute.
 
 ### v0.1.70
 - **Permanent Fix for Desktop Widget White Box Glitch** — Completely eliminated the destructive Win32 `SWP_HIDEWINDOW` / `SWP_SHOWWINDOW` visibility cycling inside `RefreshWidgetSurface` that caused DirectComposition swapchains to detach and expose Windows GDI's default `COLOR_WINDOW` solid white background during app minimizes and desktop profile switching. Removed redundant surface refresh calls from widget appearance loops, registered `NULL_BRUSH` as the Win32 window class background to structurally prevent GDI from painting white, suppressed `WM_ERASEBKGND` / `WM_NCPAINT`, and stabilized WPF per-pixel alpha composition across all desktop widgets.

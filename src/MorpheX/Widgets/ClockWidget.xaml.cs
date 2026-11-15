@@ -95,8 +95,8 @@ public partial class ClockWidget : Window
         // Date visibility
         DateText.Visibility = _settings.ClockShowDate ? Visibility.Visible : Visibility.Collapsed;
 
-        // Enforce transparent window background so theme manager or DWM never paints a dark box
-        Background = Brushes.Transparent;
+        // Enforce micro-alpha transparent window background so DWM never treats window as hollow or renders white fallback
+        Background = WidgetWindowHelper.MicroAlphaBrush;
 
         // Card background (translucent smoked glass, not an opaque black box)
         WidgetStyles.ApplyFrostedGlass(CardBorder, _settings.ClockShowBackground, 16, new Thickness(14, 8, 14, 8), _settings.WidgetTheme == 1);
@@ -127,7 +127,7 @@ public partial class ClockWidget : Window
                 10 => System.Windows.Media.Color.FromRgb(244, 63, 94),
                 _ => System.Windows.Media.Color.FromRgb(255, 255, 255)
             };
-            TimeText.Effect = new DropShadowEffect { BlurRadius = 14, ShadowDepth = 0, Color = glowColor, Opacity = 0.75, RenderingBias = RenderingBias.Quality };
+            TimeText.Effect = new DropShadowEffect { BlurRadius = 14, ShadowDepth = 0, Color = glowColor, Opacity = 0.75, RenderingBias = RenderingBias.Performance };
         }
         else
         {

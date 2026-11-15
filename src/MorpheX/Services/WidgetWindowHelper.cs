@@ -18,6 +18,9 @@ namespace MorpheX.Services;
 /// </summary>
 public static class WidgetWindowHelper
 {
+    public static readonly System.Windows.Media.SolidColorBrush MicroAlphaBrush =
+        new(System.Windows.Media.Color.FromArgb(1, 0, 0, 0));
+
     private const int GWL_EXSTYLE = -20;
     private const int WS_EX_TOOLWINDOW = 0x00000080;
     private const int WS_EX_NOACTIVATE = 0x08000000;
@@ -26,6 +29,7 @@ public static class WidgetWindowHelper
     private const int WM_MOUSEACTIVATE = 0x0021;
     private const int MA_NOACTIVATE = 3;
     private const int WM_WINDOWPOSCHANGING = 0x0046;
+    private const int WM_WINDOWPOSCHANGED = 0x0047;
     private const int WM_ERASEBKGND = 0x0014;
     private const int WM_NCPAINT = 0x0085;
     private const int WM_NCACTIVATE = 0x0086;
@@ -109,7 +113,7 @@ public static class WidgetWindowHelper
             {
                 window.Focusable = false;
             }
-            window.Background = System.Windows.Media.Brushes.Transparent;
+            window.Background = MicroAlphaBrush;
 
             var helper = new WindowInteropHelper(window);
             var hwnd = helper.EnsureHandle();
@@ -147,11 +151,17 @@ public static class WidgetWindowHelper
             }
             catch { }
 
-            // 5. Ensure HwndSource CompositionTarget background is pure Transparent
+            // 5. Ensure HwndSource CompositionTarget background is pure Transparent.
+            // For ClockWidget, SoftwareOnly rendering uses native UpdateLayeredWindow (ARGB DIB),
+            // making DWM swapchain occlusion culling and un-occlusion white boxes physically impossible.
             var source = HwndSource.FromHwnd(hwnd);
             if (source?.CompositionTarget != null)
             {
                 source.CompositionTarget.BackgroundColor = System.Windows.Media.Colors.Transparent;
+                if (window is ClockWidget)
+                {
+                    source.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
+                }
             }
 
             // 6. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
@@ -184,7 +194,7 @@ public static class WidgetWindowHelper
             if (window == null) return;
             window.Dispatcher.InvokeAsync(() =>
             {
-                window.Background = System.Windows.Media.Brushes.Transparent;
+                window.Background = MicroAlphaBrush;
                 window.InvalidateVisual();
             });
         }
@@ -251,6 +261,11 @@ public static class WidgetWindowHelper
             // Prevent Windows from repainting non-client areas when other apps minimize or close
             handled = true;
             return new IntPtr(1);
+        }
+        else if (msg == WM_WINDOWPOSCHANGED)
+        {
+            // When an occluding window minimizes, closes, or uncovers this widget, force visual refresh
+            window.Dispatcher.InvokeAsync(() => window.InvalidateVisual());
         }
         else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE)
         {

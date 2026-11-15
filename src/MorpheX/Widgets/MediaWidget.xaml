@@ -7,7 +7,7 @@
     MinWidth="240" MinHeight="110"
     WindowStyle="None"
     AllowsTransparency="True"
-    Background="Transparent"
+    Background="#01000000"
     ShowInTaskbar="False"
     ShowActivated="False"
     Focusable="False"
