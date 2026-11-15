@@ -12,7 +12,7 @@
   <img src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D6?style=flat-square" alt="Platform" />
   <img src="https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square" alt=".NET 8" />
   <img src="https://img.shields.io/badge/DirectX-Direct3D%2011-green?style=flat-square" alt="DirectX 11" />
-  <img src="https://img.shields.io/badge/version-0.1.71-orange?style=flat-square" alt="Version" />
+  <img src="https://img.shields.io/badge/version-0.1.72-orange?style=flat-square" alt="Version" />
   <img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="License" />
 </p>
 
@@ -120,6 +120,11 @@ MorpheX/
 ---
 
 ## Changelog
+
+### v0.1.72
+- **Profile snapshots and migration** — Profiles now keep widget positions and settings together with wallpaper placement, per-monitor assignments, scaling, effects, audio, playback, performance, ambient dimming, and playlist options. Existing profiles are migrated automatically and retired taskbar widget fields are removed from saved settings without deleting user profiles.
+- **Reliable live saving and switching** — Widget drags now save after a short pause. Profile changes defer intermediate saves and restore the selected profile's widget snapshot after outgoing windows close, preventing old widget positions from leaking between profiles.
+- **Clock redraw recovery** — Removed the Clock-only software-rendering override and the ineffective self-window position hook. The Clock now requests a full WPF redraw after system window visibility, minimize, move, and profile-switch events.
 
 ### v0.1.71
 - **Structural Immunity against DWM Window Occlusion Culling (White Box Bug)** — Eliminated the DWM occlusion culling glitch that occurred when application windows covered and un-covered/minimized over the Clock widget. Applied a micro-alpha background (`#01000000`, 0.3% invisible alpha) across desktop widgets so DWM never treats transparent windows as "hollow" or falls back to an uncommitted white GDI backing buffer. Assigned native `UpdateLayeredWindow` software composition (`RenderMode.SoftwareOnly`) to the Clock widget, completely bypassing DirectComposition swapchain drops on minimize. Optimized Clock text drop-shadow rendering to performance bias, significantly lowering CPU and GPU shader compute.

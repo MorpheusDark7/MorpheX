@@ -919,6 +919,7 @@ public partial class WeatherWidget : Window
         base.OnLocationChanged(e);
         _settings.WeatherX = Left;
         _settings.WeatherY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void OnClosing(object? sender, System.ComponentModel.CancelEventArgs e)

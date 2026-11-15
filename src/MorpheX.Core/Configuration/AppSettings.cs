@@ -1,4 +1,5 @@
 using MorpheX.Core.Models;
+using System.Text.Json.Serialization;
 
 namespace MorpheX.Core.Configuration;
 
@@ -18,6 +19,7 @@ public sealed class AppSettings
 
     public Dictionary<string, MonitorAssignment> MonitorAssignments { get; set; } = new();
     public WidgetSettings Widgets { get; set; } = new();
+    [JsonIgnore]
     [Obsolete("Taskbar styling feature removed.")]
     public TaskbarSettings Taskbar { get; set; } = new();
     public List<DesktopProfile> Profiles { get; set; } = new();
@@ -136,14 +138,15 @@ public sealed class WidgetSettings
     public int QuoteFontMode { get; set; } = 0;
     public double QuoteOpacity { get; set; } = 1.0;
 
+    [JsonIgnore]
     [Obsolete("Merged into SystemMonitor Simplicity Circles")]
     public bool TaskbarStatsEnabled { get; set; } = false;
 
     public bool WidgetsLocked { get; set; } = false;
 
     // ── Saved positions & dimensions ───────────────────────────────────
-    [Obsolete] public double TaskbarStatsX { get; set; } = 800;
-    [Obsolete] public double TaskbarStatsY { get; set; } = 0;
+    [JsonIgnore, Obsolete] public double TaskbarStatsX { get; set; } = 800;
+    [JsonIgnore, Obsolete] public double TaskbarStatsY { get; set; } = 0;
 
     public double ClockX { get; set; } = 20;
     public double ClockY { get; set; } = 20;

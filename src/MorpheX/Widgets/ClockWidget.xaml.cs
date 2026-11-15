@@ -360,6 +360,7 @@ public partial class ClockWidget : Window
         base.OnLocationChanged(e);
         _settings.ClockX = Left;
         _settings.ClockY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void Save()

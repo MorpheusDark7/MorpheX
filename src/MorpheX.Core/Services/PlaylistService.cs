@@ -43,6 +43,11 @@ public sealed class PlaylistService : IPlaylistService
 
     public void Start()
     {
+        Start(triggerChangeOnStartup: true);
+    }
+
+    private void Start(bool triggerChangeOnStartup)
+    {
         var config = _settingsService.Settings.Playlist;
         if (!config.Enabled)
         {
@@ -59,7 +64,7 @@ public sealed class PlaylistService : IPlaylistService
         Log.Information("PlaylistService started: Interval={Minutes}m, Source={Source}, Order={Order}",
             minutes, config.Source, config.Order);
 
-        if (config.ChangeOnStartup)
+        if (triggerChangeOnStartup && config.ChangeOnStartup)
         {
             _ = Task.Run(async () =>
             {
@@ -76,10 +81,12 @@ public sealed class PlaylistService : IPlaylistService
         Log.Debug("PlaylistService stopped");
     }
 
-    public void UpdateSettings()
+    public void UpdateSettings() => UpdateSettings(triggerChangeOnStartup: true);
+
+    public void UpdateSettings(bool triggerChangeOnStartup)
     {
         Stop();
-        Start();
+        Start(triggerChangeOnStartup);
     }
 
     private async Task OnTimerElapsedAsync()

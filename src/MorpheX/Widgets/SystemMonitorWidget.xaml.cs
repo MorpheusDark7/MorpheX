@@ -405,6 +405,7 @@ public partial class SystemMonitorWidget : Window
         base.OnLocationChanged(e);
         _settings.SystemMonitorX = Left;
         _settings.SystemMonitorY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void Save()

@@ -332,6 +332,7 @@ public partial class DayWidget : Window
         base.OnLocationChanged(e);
         _settings.DayX = Left;
         _settings.DayY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void Save()

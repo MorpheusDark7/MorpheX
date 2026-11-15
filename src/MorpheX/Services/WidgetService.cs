@@ -74,6 +74,15 @@ public sealed class WidgetService : IDisposable
         _clock?.Dispatcher.InvokeAsync(() => _clock.RefreshFormat());
     }
 
+    public void RefreshClockSurface()
+    {
+        Application.Current?.Dispatcher.InvokeAsync(() =>
+        {
+            if (_clock?.IsVisible == true)
+                WidgetWindowHelper.RefreshWidgetSurface(_clock);
+        });
+    }
+
     private bool _widgetsTemporarilyHidden;
 
     public void ToggleAllWidgets()

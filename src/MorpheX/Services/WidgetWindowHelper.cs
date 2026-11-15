@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using System.Windows.Threading;
 using System.Windows;
 using System.Windows.Interop;
 using MorpheX.Core.Desktop;
@@ -29,7 +30,6 @@ public static class WidgetWindowHelper
     private const int WM_MOUSEACTIVATE = 0x0021;
     private const int MA_NOACTIVATE = 3;
     private const int WM_WINDOWPOSCHANGING = 0x0046;
-    private const int WM_WINDOWPOSCHANGED = 0x0047;
     private const int WM_ERASEBKGND = 0x0014;
     private const int WM_NCPAINT = 0x0085;
     private const int WM_NCACTIVATE = 0x0086;
@@ -50,6 +50,8 @@ public static class WidgetWindowHelper
     private const int DWMWCP_DONOTROUND = 1;
     private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
     private const int DWMSBT_NONE = 1;
+
+    private static readonly Dictionary<Window, DispatcherTimer> PositionSaveTimers = new();
 
     [StructLayout(LayoutKind.Sequential)]
     public struct WINDOWPOS
@@ -152,16 +154,10 @@ public static class WidgetWindowHelper
             catch { }
 
             // 5. Ensure HwndSource CompositionTarget background is pure Transparent.
-            // For ClockWidget, SoftwareOnly rendering uses native UpdateLayeredWindow (ARGB DIB),
-            // making DWM swapchain occlusion culling and un-occlusion white boxes physically impossible.
             var source = HwndSource.FromHwnd(hwnd);
             if (source?.CompositionTarget != null)
             {
                 source.CompositionTarget.BackgroundColor = System.Windows.Media.Colors.Transparent;
-                if (window is ClockWidget)
-                {
-                    source.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
-                }
             }
 
             // 6. Apply WS_EX_TOOLWINDOW (hides from Alt+Tab) and WS_EX_NOACTIVATE (no focus stealing).
@@ -176,10 +172,70 @@ public static class WidgetWindowHelper
 
             // 7. Hook WndProc for non-activating click, suppress minimize, and intercept all GDI erase/NC paint messages
             source?.AddHook((IntPtr h, int m, IntPtr w, IntPtr l, ref bool hnd) => HandleWndProc(window, h, m, w, l, ref hnd));
+
+            window.Closed += (_, _) => CancelWidgetPositionSave(window);
+            if (window is ClockWidget)
+            {
+                var recovery = new ClockSurfaceRecovery(window, hwnd);
+                window.Closed += (_, _) => recovery.Dispose();
+            }
         }
         catch (Exception ex)
         {
             Log.Warning(ex, "Failed to apply desktop widget styles to {Type}", window.GetType().Name);
+        }
+    }
+
+    public static void ScheduleWidgetPositionSave(Window window)
+    {
+        if (!window.Dispatcher.CheckAccess())
+        {
+            window.Dispatcher.BeginInvoke(() => ScheduleWidgetPositionSave(window));
+            return;
+        }
+
+        if (!PositionSaveTimers.TryGetValue(window, out var timer))
+        {
+            timer = new DispatcherTimer(DispatcherPriority.Background, window.Dispatcher)
+            {
+                Interval = TimeSpan.FromMilliseconds(450)
+            };
+            timer.Tick += (_, _) =>
+            {
+                timer.Stop();
+                if (System.Windows.Application.Current is App app)
+                    _ = SaveSettingsAsync(app);
+            };
+            PositionSaveTimers[window] = timer;
+        }
+
+        timer.Stop();
+        timer.Start();
+    }
+
+    private static void CancelWidgetPositionSave(Window window)
+    {
+        if (!window.Dispatcher.CheckAccess())
+        {
+            window.Dispatcher.BeginInvoke(() => CancelWidgetPositionSave(window));
+            return;
+        }
+
+        if (PositionSaveTimers.Remove(window, out var timer))
+        {
+            timer.Stop();
+        }
+    }
+
+    private static async Task SaveSettingsAsync(App app)
+    {
+        try
+        {
+            await app.SettingsService.SaveAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Failed to save widget position");
         }
     }
 
@@ -195,7 +251,10 @@ public static class WidgetWindowHelper
             window.Dispatcher.InvokeAsync(() =>
             {
                 window.Background = MicroAlphaBrush;
+                window.InvalidateMeasure();
+                window.InvalidateArrange();
                 window.InvalidateVisual();
+                window.UpdateLayout();
             });
         }
         catch { }
@@ -261,11 +320,6 @@ public static class WidgetWindowHelper
             // Prevent Windows from repainting non-client areas when other apps minimize or close
             handled = true;
             return new IntPtr(1);
-        }
-        else if (msg == WM_WINDOWPOSCHANGED)
-        {
-            // When an occluding window minimizes, closes, or uncovers this widget, force visual refresh
-            window.Dispatcher.InvokeAsync(() => window.InvalidateVisual());
         }
         else if (msg == WM_DWMCOMPOSITIONCHANGED || msg == WM_DISPLAYCHANGE)
         {

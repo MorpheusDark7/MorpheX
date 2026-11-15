@@ -18,6 +18,7 @@ public sealed class SettingsService : ISettingsService
 
     private readonly string _settingsPath;
     private readonly SemaphoreSlim _lock = new(1, 1);
+    private int _profileTransitionDepth;
 
     public AppSettings Settings { get; private set; } = new();
 
@@ -73,9 +74,15 @@ public sealed class SettingsService : ISettingsService
 
     public async Task SaveAsync(CancellationToken ct = default)
     {
+        if (Volatile.Read(ref _profileTransitionDepth) > 0) return;
+
         await _lock.WaitAsync(ct);
         try
         {
+            // Profile switching mutates live settings over several async steps. Defer saves
+            // requested by widget closing handlers until the switch commits its final state.
+            if (Volatile.Read(ref _profileTransitionDepth) > 0) return;
+
             await SaveInternalAsync(ct);
             SettingsChanged?.Invoke(this, EventArgs.Empty);
         }
@@ -84,6 +91,14 @@ public sealed class SettingsService : ISettingsService
             _lock.Release();
         }
     }
+
+    public IDisposable DeferSavesForProfileTransition()
+    {
+        Interlocked.Increment(ref _profileTransitionDepth);
+        return new ProfileTransitionSaveScope(this);
+    }
+
+    private void EndProfileTransitionSaveScope() => Interlocked.Decrement(ref _profileTransitionDepth);
 
     public async Task ResetAsync(CancellationToken ct = default)
     {
@@ -103,13 +118,16 @@ public sealed class SettingsService : ISettingsService
 
     private async Task SaveInternalAsync(CancellationToken ct)
     {
-        // Keep active desktop profile's widgets in sync with live settings
+        // Keep the active desktop profile's complete live scene in sync with settings.
         if (!string.IsNullOrEmpty(Settings.ActiveProfileId) && Settings.Profiles != null)
         {
             var active = Settings.Profiles.FirstOrDefault(p => p.Id == Settings.ActiveProfileId);
             if (active != null)
             {
                 active.Widgets = DesktopProfile.CloneWidgetSettings(Settings.Widgets);
+                active.WallpaperSettings = DesktopProfile.CaptureWallpaperSettings(Settings);
+                active.SchemaVersion = DesktopProfile.CurrentSchemaVersion;
+                DesktopProfile.SyncLegacyWallpaperFields(active);
                 active.UpdatedAt = DateTimeOffset.UtcNow;
             }
         }
@@ -133,6 +151,18 @@ public sealed class SettingsService : ISettingsService
         catch (Exception ex)
         {
             Log.Debug(ex, "Could not back up unreadable settings file");
+        }
+    }
+
+    private sealed class ProfileTransitionSaveScope : IDisposable
+    {
+        private SettingsService? _owner;
+
+        public ProfileTransitionSaveScope(SettingsService owner) => _owner = owner;
+
+        public void Dispose()
+        {
+            Interlocked.Exchange(ref _owner, null)?.EndProfileTransitionSaveScope();
         }
     }
 }

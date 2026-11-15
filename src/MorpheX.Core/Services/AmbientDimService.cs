@@ -34,6 +34,16 @@ public sealed class AmbientDimService : IDisposable
         Log.Debug("AmbientDimService started");
     }
 
+    public void RefreshAfterProfileChange()
+    {
+        // Re-evaluate immediately with the new profile's idle threshold and dim level.
+        // Reset the old state first so a previous profile's dim state cannot linger.
+        _isDimmed = false;
+        _currentOverride = -1f;
+        _wallpaperService.ApplyEffectsToAll();
+        Poll(null);
+    }
+
     public void Stop()
     {
         _pollTimer?.Dispose();

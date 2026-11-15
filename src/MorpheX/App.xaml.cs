@@ -33,6 +33,7 @@ public partial class App : Application
     public UpdateService UpdateService { get; } = new();
     public WidgetService WidgetService { get; private set; } = null!;
     public ProfileService ProfileService { get; private set; } = null!;
+    public AmbientDimService? AmbientDimService => _ambientDimService;
 
     public UpdateInfo? AvailableUpdate { get; private set; }
     public event EventHandler<UpdateInfo>? UpdateAvailable;
@@ -561,7 +562,7 @@ public partial class App : Application
         };
 
         var version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.71";
+        string verStr = version != null ? $"v{version.Major}.{version.Minor}.{version.Build}" : "v0.1.72";
         var header = new System.Windows.Forms.ToolStripMenuItem($"MorpheX Live  •  {verStr}")
         {
             Enabled = false,
@@ -647,7 +648,11 @@ public partial class App : Application
                     {
                         Dispatcher.InvokeAsync(async () =>
                         {
-                            await ProfileService.ApplyProfileAsync(p.Id, WallpaperService, LibraryService, WidgetService);
+                            await ProfileService.ApplyProfileAsync(
+                                p.Id, WallpaperService, LibraryService, WidgetService,
+                                playbackService: PlaybackService,
+                                playlistService: PlaylistService,
+                                ambientDimService: _ambientDimService);
                         });
                     };
                     profilesSubMenu.DropDownItems.Add(profileItem);

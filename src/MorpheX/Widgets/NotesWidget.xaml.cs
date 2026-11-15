@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Threading;
 using MorpheX.Core.Configuration;
+using MorpheX.Services;
 using Application = System.Windows.Application;
 
 namespace MorpheX.Widgets;
@@ -194,6 +195,7 @@ public partial class NotesWidget : Window
         base.OnLocationChanged(e);
         _settings.NotesX = Left;
         _settings.NotesY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void DebouncedSave()

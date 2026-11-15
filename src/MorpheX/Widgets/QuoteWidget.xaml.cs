@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Input;
 using MorpheX.Core.Configuration;
+using MorpheX.Services;
 using Application = System.Windows.Application;
 
 namespace MorpheX.Widgets;
@@ -225,6 +226,7 @@ public partial class QuoteWidget : Window
         base.OnLocationChanged(e);
         _settings.QuoteX = Left;
         _settings.QuoteY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
     }
 
     private void Save()

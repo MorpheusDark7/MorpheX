@@ -71,6 +71,10 @@ public partial class ProfilesPage : Page
             {
                 wpSummary = "Spanned across displays";
             }
+            else if (string.Equals(activeProfile.PlacementMode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+            {
+                wpSummary = "Duplicated across displays";
+            }
             else
             {
                 int monitorCount = activeProfile.MonitorWallpapers.Keys.Count(k => k != MorpheX.Core.Services.WallpaperService.SpanDeviceId);
@@ -160,6 +164,10 @@ public partial class ProfilesPage : Page
                  (profile.MonitorWallpapers.ContainsKey(MorpheX.Core.Services.WallpaperService.SpanDeviceId) && profile.MonitorWallpapers.Count == 1))
         {
             wpTag = "Spanned";
+        }
+        else if (string.Equals(profile.PlacementMode, "Duplicate", StringComparison.OrdinalIgnoreCase))
+        {
+            wpTag = "Duplicate";
         }
         else
         {
@@ -269,7 +277,10 @@ public partial class ProfilesPage : Page
             app.WallpaperService,
             app.LibraryService,
             app.WidgetService,
-            notice => ModernDialogWindow.Warning("Profile Notice", "Wallpaper Skipped", notice));
+            notice => ModernDialogWindow.Warning("Profile Notice", "Wallpaper Skipped", notice),
+            app.PlaybackService,
+            app.PlaylistService,
+            app.AmbientDimService);
 
         RenderProfiles();
     }
@@ -321,7 +332,11 @@ public partial class ProfilesPage : Page
             var next = app.ProfileService.Profiles.FirstOrDefault();
             if (next != null)
             {
-                await app.ProfileService.ApplyProfileAsync(next.Id, app.WallpaperService, app.LibraryService, app.WidgetService);
+                await app.ProfileService.ApplyProfileAsync(
+                    next.Id, app.WallpaperService, app.LibraryService, app.WidgetService,
+                    playbackService: app.PlaybackService,
+                    playlistService: app.PlaylistService,
+                    ambientDimService: app.AmbientDimService);
             }
             RenderProfiles();
         }

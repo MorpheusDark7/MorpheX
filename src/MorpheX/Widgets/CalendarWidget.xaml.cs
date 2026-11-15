@@ -248,7 +248,12 @@ public partial class CalendarWidget : Window
     { _settings.CalendarX = Left; _settings.CalendarY = Top; Save(); }
 
     protected override void OnLocationChanged(EventArgs e)
-    { base.OnLocationChanged(e); _settings.CalendarX = Left; _settings.CalendarY = Top; }
+    {
+        base.OnLocationChanged(e);
+        _settings.CalendarX = Left;
+        _settings.CalendarY = Top;
+        WidgetWindowHelper.ScheduleWidgetPositionSave(this);
+    }
 
     private void Save()
     { var app = (App)Application.Current; _ = app.SettingsService.SaveAsync(); }
